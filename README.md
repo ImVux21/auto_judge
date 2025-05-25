@@ -1,68 +1,71 @@
-# AutoJudge - AI-Based Interview Platform
+# AutoJudge - AI Interview Platform
 
-AutoJudge is a smart AI interview platform that generates role-specific questions, allows live or async answers, prevents cheating, and evaluates candidates automatically.
-
-## Project Structure
-
-This project consists of:
-
-- **Backend**: Spring Boot application with PostgreSQL database
-- **Frontend**: Angular 19 with Tailwind CSS
-
-## Technologies Used
-
-### Backend
-
-- Spring Boot 3.2.3
-- Spring Security with JWT
-- Spring Data JPA
-- PostgreSQL
-- Spring AI (OpenAI integration)
-- Lombok
-
-### Frontend
-
-- Angular 19
-- Tailwind CSS
-- Chart.js for analytics
-- ngx-webcam for camera proctoring
+AutoJudge is an AI-powered interview platform that generates role-specific questions, allows live or asynchronous interviews, prevents cheating, and automatically evaluates candidates.
 
 ## Features
 
-- Role-based MCQ and open-ended question generation using LLMs
-- Interviewer dashboard to create and send out interview sessions
-- Candidate interface for timed sessions with proctoring
-- Auto-evaluation for MCQs and open-ended answers
-- Cheating prevention: IP/device binding, webcam proctoring, copy detection
-- Result dashboard with scores and analytics
+- **AI-Generated Questions**: Automatically creates multiple-choice and open-ended questions based on job roles
+- **Interviewer Dashboard**: Manage interviews, view candidate sessions, and analyze results
+- **Candidate Interface**: User-friendly interface with proctoring features
+- **Automatic Evaluation**: AI-based scoring of candidate answers
+- **Comprehensive Analytics**: Detailed reports and insights on candidate performance
 
-## Setup Instructions
+## Technology Stack
+
+### Backend
+
+- Spring Boot 3.2
+- Spring Security with JWT Authentication
+- Spring AI for OpenAI integration
+- PostgreSQL Database
+- JPA/Hibernate
+
+### Frontend
+
+- Angular 17
+- Tailwind CSS
+- Responsive Design
+
+## Getting Started
+
+### Prerequisites
+
+- Java 17+
+- Node.js 18+
+- PostgreSQL
+- OpenAI API Key
 
 ### Backend Setup
 
-1. Install PostgreSQL and create a database named `autojudge`
-2. Update `application.properties` with your database credentials
+1. Navigate to the backend directory: `cd backend`
+2. Configure database settings in `application.properties`
 3. Add your OpenAI API key to `application.properties`
-4. Run the Spring Boot application:
-   ```
-   cd backend
-   ./gradlew bootRun
-   ```
+4. Run: `./mvnw spring-boot:run`
 
 ### Frontend Setup
 
-1. Install dependencies:
-   ```
-   cd frontend
-   npm install
-   ```
-2. Start the development server:
-   ```
-   npm start
-   ```
-3. Open your browser and navigate to `http://localhost:4200`
+1. Navigate to the frontend directory: `cd frontend`
+2. Install dependencies: `npm install`
+3. Start the development server: `npm start`
+4. Access the application at `http://localhost:4200`
 
-## Contributing
+## Usage
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-# auto_judge
+### For Interviewers
+
+1. Register and log in as an interviewer
+2. Create interviews with specific job roles
+3. Generate questions automatically
+4. Invite candidates via email
+5. Review candidate performance and analytics
+
+### For Candidates
+
+1. Access the interview via the provided link
+2. Complete the interview with automatic proctoring
+3. Receive instant feedback on multiple-choice questions
+4. Get detailed evaluation for open-ended answers
+
+## License
+
+This project is licensed under the MIT License.
