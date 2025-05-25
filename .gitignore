@@ -1,0 +1,42 @@
+# Backend - Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Backend - Spring Boot
+**/application-local.properties
+**/application-dev.properties
+*.log
+*.gz
+*.tmp
+
+# IDE files
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.factorypath
+
+# Frontend - Angular
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/tmp/
+frontend/.env
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Sensitive information
+*.pem
+*.key 
