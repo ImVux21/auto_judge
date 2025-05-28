@@ -23,4 +23,24 @@ export class HeaderComponent {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
   }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  isInterviewer(): boolean {
+    return this.authService.isInterviewer();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  isCandidate(): boolean {
+    return this.authService.isCandidate();
+  }
+
+  get currentUser(): any {
+    return this.authService.currentUserValue;
+  }
 } 

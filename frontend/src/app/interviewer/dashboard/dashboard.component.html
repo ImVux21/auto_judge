@@ -1,124 +1,129 @@
-<div class="min-h-screen bg-gray-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">Interviewer Dashboard</h1>
-      <button (click)="createInterview()" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-        Create Interview
-      </button>
+<div class="container">
+  <h1 class="mb-4">Dashboard</h1>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading dashboard data...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Total Interviews</h5>
+            <h2 class="card-text">{{ dashboardData.totalInterviews || 0 }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Total Sessions</h5>
+            <h2 class="card-text">{{ dashboardData.totalSessions || 0 }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Completed Sessions</h5>
+            <h2 class="card-text">{{ dashboardData.completedSessions || 0 }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Average Score</h5>
+            <h2 class="card-text">{{ (dashboardData.averageScore || 0) | percent }}</h2>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div *ngIf="isLoading" class="flex justify-center py-10">
-      <svg class="animate-spin h-10 w-10 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    </div>
-
-    <div *ngIf="!isLoading && error" class="bg-danger-100 border border-danger-400 text-danger-700 px-4 py-3 rounded relative mb-6" role="alert">
-      <span class="block sm:inline">{{ error }}</span>
-    </div>
-
-    <div *ngIf="!isLoading && !error" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Analytics Cards -->
-      <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Total Interviews</h2>
-        <p class="text-3xl font-bold text-primary-600">{{ analytics.totalInterviews || 0 }}</p>
-      </div>
-      
-      <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Total Sessions</h2>
-        <p class="text-3xl font-bold text-primary-600">{{ analytics.totalSessions || 0 }}</p>
-      </div>
-      
-      <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Average Score</h2>
-        <p class="text-3xl font-bold text-primary-600">{{ (analytics.averageScore * 100 || 0) | number:'1.0-0' }}%</p>
-      </div>
-    </div>
-
-    <!-- Interviews List -->
-    <div *ngIf="!isLoading && !error" class="mt-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">Your Interviews</h2>
-      
-      <div *ngIf="interviews.length === 0" class="bg-white shadow rounded-lg p-6 text-center">
-        <p class="text-gray-500">No interviews found. Create your first interview to get started.</p>
-      </div>
-      
-      <div *ngIf="interviews.length > 0" class="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul role="list" class="divide-y divide-gray-200">
-          <li *ngFor="let interview of interviews">
-            <div class="px-4 py-4 sm:px-6 flex items-center justify-between">
-              <div class="flex flex-col">
-                <div class="flex items-center">
-                  <p class="text-sm font-medium text-primary-600 truncate">{{ interview.title }}</p>
-                  <span 
-                    [ngClass]="interview.active ? 'bg-success-100 text-success-800' : 'bg-gray-100 text-gray-800'"
-                    class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                    {{ interview.active ? 'Active' : 'Inactive' }}
-                  </span>
-                </div>
-                <p class="mt-1 text-sm text-gray-500">{{ interview.jobRole }}</p>
-              </div>
-              <div class="flex space-x-2">
-                <button (click)="toggleInterviewStatus(interview)"
-                  [ngClass]="interview.active ? 'bg-danger-100 text-danger-700 hover:bg-danger-200' : 'bg-success-100 text-success-700 hover:bg-success-200'"
-                  class="px-3 py-1 rounded-md text-sm font-medium">
-                  {{ interview.active ? 'Deactivate' : 'Activate' }}
-                </button>
-                <button (click)="viewSessions(interview.id)" class="px-3 py-1 bg-secondary-100 text-secondary-700 rounded-md text-sm font-medium hover:bg-secondary-200">
-                  Sessions
-                </button>
-                <button (click)="viewInterview(interview.id)" class="px-3 py-1 bg-primary-100 text-primary-700 rounded-md text-sm font-medium hover:bg-primary-200">
-                  View
-                </button>
-              </div>
+    <!-- Recent Interviews -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header">
+            <h5 class="mb-0">Recent Interviews</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="getRecentInterviews().length === 0" class="text-center py-3">
+              <p class="text-muted">No interviews created yet.</p>
+              <a routerLink="/interviewer/interviews/create" class="btn btn-primary">Create Interview</a>
             </div>
-          </li>
-        </ul>
+            <ul *ngIf="getRecentInterviews().length > 0" class="list-group list-group-flush">
+              <li *ngFor="let interview of getRecentInterviews()" class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">{{ interview.title }}</h6>
+                  <small class="text-muted">{{ interview.jobRole }}</small>
+                </div>
+                <a [routerLink]="['/interviewer/interviews', interview.id]" class="btn btn-sm btn-outline-primary">View</a>
+              </li>
+            </ul>
+            <div *ngIf="getRecentInterviews().length > 0" class="text-center mt-3">
+              <a routerLink="/interviewer/interviews" class="btn btn-outline-primary">View All Interviews</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Sessions -->
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header">
+            <h5 class="mb-0">Recent Sessions</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="getRecentSessions().length === 0" class="text-center py-3">
+              <p class="text-muted">No interview sessions yet.</p>
+            </div>
+            <ul *ngIf="getRecentSessions().length > 0" class="list-group list-group-flush">
+              <li *ngFor="let session of getRecentSessions()" class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">{{ session.candidate.firstName }} {{ session.candidate.lastName }}</h6>
+                  <small class="text-muted">{{ session.interview.title }} - {{ formatDate(session.startTime) }}</small>
+                </div>
+                <span class="badge rounded-pill" [ngClass]="{
+                  'bg-success': session.status === 'COMPLETED',
+                  'bg-warning': session.status === 'IN_PROGRESS',
+                  'bg-secondary': session.status === 'PENDING',
+                  'bg-danger': session.status === 'EXPIRED'
+                }">{{ session.status }}</span>
+              </li>
+            </ul>
+            <div *ngIf="getRecentSessions().length > 0" class="text-center mt-3">
+              <a routerLink="/analytics" class="btn btn-outline-primary">View Analytics</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Recent Sessions -->
-    <div *ngIf="!isLoading && !error && analytics.recentSessions?.length > 0" class="mt-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Sessions</h2>
-      
-      <div class="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul role="list" class="divide-y divide-gray-200">
-          <li *ngFor="let session of analytics.recentSessions">
-            <div class="px-4 py-4 sm:px-6">
-              <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-primary-600 truncate">
-                  {{ session.candidate?.firstName }} {{ session.candidate?.lastName }}
-                </p>
-                <div class="ml-2 flex-shrink-0 flex">
-                  <p 
-                    [ngClass]="{
-                      'bg-warning-100 text-warning-800': session.status === 'PENDING' || session.status === 'IN_PROGRESS',
-                      'bg-success-100 text-success-800': session.status === 'COMPLETED' || session.status === 'EVALUATED'
-                    }"
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                    {{ session.status }}
-                  </p>
-                </div>
-              </div>
-              <div class="mt-2 sm:flex sm:justify-between">
-                <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500">
-                    {{ session.interview?.title }}
-                  </p>
-                </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                  <p>
-                    Started: {{ session.startTime | date:'medium' }}
-                  </p>
-                  <p *ngIf="session.score !== null" class="ml-4">
-                    Score: {{ (session.score * 100) | number:'1.0-0' }}%
-                  </p>
-                </div>
-              </div>
+    <!-- Quick Actions -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Quick Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+              <a routerLink="/interviewer/interviews/create" class="btn btn-primary">Create New Interview</a>
+              <a routerLink="/interviewer/interviews" class="btn btn-outline-primary">Manage Interviews</a>
+              <a routerLink="/analytics" class="btn btn-outline-primary">View Analytics</a>
             </div>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>

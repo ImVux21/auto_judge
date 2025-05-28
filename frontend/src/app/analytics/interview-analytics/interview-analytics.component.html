@@ -1,0 +1,179 @@
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Interview Analytics</h1>
+    <button class="btn btn-outline-primary" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading interview analytics...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <!-- Interview Details -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Interview Details</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="analytics.interview" class="row">
+          <div class="col-md-6">
+            <h4>{{ analytics.interview.title }}</h4>
+            <p class="text-muted">{{ analytics.interview.jobRole }}</p>
+            <p><strong>Status:</strong> 
+              <span class="badge" [ngClass]="analytics.interview.active ? 'bg-success' : 'bg-secondary'">
+                {{ analytics.interview.active ? 'Active' : 'Inactive' }}
+              </span>
+            </p>
+            <p><strong>Time Limit:</strong> {{ analytics.interview.timeLimit }} minutes</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Total Sessions:</strong> {{ analytics.totalSessions || 0 }}</p>
+            <p><strong>Completed Sessions:</strong> {{ analytics.completedSessions || 0 }}</p>
+            <p><strong>Average Score:</strong> {{ (analytics.averageScore || 0) | percent }}</p>
+            <p><strong>Created:</strong> {{ formatDate(analytics.interview?.createdAt) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Distribution -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Score Distribution</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="!analytics.scoreDistribution" class="text-center py-3">
+              <p class="text-muted">No score data available yet.</p>
+            </div>
+            <div *ngIf="analytics.scoreDistribution" class="row">
+              <div class="col-md-2 mb-3" *ngFor="let item of getScoreDistributionItems()">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <h6>{{ item.range }}</h6>
+                    <h2>{{ item.count }}</h2>
+                    <div class="progress mt-2">
+                      <div class="progress-bar" 
+                        [ngClass]="getProgressBarClass(item.range)" 
+                        [style.width.%]="getProgressPercentage(item.count)" 
+                        role="progressbar" 
+                        [attr.aria-valuenow]="item.count" 
+                        aria-valuemin="0" 
+                        [attr.aria-valuemax]="getTotalSessions()">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Performance -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Question Performance</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="!analytics.questionPerformance || analytics.questionPerformance.length === 0" class="text-center py-3">
+          <p class="text-muted">No question performance data available yet.</p>
+        </div>
+        <div *ngIf="analytics.questionPerformance && analytics.questionPerformance.length > 0" class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Question</th>
+                <th>Type</th>
+                <th>Attempts</th>
+                <th>Avg. Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let question of analytics.questionPerformance; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ question.questionText }}</td>
+                <td>
+                  <span class="badge" [ngClass]="question.type === 'MULTIPLE_CHOICE' ? 'bg-info' : 'bg-warning'">
+                    {{ question.type === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
+                  </span>
+                </td>
+                <td>{{ question.attemptCount }}</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                      <div class="progress-bar" 
+                        [ngClass]="question.averageScore < 0.4 ? 'bg-danger' : question.averageScore < 0.7 ? 'bg-warning' : 'bg-success'"
+                        [style.width.%]="question.averageScore * 100">
+                      </div>
+                    </div>
+                    <span>{{ question.averageScore | percent }}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Sessions</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="!analytics.sessions || analytics.sessions?.length === 0" class="text-center py-3">
+          <p class="text-muted">No interview sessions yet.</p>
+        </div>
+        <div *ngIf="analytics.sessions && analytics.sessions.length > 0" class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let session of analytics.sessions">
+                <td>{{ session.candidate.firstName }} {{ session.candidate.lastName }}</td>
+                <td>{{ formatDate(session.startTime) }}</td>
+                <td>
+                  <span class="badge rounded-pill" [ngClass]="{
+                    'bg-success': session.status === 'COMPLETED',
+                    'bg-warning': session.status === 'IN_PROGRESS',
+                    'bg-secondary': session.status === 'PENDING',
+                    'bg-danger': session.status === 'EXPIRED'
+                  }">{{ session.status }}</span>
+                </td>
+                <td>{{ session.score !== null ? (session.score | percent) : 'N/A' }}</td>
+                <td>
+                  <button *ngIf="session.status === 'COMPLETED'" 
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="viewSessionAnalytics(session.id)">
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

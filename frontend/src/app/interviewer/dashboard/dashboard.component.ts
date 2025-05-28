@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { InterviewService } from '../../shared/services/interview.service';
 import { AnalyticsService } from '../../shared/services/analytics.service';
+import { ApiService } from '../../shared/services/api.service';
+import { Interview, InterviewSession } from '../../shared/models/interview.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,19 +11,50 @@ import { AnalyticsService } from '../../shared/services/analytics.service';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  dashboardData: any = {};
+  loading = true;
+  error = '';
   interviews: any[] = [];
   analytics: any = {};
   isLoading = true;
-  error = '';
 
   constructor(
     private interviewService: InterviewService,
     private analyticsService: AnalyticsService,
-    private router: Router
+    private router: Router,
+    private apiService: ApiService
   ) { }
 
   ngOnInit(): void {
-    this.loadDashboard();
+    this.loadDashboardData();
+  }
+
+  loadDashboardData(): void {
+    this.loading = true;
+    this.apiService.getDashboardData().subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load dashboard data. Please try again later.';
+        this.loading = false;
+        console.error('Error loading dashboard data:', err);
+      }
+    });
+  }
+
+  getRecentInterviews(): Interview[] {
+    return this.dashboardData.recentInterviews || [];
+  }
+
+  getRecentSessions(): InterviewSession[] {
+    return this.dashboardData.recentSessions || [];
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString();
   }
 
   loadDashboard(): void {

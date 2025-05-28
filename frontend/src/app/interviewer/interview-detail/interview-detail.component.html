@@ -1,0 +1,217 @@
+<div class="container">
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading interview details...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error && interview">
+    <!-- Interview Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1>{{ interview.title }}</h1>
+        <p class="text-muted">{{ interview.jobRole }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn" 
+          [ngClass]="interview.active ? 'btn-outline-danger' : 'btn-outline-success'"
+          (click)="toggleInterviewStatus()">
+          {{ interview.active ? 'Deactivate' : 'Activate' }}
+        </button>
+        <button class="btn btn-primary" (click)="toggleSessionForm()">
+          Create Session
+        </button>
+      </div>
+    </div>
+
+    <!-- Interview Details -->
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Interview Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Status:</strong> 
+                  <span class="badge" [ngClass]="interview.active ? 'bg-success' : 'bg-secondary'">
+                    {{ interview.active ? 'Active' : 'Inactive' }}
+                  </span>
+                </p>
+                <p><strong>Time Limit:</strong> {{ interview.timeLimit }} minutes</p>
+                <p><strong>Created By:</strong> {{ interview.createdBy.firstName }} {{ interview.createdBy.lastName }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>MCQ Questions:</strong> {{ interview.mcqCount }}</p>
+                <p><strong>Open-ended Questions:</strong> {{ interview.openEndedCount }}</p>
+                <p><strong>Created:</strong> {{ formatDate(interview.createdAt) }}</p>
+              </div>
+            </div>
+            <div *ngIf="interview.description" class="mt-3">
+              <h6>Description:</h6>
+              <p>{{ interview.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions List -->
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Questions ({{ questions.length }})</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="questions.length === 0" class="text-center py-3">
+              <p class="text-muted">No questions available for this interview.</p>
+            </div>
+            <div *ngIf="questions.length > 0">
+              <div *ngFor="let question of questions; let i = index" class="mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between">
+                  <h6>{{ i + 1 }}. {{ question.text }}</h6>
+                  <span class="badge" [ngClass]="question.type === 'MULTIPLE_CHOICE' ? 'bg-info' : 'bg-warning'">
+                    {{ question.type === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
+                  </span>
+                </div>
+                <p class="mb-1"><small class="text-muted">Category: {{ question.category }}</small></p>
+                <p class="mb-1"><small class="text-muted">Difficulty: {{ question.difficulty }}</small></p>
+                
+                <div *ngIf="question.type === 'MULTIPLE_CHOICE' && question.options?.length">
+                  <p class="mb-1">Options:</p>
+                  <ul class="list-group">
+                    <li *ngFor="let option of question.options" class="list-group-item d-flex justify-content-between align-items-center">
+                      {{ option.text }}
+                      <span *ngIf="option.isCorrect" class="badge bg-success">Correct</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions List -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Interview Sessions ({{ sessions.length }})</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="sessions.length === 0" class="text-center py-3">
+              <p class="text-muted">No sessions created yet.</p>
+              <button class="btn btn-primary" (click)="toggleSessionForm()">Create Session</button>
+            </div>
+            <div *ngIf="sessions.length > 0">
+              <div *ngFor="let session of sessions" class="card mb-2">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">{{ session.candidate.firstName }} {{ session.candidate.lastName }}</h6>
+                    <span class="badge rounded-pill" [ngClass]="{
+                      'bg-success': session.status === 'COMPLETED',
+                      'bg-warning': session.status === 'IN_PROGRESS',
+                      'bg-secondary': session.status === 'PENDING',
+                      'bg-danger': session.status === 'EXPIRED'
+                    }">{{ session.status }}</span>
+                  </div>
+                  <p class="mb-1"><small>{{ session.candidate.email }}</small></p>
+                  <p class="mb-1"><small>Started: {{ formatDate(session.startTime) }}</small></p>
+                  <p *ngIf="session.score !== null && session.score !== undefined" class="mb-1">
+                    <small>Score: {{ session.score | percent }}</small>
+                  </p>
+                  <div class="d-flex justify-content-between mt-2">
+                    <small class="text-muted">Token: {{ session.token }}</small>
+                    <button *ngIf="session.status === 'COMPLETED'" 
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="viewAnalytics(session.id)">
+                      Analytics
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Session Form Modal -->
+  <div *ngIf="showSessionForm" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create Interview Session</h5>
+          <button type="button" class="btn-close" (click)="toggleSessionForm()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="sessionError" class="alert alert-danger">
+            {{ sessionError }}
+          </div>
+          <div *ngIf="sessionSuccess" class="alert alert-success">
+            {{ sessionSuccess }}
+          </div>
+          
+          <form [formGroup]="sessionForm" (ngSubmit)="createSession()">
+            <div class="mb-3">
+              <label for="candidateEmail" class="form-label">Candidate Email</label>
+              <input 
+                type="email" 
+                id="candidateEmail" 
+                formControlName="candidateEmail" 
+                class="form-control" 
+                [ngClass]="{'is-invalid': sessionForm.get('candidateEmail')?.invalid && sessionForm.get('candidateEmail')?.touched}"
+                placeholder="Enter candidate email"
+              >
+              <div *ngIf="sessionForm.get('candidateEmail')?.invalid && sessionForm.get('candidateEmail')?.touched" class="invalid-feedback">
+                <div *ngIf="sessionForm.get('candidateEmail')?.errors?.['required']">Email is required</div>
+                <div *ngIf="sessionForm.get('candidateEmail')?.errors?.['email']">Please enter a valid email</div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="candidateFirstName" class="form-label">First Name</label>
+              <input 
+                type="text" 
+                id="candidateFirstName" 
+                formControlName="candidateFirstName" 
+                class="form-control" 
+                [ngClass]="{'is-invalid': sessionForm.get('candidateFirstName')?.invalid && sessionForm.get('candidateFirstName')?.touched}"
+                placeholder="Enter candidate first name"
+              >
+              <div *ngIf="sessionForm.get('candidateFirstName')?.invalid && sessionForm.get('candidateFirstName')?.touched" class="invalid-feedback">
+                First name is required
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="candidateLastName" class="form-label">Last Name</label>
+              <input 
+                type="text" 
+                id="candidateLastName" 
+                formControlName="candidateLastName" 
+                class="form-control" 
+                [ngClass]="{'is-invalid': sessionForm.get('candidateLastName')?.invalid && sessionForm.get('candidateLastName')?.touched}"
+                placeholder="Enter candidate last name"
+              >
+              <div *ngIf="sessionForm.get('candidateLastName')?.invalid && sessionForm.get('candidateLastName')?.touched" class="invalid-feedback">
+                Last name is required
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="toggleSessionForm()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="sessionForm.invalid || submittingSession" (click)="createSession()">
+            <span *ngIf="submittingSession" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Create Session
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

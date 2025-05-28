@@ -1,0 +1,86 @@
+<div class="container">
+  <h1 class="mb-4">My Interview Sessions</h1>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading your sessions...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="sessions.length === 0" class="card p-5 text-center">
+      <h4>No Interview Sessions Found</h4>
+      <p class="mb-4">You don't have any interview sessions yet. When you receive an invitation, you'll be able to access it here.</p>
+      <p>To start an interview, you need to receive an invitation with a session token from the interviewer.</p>
+      
+      <div class="mt-4">
+        <div class="card mb-3 mx-auto" style="max-width: 500px;">
+          <div class="card-header">
+            <h5 class="mb-0">Have a session token?</h5>
+          </div>
+          <div class="card-body">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Enter your session token" #sessionToken>
+              <button class="btn btn-primary" (click)="continueSession(sessionToken.value)" [disabled]="!sessionToken.value">
+                Start Interview
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="sessions.length > 0" class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Your Sessions</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Interview</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let session of sessions">
+                <td>{{ session.interview.title }}</td>
+                <td>{{ formatDate(session.startTime) }}</td>
+                <td>
+                  <span class="badge rounded-pill" [ngClass]="{
+                    'bg-success': session.status === 'COMPLETED',
+                    'bg-warning': session.status === 'IN_PROGRESS',
+                    'bg-secondary': session.status === 'PENDING',
+                    'bg-danger': session.status === 'EXPIRED'
+                  }">{{ session.status }}</span>
+                </td>
+                <td>{{ session.score !== null ? (session.score | percent) : 'N/A' }}</td>
+                <td>
+                  <button *ngIf="session.status === 'PENDING' || session.status === 'IN_PROGRESS'" 
+                    class="btn btn-sm btn-primary"
+                    (click)="continueSession(session.token)">
+                    Continue
+                  </button>
+                  <button *ngIf="session.status === 'COMPLETED'" 
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="viewResults(session.token)">
+                    View Results
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CandidateService } from '../../shared/services/candidate.service';
 import { InterviewService } from '../../shared/services/interview.service';
 import { interval, Subscription } from 'rxjs';
+import { ApiService } from '../../shared/services/api.service';
 
 @Component({
   selector: 'app-interview-session',
@@ -11,45 +12,37 @@ import { interval, Subscription } from 'rxjs';
   styleUrls: ['./interview-session.component.css']
 })
 export class InterviewSessionComponent implements OnInit, OnDestroy {
-  token: string = '';
+  sessionToken!: string;
   session: any = null;
   questions: any[] = [];
   currentQuestionIndex = 0;
-  isLoading = true;
+  loading = true;
+  isLoading = true; // Alias for loading
   error = '';
-  mcqForm: FormGroup;
-  openEndedForm: FormGroup;
-  isSubmitting = false;
-  timeRemaining = 0;
-  timerSubscription?: Subscription;
-  webcamEnabled = false;
-  deviceInfo = '';
   sessionStarted = false;
+  
+  // Timer variables
+  timeRemaining: number = 0;
+  timerSubscription?: Subscription;
+  
+  // Answer forms
+  mcqForm!: FormGroup;
+  openEndedForm!: FormGroup;
+  submitting = false;
+  isSubmitting = false; // Alias for submitting
+  submitError = '';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private formBuilder: FormBuilder,
-    private candidateService: CandidateService,
-    private interviewService: InterviewService
-  ) {
-    this.mcqForm = this.formBuilder.group({
-      selectedOptions: [[], [Validators.required]]
-    });
-    
-    this.openEndedForm = this.formBuilder.group({
-      textAnswer: ['', [Validators.required, Validators.minLength(10)]]
-    });
-  }
+    private apiService: ApiService,
+    private fb: FormBuilder
+  ) { }
 
   ngOnInit(): void {
-    this.token = this.route.snapshot.paramMap.get('token') || '';
-    if (!this.token) {
-      this.error = 'Invalid session token';
-      return;
-    }
-
-    this.loadSession();
+    this.sessionToken = this.route.snapshot.paramMap.get('token') || '';
+    this.loadSessionInfo();
+    this.initializeForms();
   }
 
   ngOnDestroy(): void {
@@ -58,68 +51,48 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadSession(): void {
+  loadSessionInfo(): void {
+    this.loading = true;
     this.isLoading = true;
-    
-    this.interviewService.getSessionByToken(this.token).subscribe({
-      next: (session) => {
-        this.session = session;
-        if (session.status === 'COMPLETED' || session.status === 'EVALUATED') {
-          this.router.navigate(['/candidate/session', this.token, 'results']);
-          return;
-        }
-        
-        this.deviceInfo = this.getDeviceInfo();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.error = 'Failed to load interview session';
-        console.error(err);
-      }
-    });
-  }
-
-  startSession(): void {
-    this.isSubmitting = true;
-    
-    this.candidateService.startSession(this.token, { deviceInfo: this.deviceInfo }).subscribe({
-      next: (session) => {
-        this.session = session;
-        this.sessionStarted = true;
+    this.apiService.getSessionByToken(this.sessionToken).subscribe({
+      next: (data) => {
+        this.session = data;
         this.loadQuestions();
-        this.startTimer();
-        this.isSubmitting = false;
       },
       error: (err) => {
-        this.isSubmitting = false;
-        this.error = err.error?.message || 'Failed to start session';
-        console.error(err);
+        this.error = 'Failed to load session information. Please check your session token.';
+        this.loading = false;
+        this.isLoading = false;
+        console.error('Error loading session:', err);
       }
     });
   }
 
   loadQuestions(): void {
-    this.isLoading = true;
-    
-    this.candidateService.getSessionQuestions(this.token).subscribe({
-      next: (questions) => {
-        this.questions = questions;
+    this.apiService.getSessionQuestions(this.sessionToken).subscribe({
+      next: (data) => {
+        this.questions = data;
+        this.loading = false;
         this.isLoading = false;
+        this.initializeTimer();
+        this.initializeForms();
       },
       error: (err) => {
+        this.error = 'Failed to load questions.';
+        this.loading = false;
         this.isLoading = false;
-        this.error = 'Failed to load questions';
-        console.error(err);
+        console.error('Error loading questions:', err);
       }
     });
   }
 
-  startTimer(): void {
-    if (this.session.timeLimit) {
-      this.timeRemaining = this.session.timeLimit * 60; // Convert to seconds
+  initializeTimer(): void {
+    if (this.session && this.session.interview) {
+      this.timeRemaining = this.session.interview.timeLimit * 60; // Convert minutes to seconds
+      
       this.timerSubscription = interval(1000).subscribe(() => {
         this.timeRemaining--;
+        
         if (this.timeRemaining <= 0) {
           this.completeSession();
         }
@@ -127,26 +100,66 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     }
   }
 
+  initializeForms(): void {
+    // Initialize MCQ form
+    this.mcqForm = this.fb.group({
+      selectedOptions: [[], Validators.required]
+    });
+    
+    // Initialize Open-ended form
+    this.openEndedForm = this.fb.group({
+      textAnswer: ['', [Validators.required, Validators.minLength(10)]]
+    });
+  }
+
+  startSession(): void {
+    this.submitting = true;
+    this.isSubmitting = true;
+    
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height
+    };
+    
+    this.apiService.startSession(this.sessionToken, deviceInfo).subscribe({
+      next: () => {
+        this.sessionStarted = true;
+        this.submitting = false;
+        this.isSubmitting = false;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to start session. Please try again.';
+        this.submitting = false;
+        this.isSubmitting = false;
+        console.error('Error starting session:', err);
+      }
+    });
+  }
+
   submitMCQAnswer(): void {
     if (this.mcqForm.invalid) {
       return;
     }
-
-    this.isSubmitting = true;
-    const currentQuestion = this.questions[this.currentQuestionIndex];
     
-    this.candidateService.submitMCQAnswer(this.token, {
-      questionId: currentQuestion.id,
-      selectedOptionIds: this.mcqForm.value.selectedOptions
-    }).subscribe({
+    this.submitting = true;
+    this.isSubmitting = true;
+    
+    const currentQuestion = this.questions[this.currentQuestionIndex];
+    const selectedOptionIds = this.mcqForm.value.selectedOptions;
+    
+    this.apiService.submitMCQAnswer(this.sessionToken, currentQuestion.id, selectedOptionIds).subscribe({
       next: () => {
+        this.submitting = false;
         this.isSubmitting = false;
-        this.nextQuestion();
+        this.moveToNextQuestion();
       },
       error: (err) => {
+        this.submitting = false;
         this.isSubmitting = false;
-        this.error = err.error?.message || 'Failed to submit answer';
-        console.error(err);
+        this.error = err.error?.message || 'Failed to submit answer. Please try again.';
+        console.error('Error submitting MCQ answer:', err);
       }
     });
   }
@@ -155,30 +168,32 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     if (this.openEndedForm.invalid) {
       return;
     }
-
-    this.isSubmitting = true;
-    const currentQuestion = this.questions[this.currentQuestionIndex];
     
-    this.candidateService.submitOpenEndedAnswer(this.token, {
-      questionId: currentQuestion.id,
-      textAnswer: this.openEndedForm.value.textAnswer
-    }).subscribe({
+    this.submitting = true;
+    this.isSubmitting = true;
+    
+    const currentQuestion = this.questions[this.currentQuestionIndex];
+    const textAnswer = this.openEndedForm.value.textAnswer;
+    
+    this.apiService.submitOpenEndedAnswer(this.sessionToken, currentQuestion.id, textAnswer).subscribe({
       next: () => {
+        this.submitting = false;
         this.isSubmitting = false;
-        this.nextQuestion();
+        this.moveToNextQuestion();
       },
       error: (err) => {
+        this.submitting = false;
         this.isSubmitting = false;
-        this.error = err.error?.message || 'Failed to submit answer';
-        console.error(err);
+        this.error = err.error?.message || 'Failed to submit answer. Please try again.';
+        console.error('Error submitting open-ended answer:', err);
       }
     });
   }
 
-  nextQuestion(): void {
+  moveToNextQuestion(): void {
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
-      this.resetForms();
+      this.initializeForms();
     } else {
       this.completeSession();
     }
@@ -187,13 +202,8 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   previousQuestion(): void {
     if (this.currentQuestionIndex > 0) {
       this.currentQuestionIndex--;
-      this.resetForms();
+      this.initializeForms();
     }
-  }
-
-  resetForms(): void {
-    this.mcqForm.reset({ selectedOptions: [] });
-    this.openEndedForm.reset({ textAnswer: '' });
   }
 
   completeSession(): void {
@@ -201,45 +211,62 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       this.timerSubscription.unsubscribe();
     }
     
+    this.submitting = true;
     this.isSubmitting = true;
     
-    this.candidateService.completeSession(this.token).subscribe({
+    this.apiService.completeSession(this.sessionToken).subscribe({
       next: () => {
+        this.submitting = false;
         this.isSubmitting = false;
-        this.router.navigate(['/candidate/session', this.token, 'results']);
+        this.router.navigate(['/candidate/session', this.sessionToken, 'complete']);
       },
       error: (err) => {
+        this.submitting = false;
         this.isSubmitting = false;
-        this.error = err.error?.message || 'Failed to complete session';
-        console.error(err);
+        console.error('Error completing session:', err);
+        // Still navigate to complete page even if there's an error
+        this.router.navigate(['/candidate/session', this.sessionToken, 'complete']);
       }
     });
-  }
-
-  toggleOption(optionId: number): void {
-    const selectedOptions = [...this.mcqForm.value.selectedOptions];
-    const index = selectedOptions.indexOf(optionId);
-    
-    if (index === -1) {
-      selectedOptions.push(optionId);
-    } else {
-      selectedOptions.splice(index, 1);
-    }
-    
-    this.mcqForm.patchValue({ selectedOptions });
-  }
-
-  isOptionSelected(optionId: number): boolean {
-    return this.mcqForm.value.selectedOptions.includes(optionId);
   }
 
   formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
-  getDeviceInfo(): string {
-    return `${navigator.userAgent} | ${navigator.platform} | ${window.screen.width}x${window.screen.height}`;
+  toggleOption(optionId: number): void {
+    const currentValue = this.mcqForm.get('selectedOptions')?.value || [];
+    const currentQuestion = this.questions[this.currentQuestionIndex];
+    
+    // For single-choice questions (radio buttons)
+    if (!currentQuestion.multipleAllowed) {
+      this.mcqForm.patchValue({
+        selectedOptions: [optionId]
+      });
+      return;
+    }
+    
+    // For multiple-choice questions (checkboxes)
+    const index = currentValue.indexOf(optionId);
+    if (index === -1) {
+      // Add the option
+      this.mcqForm.patchValue({
+        selectedOptions: [...currentValue, optionId]
+      });
+    } else {
+      // Remove the option
+      const updatedValue = [...currentValue];
+      updatedValue.splice(index, 1);
+      this.mcqForm.patchValue({
+        selectedOptions: updatedValue
+      });
+    }
+  }
+
+  isOptionSelected(optionId: number): boolean {
+    const selectedOptions = this.mcqForm.get('selectedOptions')?.value || [];
+    return selectedOptions.includes(optionId);
   }
 } 

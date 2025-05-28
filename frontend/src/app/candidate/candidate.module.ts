@@ -1,18 +1,27 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { InterviewSessionComponent } from './interview-session/interview-session.component';
+import { SessionListComponent } from './session-list/session-list.component';
+import { SessionStartComponent } from './session-start/session-start.component';
+import { SessionCompleteComponent } from './session-complete/session-complete.component';
 
 const routes: Routes = [
+  { path: 'sessions', component: SessionListComponent },
+  { path: 'session/:token/start', component: SessionStartComponent },
   { path: 'session/:token', component: InterviewSessionComponent },
-  { path: '', redirectTo: '/auth/login', pathMatch: 'full' }
+  { path: 'session/:token/complete', component: SessionCompleteComponent },
+  { path: '', redirectTo: 'sessions', pathMatch: 'full' }
 ];
 
 @NgModule({
   declarations: [
-    InterviewSessionComponent
+    InterviewSessionComponent,
+    SessionListComponent,
+    SessionStartComponent,
+    SessionCompleteComponent
   ],
   imports: [
     CommonModule,

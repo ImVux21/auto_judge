@@ -1,40 +1,34 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InterviewService } from '../../shared/services/interview.service';
+import { ApiService } from '../../shared/services/api.service';
 
 @Component({
   selector: 'app-create-interview',
   templateUrl: './create-interview.component.html',
   styleUrls: ['./create-interview.component.css']
 })
-export class CreateInterviewComponent {
-  interviewForm: FormGroup;
+export class CreateInterviewComponent implements OnInit {
+  interviewForm!: FormGroup;
   isSubmitting = false;
-  errorMessage = '';
+  error = '';
+  success = '';
 
   constructor(
-    private formBuilder: FormBuilder,
-    private interviewService: InterviewService,
+    private fb: FormBuilder,
+    private apiService: ApiService,
     private router: Router
-  ) {
-    this.interviewForm = this.formBuilder.group({
+  ) { }
+
+  ngOnInit(): void {
+    this.interviewForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       jobRole: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
       timeLimit: [60, [Validators.required, Validators.min(10), Validators.max(180)]],
       mcqCount: [5, [Validators.required, Validators.min(0), Validators.max(20)]],
       openEndedCount: [3, [Validators.required, Validators.min(0), Validators.max(10)]]
-    }, {
-      validators: this.atLeastOneQuestionValidator
     });
-  }
-
-  atLeastOneQuestionValidator(form: FormGroup) {
-    const mcqCount = form.get('mcqCount')?.value || 0;
-    const openEndedCount = form.get('openEndedCount')?.value || 0;
-    
-    return mcqCount + openEndedCount > 0 ? null : { noQuestions: true };
   }
 
   onSubmit(): void {
@@ -43,22 +37,27 @@ export class CreateInterviewComponent {
     }
 
     this.isSubmitting = true;
-    this.errorMessage = '';
+    this.error = '';
+    this.success = '';
 
-    this.interviewService.createInterview(this.interviewForm.value).subscribe({
-      next: (interview) => {
+    this.apiService.createInterview(this.interviewForm.value).subscribe({
+      next: (data) => {
         this.isSubmitting = false;
-        this.router.navigate(['/interviewer/interviews', interview.id]);
+        this.success = 'Interview created successfully!';
+        
+        setTimeout(() => {
+          this.router.navigate(['/interviewer/interviews', data.id]);
+        }, 1500);
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.errorMessage = err.error?.message || 'Failed to create interview';
-        console.error(err);
+        this.error = err.error?.message || 'Failed to create interview. Please try again.';
+        console.error('Error creating interview:', err);
       }
     });
   }
 
   cancel(): void {
-    this.router.navigate(['/interviewer/dashboard']);
+    this.router.navigate(['/interviewer/interviews']);
   }
 } 

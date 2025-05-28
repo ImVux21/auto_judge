@@ -1,0 +1,138 @@
+<div class="container">
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading session results...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error && session">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Interview Results</h1>
+      <button class="btn btn-outline-primary" (click)="goToSessions()">
+        <i class="bi bi-arrow-left"></i> Back to Sessions
+      </button>
+    </div>
+
+    <!-- Session Details -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Session Details</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h4>{{ session.interview.title }}</h4>
+            <p class="text-muted">{{ session.interview.jobRole }}</p>
+            <p><strong>Status:</strong> 
+              <span class="badge rounded-pill bg-success">{{ session.status }}</span>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Started:</strong> {{ formatDate(session.startTime) }} at {{ formatTime(session.startTime) }}</p>
+            <p *ngIf="session.endTime"><strong>Completed:</strong> {{ formatDate(session.endTime) }} at {{ formatTime(session.endTime) }}</p>
+            <p><strong>Overall Score:</strong> <span class="badge" [ngClass]="getProgressBarClass(session.score)">{{ session.score | percent }}</span></p>
+          </div>
+        </div>
+
+        <div *ngIf="session.evaluationSummary" class="mt-4">
+          <h5>Evaluation Summary</h5>
+          <div class="card bg-light">
+            <div class="card-body">
+              <p class="mb-0">{{ session.evaluationSummary }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Performance -->
+    <div *ngIf="getCategoryPerformance().length > 0" class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Performance by Category</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3" *ngFor="let item of getCategoryPerformance()">
+            <div class="card h-100">
+              <div class="card-body">
+                <h6 class="mb-2">{{ item.category }}</h6>
+                <div class="d-flex align-items-center">
+                  <div class="progress flex-grow-1 me-2">
+                    <div class="progress-bar" 
+                      [ngClass]="getProgressBarClass(item.score)" 
+                      [style.width.%]="item.score * 100" 
+                      role="progressbar" 
+                      [attr.aria-valuenow]="item.score * 100" 
+                      aria-valuemin="0" 
+                      aria-valuemax="100">
+                    </div>
+                  </div>
+                  <span>{{ item.score | percent }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answer Review -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Answer Review</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="answers.length === 0" class="text-center py-3">
+          <p class="text-muted">No answers available for review.</p>
+        </div>
+        <div *ngIf="answers.length > 0">
+          <div *ngFor="let answer of answers; let i = index" class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Question {{ i + 1 }}</h6>
+              <div>
+                <span class="badge me-2" [ngClass]="answer.question.type === 'MULTIPLE_CHOICE' ? 'bg-info' : 'bg-warning'">
+                  {{ answer.question.type === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
+                </span>
+                <span class="badge" [ngClass]="getProgressBarClass(answer.score || 0)">
+                  {{ answer.score !== null ? (answer.score | percent) : 'N/A' }}
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p><strong>{{ answer.question.text }}</strong></p>
+              
+              <div *ngIf="answer.question.type === 'MULTIPLE_CHOICE'">
+                <p><strong>Your Answer:</strong></p>
+                <ul class="list-group">
+                  <li *ngFor="let option of answer.selectedOptions" class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ option.text }}
+                    <span *ngIf="option.isCorrect" class="badge bg-success">Correct</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div *ngIf="answer.question.type === 'OPEN_ENDED'">
+                <p><strong>Your Answer:</strong></p>
+                <div class="card">
+                  <div class="card-body bg-light">
+                    <p class="mb-0">{{ answer.textAnswer }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div *ngIf="answer.aiEvaluation" class="mt-3">
+                <p><strong>Evaluation:</strong></p>
+                <p>{{ answer.aiEvaluation }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

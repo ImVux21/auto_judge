@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Interviews</h1>
+    <button class="btn btn-primary" (click)="createInterview()">Create Interview</button>
+  </div>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading interviews...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="interviews.length === 0" class="card p-5 text-center">
+      <p class="mb-3">No interviews found. Create your first interview to get started.</p>
+      <button class="btn btn-primary mx-auto" style="width: fit-content;" (click)="createInterview()">Create Interview</button>
+    </div>
+
+    <div *ngIf="interviews.length > 0" class="card">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Job Role</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let interview of interviews">
+              <td>{{ interview.title }}</td>
+              <td>{{ interview.jobRole }}</td>
+              <td>
+                <span class="badge" [ngClass]="interview.active ? 'bg-success' : 'bg-secondary'">
+                  {{ interview.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>{{ interview.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-sm" 
+                    [ngClass]="interview.active ? 'btn-outline-danger' : 'btn-outline-success'"
+                    (click)="toggleInterviewStatus(interview)">
+                    {{ interview.active ? 'Deactivate' : 'Activate' }}
+                  </button>
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewInterview(interview.id)">
+                    View
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div> 

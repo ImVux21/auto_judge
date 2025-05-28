@@ -1,0 +1,153 @@
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Session Analytics</h1>
+    <div>
+      <button class="btn btn-outline-primary me-2" (click)="viewInterviewAnalytics()" *ngIf="analytics.session?.interview?.id">
+        View Interview Analytics
+      </button>
+      <button class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading session analytics...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <!-- Session Details -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Session Details</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="analytics.session" class="row">
+          <div class="col-md-6">
+            <h4>{{ analytics.session.interview.title }}</h4>
+            <p class="text-muted">{{ analytics.session.interview.jobRole }}</p>
+            <p><strong>Candidate:</strong> {{ analytics.session.candidate.firstName }} {{ analytics.session.candidate.lastName }}</p>
+            <p><strong>Email:</strong> {{ analytics.session.candidate.email }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Status:</strong> 
+              <span class="badge rounded-pill" [ngClass]="{
+                'bg-success': analytics.session.status === 'COMPLETED',
+                'bg-warning': analytics.session.status === 'IN_PROGRESS',
+                'bg-secondary': analytics.session.status === 'PENDING',
+                'bg-danger': analytics.session.status === 'EXPIRED'
+              }">{{ analytics.session.status }}</span>
+            </p>
+            <p><strong>Started:</strong> {{ formatDate(analytics.session.startTime) }} at {{ formatTime(analytics.session.startTime) }}</p>
+            <p *ngIf="analytics.session.endTime"><strong>Ended:</strong> {{ formatDate(analytics.session.endTime) }} at {{ formatTime(analytics.session.endTime) }}</p>
+            <p><strong>Score:</strong> {{ analytics.session.score !== null ? (analytics.session.score | percent) : 'N/A' }}</p>
+          </div>
+          
+          <div *ngIf="analytics.session.evaluationSummary" class="col-12 mt-3">
+            <h5>Evaluation Summary</h5>
+            <p>{{ analytics.session.evaluationSummary }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Performance -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Category Performance</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="!analytics.categoryPerformance" class="text-center py-3">
+              <p class="text-muted">No category performance data available.</p>
+            </div>
+            <div *ngIf="analytics.categoryPerformance" class="row">
+              <div class="col-md-4 mb-3" *ngFor="let item of getCategoryPerformanceItems()">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h6 class="mb-2">{{ item.category }}</h6>
+                    <div class="d-flex align-items-center">
+                      <div class="progress flex-grow-1 me-2">
+                        <div class="progress-bar" 
+                          [ngClass]="getProgressBarClass(item.score)" 
+                          [style.width.%]="item.score * 100" 
+                          role="progressbar" 
+                          [attr.aria-valuenow]="item.score * 100" 
+                          aria-valuemin="0" 
+                          aria-valuemax="100">
+                        </div>
+                      </div>
+                      <span>{{ item.score | percent }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answer Performance -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Answer Performance</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="!analytics.answerPerformance || analytics.answerPerformance.length === 0" class="text-center py-3">
+          <p class="text-muted">No answer performance data available.</p>
+        </div>
+        <div *ngIf="analytics.answerPerformance && analytics.answerPerformance.length > 0">
+          <div *ngFor="let answer of analytics.answerPerformance; let i = index" class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Question {{ i + 1 }}</h6>
+              <div>
+                <span class="badge me-2" [ngClass]="answer.questionType === 'MULTIPLE_CHOICE' ? 'bg-info' : 'bg-warning'">
+                  {{ answer.questionType === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
+                </span>
+                <span class="badge" [ngClass]="getProgressBarClass(answer.score || 0)">
+                  {{ answer.score !== null ? (answer.score | percent) : 'N/A' }}
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p><strong>{{ answer.questionText }}</strong></p>
+              
+              <div *ngIf="answer.questionType === 'MULTIPLE_CHOICE'">
+                <p><strong>Selected Options:</strong></p>
+                <ul class="list-group">
+                  <li *ngFor="let option of answer.selectedOptions" class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ option.text }}
+                    <span *ngIf="option.isCorrect" class="badge bg-success">Correct</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div *ngIf="answer.questionType === 'OPEN_ENDED'">
+                <p><strong>Answer:</strong></p>
+                <div class="card">
+                  <div class="card-body bg-light">
+                    <p class="mb-0">{{ answer.textAnswer }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div *ngIf="answer.evaluation" class="mt-3">
+                <p><strong>Evaluation:</strong></p>
+                <p>{{ answer.evaluation }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

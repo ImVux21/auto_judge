@@ -1,0 +1,111 @@
+<div class="container">
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading session information...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error && session">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ session.interview.title }}</h2>
+          </div>
+          <div class="card-body">
+            <div class="mb-4">
+              <h4>Welcome to your interview session!</h4>
+              <p class="text-muted">{{ session.interview.jobRole }}</p>
+              
+              <div class="alert alert-info">
+                <h5>Interview Information</h5>
+                <ul class="mb-0">
+                  <li><strong>Time Limit:</strong> {{ session.interview.timeLimit }} minutes</li>
+                  <li><strong>Questions:</strong> {{ session.interview.mcqCount + session.interview.openEndedCount }}</li>
+                  <li><strong>Multiple Choice Questions:</strong> {{ session.interview.mcqCount }}</li>
+                  <li><strong>Open-Ended Questions:</strong> {{ session.interview.openEndedCount }}</li>
+                </ul>
+              </div>
+              
+              <div *ngIf="session.interview.description" class="mb-4">
+                <h5>Description</h5>
+                <p>{{ session.interview.description }}</p>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <h5>Before You Begin</h5>
+              <ul>
+                <li>Ensure you have a stable internet connection</li>
+                <li>Find a quiet place without distractions</li>
+                <li>Have a pen and paper ready if needed</li>
+                <li>Your webcam will be used for proctoring purposes</li>
+                <li>Once started, the timer cannot be paused</li>
+              </ul>
+            </div>
+            
+            <form [formGroup]="deviceInfoForm" (ngSubmit)="startSession()">
+              <div *ngIf="submitError" class="alert alert-danger">
+                {{ submitError }}
+              </div>
+              
+              <div class="mb-3">
+                <label for="deviceName" class="form-label">Device Name</label>
+                <input 
+                  type="text" 
+                  id="deviceName" 
+                  formControlName="deviceName" 
+                  class="form-control" 
+                  [ngClass]="{'is-invalid': deviceInfoForm.get('deviceName')?.invalid && deviceInfoForm.get('deviceName')?.touched}"
+                >
+                <div *ngIf="deviceInfoForm.get('deviceName')?.invalid && deviceInfoForm.get('deviceName')?.touched" class="invalid-feedback">
+                  Device name is required
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="browserInfo" class="form-label">Browser</label>
+                <input 
+                  type="text" 
+                  id="browserInfo" 
+                  formControlName="browserInfo" 
+                  class="form-control" 
+                  [ngClass]="{'is-invalid': deviceInfoForm.get('browserInfo')?.invalid && deviceInfoForm.get('browserInfo')?.touched}"
+                >
+                <div *ngIf="deviceInfoForm.get('browserInfo')?.invalid && deviceInfoForm.get('browserInfo')?.touched" class="invalid-feedback">
+                  Browser information is required
+                </div>
+              </div>
+              
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="allowCamera" formControlName="allowCamera">
+                <label class="form-check-label" for="allowCamera">Allow camera access (required for proctoring)</label>
+              </div>
+              
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="allowMicrophone" formControlName="allowMicrophone">
+                <label class="form-check-label" for="allowMicrophone">Allow microphone access (optional)</label>
+              </div>
+              
+              <div class="d-grid gap-2">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary btn-lg" 
+                  [disabled]="deviceInfoForm.invalid || isSubmitting || !deviceInfoForm.value.allowCamera"
+                >
+                  <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  Start Interview
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { ApiService } from './api.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'auth-user';
@@ -13,19 +12,15 @@ const USER_KEY = 'auth-user';
 export class AuthService {
   private currentUserSubject: BehaviorSubject<any>;
   public currentUser: Observable<any>;
-  private apiUrl = `${environment.apiUrl}/auth`;
 
-  constructor(private http: HttpClient) {
+  constructor(private apiService: ApiService) {
     this.currentUserSubject = new BehaviorSubject<any>(this.getUser());
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signin`, {
-      email,
-      password
-    }).pipe(
-      tap((response: any) => {
+    return this.apiService.login(email, password).pipe(
+      tap(response => {
         this.saveToken(response.token);
         this.saveUser(response);
         this.currentUserSubject.next(response);
@@ -33,19 +28,12 @@ export class AuthService {
     );
   }
 
-  register(firstName: string, lastName: string, email: string, password: string, roles: string[] = []): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signup`, {
-      firstName,
-      lastName,
-      email,
-      password,
-      roles
-    });
+  register(firstName: string, lastName: string, email: string, password: string, roles?: string[]): Observable<any> {
+    return this.apiService.register(firstName, lastName, email, password, roles);
   }
 
   logout(): void {
-    window.sessionStorage.removeItem(TOKEN_KEY);
-    window.sessionStorage.removeItem(USER_KEY);
+    window.sessionStorage.clear();
     this.currentUserSubject.next(null);
   }
 
@@ -81,10 +69,10 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     const user = this.getUser();
-    if (!user || !user.roles) {
-      return false;
+    if (user && user.roles) {
+      return user.roles.includes(role);
     }
-    return user.roles.includes(role);
+    return false;
   }
 
   isInterviewer(): boolean {
