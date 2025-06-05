@@ -115,7 +115,7 @@ public class InterviewController {
             
             // Add candidate role
             Role candidateRole = new Role();
-            candidateRole.setId(3L); // Assuming 3 is the ID for ROLE_CANDIDATE
+            candidateRole.setId(3); // Assuming 3 is the ID for ROLE_CANDIDATE
             candidateRole.setName(ERole.ROLE_CANDIDATE);
             candidate.setRoles(java.util.Collections.singleton(candidateRole));
             

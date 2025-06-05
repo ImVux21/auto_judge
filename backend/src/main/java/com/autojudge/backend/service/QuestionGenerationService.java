@@ -8,25 +8,26 @@ import com.autojudge.backend.repository.QuestionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.ai.chat.ChatResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.chat.prompt.UserPrompt;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class QuestionGenerationService {
-
-    @Autowired
-    private ChatClient chatClient;
-    
-    @Autowired
-    private QuestionRepository questionRepository;
+    private final ChatClient chatClient;
+    private final OllamaChatModel chatModel;
+    private final QuestionRepository questionRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -75,17 +76,22 @@ public class QuestionGenerationService {
               }
             ]
             """;
-        
         String formattedSystemPrompt = String.format(systemPrompt, count, interview.getJobRole());
-        
-        Prompt prompt = new Prompt(
-            new SystemPromptTemplate(formattedSystemPrompt).create(),
-            new UserPrompt("Generate the questions now")
-        );
-        
-        ChatResponse response = chatClient.call(prompt);
-        String responseContent = response.getResult().getOutput().getContent();
-        
+        // For Spring AI Chat Client
+//        String responseContent = chatClient
+//                .prompt()
+//                .system(formattedSystemPrompt)
+//                .user("Generate the questions now")
+//                .call()
+//                .content();
+
+        // For HuggingFace
+        Message userMessage = new UserMessage("Generate the questions now");
+        Message systemMessage = new SystemMessage(formattedSystemPrompt);
+        Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
+
+        ChatResponse response = chatModel.call(prompt);
+        String responseContent = response.getResult().getOutput().getText();
         try {
             JsonNode questionsArray = objectMapper.readTree(responseContent);
             List<Question> questions = new ArrayList<>();
@@ -140,17 +146,14 @@ public class QuestionGenerationService {
               }
             ]
             """;
-        
         String formattedSystemPrompt = String.format(systemPrompt, count, interview.getJobRole());
         
-        Prompt prompt = new Prompt(
-            new SystemPromptTemplate(formattedSystemPrompt).create(),
-            new UserPrompt("Generate the questions now")
-        );
-        
-        ChatResponse response = chatClient.call(prompt);
-        String responseContent = response.getResult().getOutput().getContent();
-        
+        String responseContent = chatClient
+                .prompt()
+                .system(formattedSystemPrompt)
+                .user("Generate the questions now")
+                .call()
+                .content();
         try {
             JsonNode questionsArray = objectMapper.readTree(responseContent);
             List<Question> questions = new ArrayList<>();

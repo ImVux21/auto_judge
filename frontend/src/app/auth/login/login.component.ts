@@ -46,18 +46,15 @@ export class LoginComponent implements OnInit {
 
     const { email, password } = this.loginForm.value;
 
-    this.redirectBasedOnRole();
-
-
-    // this.authService.login(email, password).subscribe({
-    //   next: () => {
-    //     this.redirectBasedOnRole();
-    //   },
-    //   error: err => {
-    //     this.errorMessage = err.error?.message || 'Failed to login. Please check your credentials.';
-    //     this.isSubmitting = false;
-    //   }
-    // });
+    this.authService.login(email, password).subscribe({
+      next: () => {
+        this.redirectBasedOnRole();
+      },
+      error: err => {
+        this.errorMessage = err.error?.message || 'Failed to login. Please check your credentials.';
+        this.isSubmitting = false;
+      }
+    });
   }
 
   private redirectBasedOnRole(): void {

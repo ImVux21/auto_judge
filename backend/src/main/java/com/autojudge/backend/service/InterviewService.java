@@ -52,7 +52,7 @@ public class InterviewService {
             savedInterview, mcqCount, openEndedCount);
         
         // Save questions
-        questions.forEach(question -> questionRepository.save(question));
+        questionRepository.saveAll(questions);
         
         return savedInterview;
     }

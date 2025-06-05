@@ -5,12 +5,8 @@ import com.autojudge.backend.model.Option;
 import com.autojudge.backend.model.Question;
 import com.autojudge.backend.model.QuestionType;
 import com.autojudge.backend.repository.OptionRepository;
-import org.springframework.ai.chat.ChatClient;
-import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.chat.prompt.UserPrompt;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,13 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AnswerEvaluationService {
-
-    @Autowired
-    private ChatClient chatClient;
-    
-    @Autowired
-    private OptionRepository optionRepository;
+    private final ChatClient chatClient;
+    private final OptionRepository optionRepository;
 
     public void evaluateAnswer(Answer answer) {
         Question question = answer.getQuestion();
@@ -107,15 +100,23 @@ public class AnswerEvaluationService {
             
             Evaluate the candidate's answer:
             """, question.getText(), modelAnswer, candidateAnswer);
-        
-        Prompt prompt = new Prompt(
-            new SystemPromptTemplate(systemPrompt).create(),
-            new UserPrompt(userPrompt)
-        );
-        
-        ChatResponse response = chatClient.call(prompt);
-        String responseContent = response.getResult().getOutput().getContent();
-        
+
+        // For Spring AI Chat Client
+        String responseContent = chatClient
+                .prompt()
+                .system(systemPrompt)
+                .user(userPrompt)
+                .call()
+                .content();
+        // For HuggingFace
+//        Message userMessage = new UserMessage(userPrompt);
+//        Message systemMessage = new SystemMessage(systemPrompt);
+//        ChatOptions chatOptions = ChatOptions.builder().model("deepseek/deepseek-r1-0528").build();
+//        Prompt prompt = new Prompt(List.of(userMessage, systemMessage), chatOptions);
+//
+//        ChatResponse response = chatModel.call(prompt);
+//        String responseContent = response.getResult().getOutput().getText();
+
         // Extract score and evaluation from JSON response
         try {
             // Simple extraction using string manipulation for now

@@ -11,7 +11,7 @@ import { InterviewDetailComponent } from './interview-detail/interview-detail.co
 const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent },
   { path: 'interviews', component: InterviewListComponent },
-  { path: 'create', component: CreateInterviewComponent },
+  { path: 'interviews/create', component: CreateInterviewComponent },
   { path: 'interviews/:id', component: InterviewDetailComponent },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];
