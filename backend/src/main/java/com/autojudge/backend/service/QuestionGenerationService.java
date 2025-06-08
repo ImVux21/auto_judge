@@ -46,7 +46,7 @@ public class QuestionGenerationService {
             generatedQuestions.get(i).setOrderIndex(i);
         }
         
-        return generatedQuestions;
+        return questionRepository.saveAll(generatedQuestions);
     }
     
     private List<Question> generateMCQs(Interview interview, int count) {
