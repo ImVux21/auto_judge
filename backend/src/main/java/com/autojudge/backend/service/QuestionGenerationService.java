@@ -10,23 +10,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.ChatOptions;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class QuestionGenerationService {
     private final ChatClient chatClient;
-    private final OllamaChatModel chatModel;
+//    private final OllamaChatModel chatModel;
     private final QuestionRepository questionRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -75,23 +70,29 @@ public class QuestionGenerationService {
                 "category": "Category name"
               }
             ]
+            
+            IMPORTANT: Return ONLY the JSON array without any markdown formatting, code blocks, or additional text.
             """;
         String formattedSystemPrompt = String.format(systemPrompt, count, interview.getJobRole());
         // For Spring AI Chat Client
-//        String responseContent = chatClient
-//                .prompt()
-//                .system(formattedSystemPrompt)
-//                .user("Generate the questions now")
-//                .call()
-//                .content();
+       String responseContent = chatClient
+               .prompt()
+               .system(formattedSystemPrompt)
+               .user("Generate the questions now")
+               .call()
+               .content();
 
         // For HuggingFace
-        Message userMessage = new UserMessage("Generate the questions now");
-        Message systemMessage = new SystemMessage(formattedSystemPrompt);
-        Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
+        // Message userMessage = new UserMessage("Generate the questions now");
+        // Message systemMessage = new SystemMessage(formattedSystemPrompt);
+        // Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
 
-        ChatResponse response = chatModel.call(prompt);
-        String responseContent = response.getResult().getOutput().getText();
+        // ChatResponse response = chatModel.call(prompt);
+        // String responseContent = response.getResult().getOutput().getText();
+        
+        // Clean the response to extract only the JSON part
+        responseContent = cleanJsonResponse(responseContent);
+        
         try {
             JsonNode questionsArray = objectMapper.readTree(responseContent);
             List<Question> questions = new ArrayList<>();
@@ -121,8 +122,33 @@ public class QuestionGenerationService {
             
             return questions;
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to parse AI response for MCQ generation", e);
+            throw new RuntimeException("Failed to parse AI response for MCQ generation: " + responseContent, e);
         }
+    }
+    
+    /**
+     * Cleans the AI response to extract only the JSON part.
+     * Removes markdown code blocks, backticks, and any text before or after the JSON.
+     */
+    private String cleanJsonResponse(String response) {
+        // Remove markdown code block indicators if present
+        response = response.replaceAll("```json", "").replaceAll("```", "");
+        
+        // Try to extract JSON array using regex
+        Pattern pattern = Pattern.compile("\\[\\s*\\{.*}\\s*\\]", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(response);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        
+        // If no clear JSON array is found, just remove any non-JSON starting characters
+        response = response.trim();
+        int jsonStart = response.indexOf('[');
+        if (jsonStart >= 0) {
+            response = response.substring(jsonStart);
+        }
+        
+        return response;
     }
     
     private List<Question> generateOpenEndedQuestions(Interview interview, int count) {
@@ -145,6 +171,8 @@ public class QuestionGenerationService {
                 "category": "Category name"
               }
             ]
+            
+            IMPORTANT: Return ONLY the JSON array without any markdown formatting, code blocks, or additional text.
             """;
         String formattedSystemPrompt = String.format(systemPrompt, count, interview.getJobRole());
         
@@ -154,6 +182,10 @@ public class QuestionGenerationService {
                 .user("Generate the questions now")
                 .call()
                 .content();
+                
+        // Clean the response to extract only the JSON part
+        responseContent = cleanJsonResponse(responseContent);
+        
         try {
             JsonNode questionsArray = objectMapper.readTree(responseContent);
             List<Question> questions = new ArrayList<>();
@@ -172,7 +204,7 @@ public class QuestionGenerationService {
             
             return questions;
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to parse AI response for open-ended question generation", e);
+            throw new RuntimeException("Failed to parse AI response for open-ended question generation: " + responseContent, e);
         }
     }
 } 
