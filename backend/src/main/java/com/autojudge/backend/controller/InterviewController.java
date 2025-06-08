@@ -1,6 +1,10 @@
 package com.autojudge.backend.controller;
 
+import com.autojudge.backend.mapper.EntityMapper;
 import com.autojudge.backend.model.*;
+import com.autojudge.backend.payload.dto.InterviewDto;
+import com.autojudge.backend.payload.dto.InterviewSessionDto;
+import com.autojudge.backend.payload.dto.QuestionDto;
 import com.autojudge.backend.payload.request.CreateInterviewRequest;
 import com.autojudge.backend.payload.request.CreateSessionRequest;
 import com.autojudge.backend.payload.response.MessageResponse;
@@ -9,7 +13,7 @@ import com.autojudge.backend.repository.UserRepository;
 import com.autojudge.backend.security.services.UserDetailsImpl;
 import com.autojudge.backend.service.InterviewService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,16 +27,13 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/interview")
+@RequiredArgsConstructor
 public class InterviewController {
 
-    @Autowired
-    private InterviewService interviewService;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private QuestionRepository questionRepository;
+    private final InterviewService interviewService;
+    private final UserRepository userRepository;
+    private final QuestionRepository questionRepository;
+    private final EntityMapper entityMapper;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
@@ -51,7 +52,7 @@ public class InterviewController {
             request.getOpenEndedCount()
         );
         
-        return ResponseEntity.ok(interview);
+        return ResponseEntity.ok(entityMapper.toInterviewDto(interview));
     }
     
     @GetMapping("/list")
@@ -62,7 +63,8 @@ public class InterviewController {
         User user = userRepository.findById(userDetails.getId()).orElseThrow(() -> new RuntimeException("User not found"));
         
         List<Interview> interviews = interviewService.getInterviewsByUser(user);
-        return ResponseEntity.ok(interviews);
+        List<InterviewDto> interviewDtos = entityMapper.toInterviewDtoList(interviews);
+        return ResponseEntity.ok(interviewDtos);
     }
     
     @GetMapping("/{id}")
@@ -71,7 +73,8 @@ public class InterviewController {
         Optional<Interview> interview = interviewService.getInterviewById(id);
         
         if (interview.isPresent()) {
-            return ResponseEntity.ok(interview.get());
+            InterviewDto interviewDto = entityMapper.toInterviewDto(interview.get());
+            return ResponseEntity.ok(interviewDto);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -85,7 +88,8 @@ public class InterviewController {
         if (interviewOpt.isPresent()) {
             Interview interview = interviewOpt.get();
             List<Question> questions = questionRepository.findByInterviewOrderByOrderIndexAsc(interview);
-            return ResponseEntity.ok(questions);
+            List<QuestionDto> questionDtos = entityMapper.toQuestionDtoList(questions);
+            return ResponseEntity.ok(questionDtos);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -123,8 +127,9 @@ public class InterviewController {
         }
         
         InterviewSession session = interviewService.createInterviewSession(interviewOpt.get(), candidate);
+        InterviewSessionDto sessionDto = entityMapper.toInterviewSessionDto(session);
         
-        return ResponseEntity.ok(session);
+        return ResponseEntity.ok(sessionDto);
     }
     
     @GetMapping("/{id}/sessions")
@@ -135,7 +140,8 @@ public class InterviewController {
         if (interviewOpt.isPresent()) {
             Interview interview = interviewOpt.get();
             List<InterviewSession> sessions = interviewService.getSessionsByInterview(interview);
-            return ResponseEntity.ok(sessions);
+            List<InterviewSessionDto> sessionDtos = entityMapper.toInterviewSessionDtoList(sessions);
+            return ResponseEntity.ok(sessionDtos);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -150,7 +156,8 @@ public class InterviewController {
             Interview interview = interviewOpt.get();
             interview.setActive(true);
             interview = interviewService.interviewRepository.save(interview);
-            return ResponseEntity.ok(interview);
+            InterviewDto interviewDto = entityMapper.toInterviewDto(interview);
+            return ResponseEntity.ok(interviewDto);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -165,7 +172,8 @@ public class InterviewController {
             Interview interview = interviewOpt.get();
             interview.setActive(false);
             interview = interviewService.interviewRepository.save(interview);
-            return ResponseEntity.ok(interview);
+            InterviewDto interviewDto = entityMapper.toInterviewDto(interview);
+            return ResponseEntity.ok(interviewDto);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -179,7 +187,8 @@ public class InterviewController {
         
         if (sessionOpt.isPresent()) {
             InterviewSession session = sessionOpt.get();
-            return ResponseEntity.ok(session);
+            InterviewSessionDto sessionDto = entityMapper.toInterviewSessionDto(session);
+            return ResponseEntity.ok(sessionDto);
         } else {
             return ResponseEntity.notFound().build();
         }

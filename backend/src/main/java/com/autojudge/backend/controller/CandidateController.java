@@ -1,6 +1,10 @@
 package com.autojudge.backend.controller;
 
+import com.autojudge.backend.mapper.EntityMapper;
 import com.autojudge.backend.model.*;
+import com.autojudge.backend.payload.dto.AnswerDto;
+import com.autojudge.backend.payload.dto.InterviewSessionDto;
+import com.autojudge.backend.payload.dto.QuestionDto;
 import com.autojudge.backend.payload.request.AnswerMCQRequest;
 import com.autojudge.backend.payload.request.AnswerOpenEndedRequest;
 import com.autojudge.backend.payload.request.StartSessionRequest;
@@ -12,7 +16,7 @@ import com.autojudge.backend.service.InterviewService;
 import com.autojudge.backend.service.ProctorService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,22 +26,15 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/candidate")
+@RequiredArgsConstructor
 public class CandidateController {
 
-    @Autowired
-    private InterviewService interviewService;
-    
-    @Autowired
-    private QuestionRepository questionRepository;
-    
-    @Autowired
-    private AnswerService answerService;
-    
-    @Autowired
-    private ProctorService proctorService;
-    
-    @Autowired
-    private AnswerRepository answerRepository;
+    private final InterviewService interviewService;
+    private final QuestionRepository questionRepository;
+    private final AnswerService answerService;
+    private final ProctorService proctorService;
+    private final AnswerRepository answerRepository;
+    private final EntityMapper entityMapper;
 
     @PostMapping("/session/{token}/start")
     public ResponseEntity<?> startSession(
@@ -66,7 +63,7 @@ public class CandidateController {
         
         interviewService.updateSessionStatus(session, "IN_PROGRESS");
         
-        return ResponseEntity.ok(session);
+        return ResponseEntity.ok(entityMapper.toInterviewSessionDto(session));
     }
     
     @GetMapping("/session/{token}/questions")
@@ -81,8 +78,9 @@ public class CandidateController {
         Interview interview = session.getInterview();
         
         List<Question> questions = questionRepository.findByInterviewOrderByOrderIndexAsc(interview);
+        List<QuestionDto> questionDtos = entityMapper.toQuestionDtoList(questions);
         
-        return ResponseEntity.ok(questions);
+        return ResponseEntity.ok(questionDtos);
     }
     
     @PostMapping("/session/{token}/answer/mcq")
@@ -122,8 +120,9 @@ public class CandidateController {
         }
         
         Answer answer = answerService.submitMCQAnswer(session, question, request.getSelectedOptionIds());
+        AnswerDto answerDto = entityMapper.toAnswerDto(answer);
         
-        return ResponseEntity.ok(answer);
+        return ResponseEntity.ok(answerDto);
     }
     
     @PostMapping("/session/{token}/answer/open-ended")
@@ -168,8 +167,9 @@ public class CandidateController {
         }
         
         Answer answer = answerService.submitOpenEndedAnswer(session, question, request.getTextAnswer());
+        AnswerDto answerDto = entityMapper.toAnswerDto(answer);
         
-        return ResponseEntity.ok(answer);
+        return ResponseEntity.ok(answerDto);
     }
     
     @PostMapping("/session/{token}/proctor/snapshot")
@@ -227,7 +227,8 @@ public class CandidateController {
         
         InterviewSession session = sessionOpt.get();
         List<Answer> answers = answerService.getAnswersBySession(session);
+        List<AnswerDto> answerDtos = entityMapper.toAnswerDtoList(answers);
         
-        return ResponseEntity.ok(answers);
+        return ResponseEntity.ok(answerDtos);
     }
 } 

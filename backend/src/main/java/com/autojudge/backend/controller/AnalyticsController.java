@@ -1,12 +1,15 @@
 package com.autojudge.backend.controller;
 
+import com.autojudge.backend.mapper.EntityMapper;
 import com.autojudge.backend.model.*;
+import com.autojudge.backend.payload.dto.InterviewDto;
+import com.autojudge.backend.payload.dto.InterviewSessionDto;
 import com.autojudge.backend.repository.AnswerRepository;
 import com.autojudge.backend.repository.InterviewRepository;
 import com.autojudge.backend.repository.InterviewSessionRepository;
 import com.autojudge.backend.repository.QuestionRepository;
 import com.autojudge.backend.security.services.UserDetailsImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,19 +23,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/analytics")
 @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class AnalyticsController {
-
-    @Autowired
-    private InterviewRepository interviewRepository;
-    
-    @Autowired
-    private InterviewSessionRepository sessionRepository;
-    
-    @Autowired
-    private AnswerRepository answerRepository;
-    
-    @Autowired
-    private QuestionRepository questionRepository;
+    private final InterviewRepository interviewRepository;
+    private final InterviewSessionRepository sessionRepository;
+    private final AnswerRepository answerRepository;
+    private final QuestionRepository questionRepository;
+    private final EntityMapper entityMapper;
 
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboardData() {
@@ -74,14 +71,20 @@ public class AnalyticsController {
                 .sorted(Comparator.comparing(Interview::getCreatedAt).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
-        analytics.put("recentInterviews", recentInterviews);
+        
+        // Convert to DTOs
+        List<InterviewDto> recentInterviewDtos = entityMapper.toInterviewDtoList(recentInterviews);
+        analytics.put("recentInterviews", recentInterviewDtos);
         
         // Recent sessions
         List<InterviewSession> recentSessions = sessions.stream()
                 .sorted(Comparator.comparing(InterviewSession::getStartTime).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
-        analytics.put("recentSessions", recentSessions);
+        
+        // Convert to DTOs
+        List<InterviewSessionDto> recentSessionDtos = entityMapper.toInterviewSessionDtoList(recentSessions);
+        analytics.put("recentSessions", recentSessionDtos);
         
         return ResponseEntity.ok(analytics);
     }
@@ -90,7 +93,7 @@ public class AnalyticsController {
     public ResponseEntity<?> getInterviewAnalytics(@PathVariable Long id) {
         Optional<Interview> interviewOpt = interviewRepository.findById(id);
         
-        if (!interviewOpt.isPresent()) {
+        if (interviewOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -98,6 +101,9 @@ public class AnalyticsController {
         List<InterviewSession> sessions = sessionRepository.findByInterview(interview);
         
         Map<String, Object> analytics = new HashMap<>();
+        
+        // Interview details
+        analytics.put("interview", entityMapper.toInterviewDto(interview));
         
         // Total sessions
         analytics.put("totalSessions", sessions.size());
@@ -163,6 +169,10 @@ public class AnalyticsController {
         
         analytics.put("questionPerformance", questionPerformance);
         
+        // Sessions as DTOs
+        List<InterviewSessionDto> sessionDtos = entityMapper.toInterviewSessionDtoList(sessions);
+        analytics.put("sessions", sessionDtos);
+        
         return ResponseEntity.ok(analytics);
     }
     
@@ -179,8 +189,8 @@ public class AnalyticsController {
         
         Map<String, Object> analytics = new HashMap<>();
         
-        // Session details
-        analytics.put("session", session);
+        // Session details as DTO
+        analytics.put("session", entityMapper.toInterviewSessionDto(session));
         
         // Answer performance
         List<Map<String, Object>> answerPerformance = new ArrayList<>();

@@ -28,7 +28,7 @@ ng new autojudge-frontend --directory . --routing true --style css --skip-git --
 # Install dependencies
 echo "Installing dependencies..."
 npm install
-npm install tailwindcss @tailwindcss/forms postcss autoprefixer --save-dev
+# npm install tailwindcss @tailwindcss/forms postcss autoprefixer --save-dev
 
 # Initialize Tailwind CSS
 echo "Initializing Tailwind CSS..."

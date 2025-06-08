@@ -5,7 +5,7 @@ import com.autojudge.backend.repository.InterviewRepository;
 import com.autojudge.backend.repository.InterviewSessionRepository;
 import com.autojudge.backend.repository.QuestionRepository;
 import com.autojudge.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,22 +15,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class InterviewService {
 
-    @Autowired
-    public InterviewRepository interviewRepository;
-    
-    @Autowired
-    private QuestionRepository questionRepository;
-    
-    @Autowired
-    private InterviewSessionRepository sessionRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private QuestionGenerationService questionGenerationService;
+    public final InterviewRepository interviewRepository;
+    private final QuestionRepository questionRepository;
+    private final InterviewSessionRepository sessionRepository;
+    private final UserRepository userRepository;
+    private final QuestionGenerationService questionGenerationService;
 
     @Transactional
     public Interview createInterview(String title, String jobRole, String description, Integer timeLimit, 

@@ -15,12 +15,12 @@ public class AutoJudgeApplication {
         SpringApplication.run(AutoJudgeApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner testOllama(ChatClient chatClient) {
-        return args -> {
-            ChatResponse response = chatClient.prompt(new Prompt("Hello!")).call().chatResponse();
-            System.out.println("Ollama says: " + response.getResult().getOutput().getText());
-        };
-    }
+//    @Bean
+//    public CommandLineRunner testOllama(ChatClient chatClient) {
+//        return args -> {
+//            ChatResponse response = chatClient.prompt(new Prompt("Hello!")).call().chatResponse();
+//            System.out.println("Ollama says: " + response.getResult().getOutput().getText());
+//        };
+//    }
 
 } 

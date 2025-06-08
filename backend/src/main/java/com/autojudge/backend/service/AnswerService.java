@@ -3,7 +3,7 @@ package com.autojudge.backend.service;
 import com.autojudge.backend.model.*;
 import com.autojudge.backend.repository.AnswerRepository;
 import com.autojudge.backend.repository.OptionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,16 +13,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AnswerService {
 
-    @Autowired
-    private AnswerRepository answerRepository;
-    
-    @Autowired
-    private OptionRepository optionRepository;
-    
-    @Autowired
-    private AnswerEvaluationService evaluationService;
+    private final AnswerRepository answerRepository;
+    private final OptionRepository optionRepository;
+    private final AnswerEvaluationService evaluationService;
 
     @Transactional
     public Answer submitMCQAnswer(InterviewSession session, Question question, List<Long> optionIds) {

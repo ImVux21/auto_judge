@@ -2,7 +2,7 @@ package com.autojudge.backend.service;
 
 import com.autojudge.backend.model.InterviewSession;
 import com.autojudge.backend.repository.InterviewSessionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ProctorService {
 
-    @Autowired
-    private InterviewSessionRepository sessionRepository;
+    private final InterviewSessionRepository sessionRepository;
     
     // Store IP and device info for sessions
     private final Map<String, String> sessionIpMap = new HashMap<>();
