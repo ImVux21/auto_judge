@@ -59,6 +59,13 @@ public class AuthController {
                                                  roles));
     }
 
+    @PostMapping("/signout")
+    public ResponseEntity<?> logoutUser() {
+        // In a stateless JWT authentication system, the server doesn't need to do anything
+        // The client will remove the token
+        return ResponseEntity.ok(new MessageResponse("User signed out successfully!"));
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {

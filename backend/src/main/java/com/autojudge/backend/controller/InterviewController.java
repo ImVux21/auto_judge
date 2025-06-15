@@ -18,11 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -34,6 +34,7 @@ public class InterviewController {
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
     private final EntityMapper entityMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
@@ -115,7 +116,7 @@ public class InterviewController {
             candidate.setEmail(request.getCandidateEmail());
             candidate.setFirstName(request.getCandidateFirstName());
             candidate.setLastName(request.getCandidateLastName());
-            candidate.setPassword("temporary"); // This should be a secure random password in production
+            candidate.setPassword(passwordEncoder.encode("temporary")); // This should be a secure random password in production
             
             // Add candidate role
             Role candidateRole = new Role();
@@ -180,7 +181,6 @@ public class InterviewController {
     }
     
     // Public endpoints for candidates
-    
     @GetMapping("/public/session/{token}")
     public ResponseEntity<?> getSessionByToken(@PathVariable String token) {
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);

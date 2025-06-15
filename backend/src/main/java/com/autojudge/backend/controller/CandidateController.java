@@ -11,6 +11,8 @@ import com.autojudge.backend.payload.request.StartSessionRequest;
 import com.autojudge.backend.payload.response.MessageResponse;
 import com.autojudge.backend.repository.AnswerRepository;
 import com.autojudge.backend.repository.QuestionRepository;
+import com.autojudge.backend.repository.UserRepository;
+import com.autojudge.backend.security.services.UserDetailsImpl;
 import com.autojudge.backend.service.AnswerService;
 import com.autojudge.backend.service.InterviewService;
 import com.autojudge.backend.service.ProctorService;
@@ -18,10 +20,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -35,6 +41,34 @@ public class CandidateController {
     private final ProctorService proctorService;
     private final AnswerRepository answerRepository;
     private final EntityMapper entityMapper;
+    private final UserRepository userRepository;
+
+    @GetMapping("/sessions")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<?> getCandidateSessions() {
+        // Get the authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        
+        // Get the User entity from the repository using the email
+        Optional<User> userOpt = userRepository.findByEmail(userDetails.getUsername());
+        
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found"));
+        }
+        
+        User currentUser = userOpt.get();
+        
+        // Get sessions for the current candidate
+        List<InterviewSession> sessions = interviewService.getSessionsByCandidate(currentUser);
+        
+        // Map to DTOs
+        List<InterviewSessionDto> sessionDtos = sessions.stream()
+            .map(entityMapper::toInterviewSessionDto)
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(sessionDtos);
+    }
 
     @PostMapping("/session/{token}/start")
     public ResponseEntity<?> startSession(
@@ -44,7 +78,7 @@ public class CandidateController {
         
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -70,7 +104,7 @@ public class CandidateController {
     public ResponseEntity<?> getSessionQuestions(@PathVariable String token) {
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -91,7 +125,7 @@ public class CandidateController {
         
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -108,7 +142,7 @@ public class CandidateController {
         
         Optional<Question> questionOpt = questionRepository.findById(request.getQuestionId());
         
-        if (!questionOpt.isPresent()) {
+        if (questionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -133,7 +167,7 @@ public class CandidateController {
         
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -150,7 +184,7 @@ public class CandidateController {
         
         Optional<Question> questionOpt = questionRepository.findById(request.getQuestionId());
         
-        if (!questionOpt.isPresent()) {
+        if (questionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -180,7 +214,7 @@ public class CandidateController {
         
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -200,7 +234,7 @@ public class CandidateController {
     public ResponseEntity<?> completeSession(@PathVariable String token) {
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
@@ -221,7 +255,7 @@ public class CandidateController {
     public ResponseEntity<?> getSessionAnswers(@PathVariable String token) {
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
-        if (!sessionOpt.isPresent()) {
+        if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         

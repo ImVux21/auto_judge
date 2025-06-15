@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap, finalize } from 'rxjs/operators';
 
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'auth-user';
@@ -32,7 +32,7 @@ export class AuthService {
     return this.apiService.register(firstName, lastName, email, password, roles);
   }
 
-  logout(): void {
+  logout() {
     window.sessionStorage.clear();
     this.currentUserSubject.next(null);
   }

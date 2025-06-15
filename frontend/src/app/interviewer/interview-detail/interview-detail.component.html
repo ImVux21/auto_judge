@@ -124,7 +124,7 @@
                     <small>Score: {{ session.score | percent }}</small>
                   </p>
                   <div class="d-flex justify-content-between mt-2">
-                    <small class="text-muted">Token: {{ session.token }}</small>
+                    <small class="text-muted">Token: {{ session.accessToken }}</small>
                     <button *ngIf="session.status === 'COMPLETED'" 
                       class="btn btn-sm btn-outline-primary"
                       (click)="viewAnalytics(session.id)">

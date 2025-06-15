@@ -35,7 +35,7 @@ export interface Option {
 
 export interface InterviewSession {
   id: number;
-  token: string;
+  accessToken: string;
   startTime: string;
   endTime?: string;
   status: string;

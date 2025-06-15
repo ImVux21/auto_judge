@@ -1,7 +1,9 @@
 package com.autojudge.backend.service;
 
 import com.autojudge.backend.model.InterviewSession;
+import com.autojudge.backend.payload.request.StartSessionRequest.DeviceInfo;
 import com.autojudge.backend.repository.InterviewSessionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +17,11 @@ import java.util.Map;
 public class ProctorService {
 
     private final InterviewSessionRepository sessionRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     // Store IP and device info for sessions
     private final Map<String, String> sessionIpMap = new HashMap<>();
-    private final Map<String, String> sessionDeviceMap = new HashMap<>();
+    private final Map<String, DeviceInfo> sessionDeviceMap = new HashMap<>();
 
     /**
      * Validates if the session can be started from the given IP and device
@@ -28,24 +31,53 @@ public class ProctorService {
      * @return true if session can be started, false otherwise
      */
     @Transactional
-    public boolean validateSessionStart(InterviewSession session, String ipAddress, String deviceInfo) {
+    public boolean validateSessionStart(InterviewSession session, String ipAddress, DeviceInfo deviceInfo) {
         String token = session.getAccessToken();
         
-        // First time this session is accessed
-        if (session.getIpAddress() == null || session.getIpAddress().isEmpty()) {
-            session.setIpAddress(ipAddress);
-            session.setDeviceInfo(deviceInfo);
-            session.setStatus("IN_PROGRESS");
-            sessionRepository.save(session);
+        try {
+            String deviceInfoJson = objectMapper.writeValueAsString(deviceInfo);
             
-            sessionIpMap.put(token, ipAddress);
-            sessionDeviceMap.put(token, deviceInfo);
-            return true;
+            // First time this session is accessed
+            if (session.getIpAddress() == null || session.getIpAddress().isEmpty()) {
+                session.setIpAddress(ipAddress);
+                session.setDeviceInfo(deviceInfoJson);
+                session.setStatus("IN_PROGRESS");
+                sessionRepository.save(session);
+                
+                sessionIpMap.put(token, ipAddress);
+                sessionDeviceMap.put(token, deviceInfo);
+                return true;
+            }
+            
+            // Check if IP matches and device fingerprint is similar
+            DeviceInfo storedDeviceInfo = objectMapper.readValue(session.getDeviceInfo(), DeviceInfo.class);
+            return session.getIpAddress().equals(ipAddress) && 
+                  isDeviceInfoSimilar(storedDeviceInfo, deviceInfo);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Checks if two device info objects are similar enough to be considered the same device
+     */
+    private boolean isDeviceInfoSimilar(DeviceInfo stored, DeviceInfo current) {
+        // Platform must match exactly
+        if (!stored.getPlatform().equals(current.getPlatform())) {
+            return false;
         }
         
-        // Check if IP and device match the ones used to start the session
-        return session.getIpAddress().equals(ipAddress) && 
-               (session.getDeviceInfo().equals(deviceInfo) || deviceInfo.contains(session.getDeviceInfo()));
+        // User agent should contain the stored user agent string
+        if (!current.getUserAgent().contains(stored.getUserAgent())) {
+            return false;
+        }
+        
+        // Screen dimensions might vary slightly due to browser resize, but should be close
+        int heightDiff = Math.abs(stored.getScreenHeight() - current.getScreenHeight());
+        int widthDiff = Math.abs(stored.getScreenWidth() - current.getScreenWidth());
+        
+        // Allow for some difference in screen dimensions (e.g., due to browser resize)
+        return heightDiff < 100 && widthDiff < 100;
     }
     
     /**

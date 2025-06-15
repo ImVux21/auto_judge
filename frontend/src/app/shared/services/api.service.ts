@@ -54,6 +54,10 @@ export class ApiService {
   }
 
   // Candidate endpoints
+  getCandidateSessions(): Observable<any> {
+    return this.http.get(`${API_URL}/candidate/sessions`);
+  }
+
   getSessionByToken(token: string): Observable<any> {
     return this.http.get(`${API_URL}/interview/public/session/${token}`);
   }

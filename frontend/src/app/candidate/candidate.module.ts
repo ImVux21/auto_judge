@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InterviewSessionComponent } from './interview-session/interview-session.component';
 import { SessionListComponent } from './session-list/session-list.component';
 import { SessionStartComponent } from './session-start/session-start.component';
 import { SessionCompleteComponent } from './session-complete/session-complete.component';
+import { SharedModule } from '../shared/shared.module';
 
 const routes: Routes = [
   { path: 'sessions', component: SessionListComponent },
@@ -26,7 +26,9 @@ const routes: Routes = [
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    SharedModule,
+    FormsModule
   ]
 })
 export class CandidateModule { } 

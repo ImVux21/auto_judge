@@ -1,10 +1,12 @@
 package com.autojudge.backend.service;
 
+import com.autojudge.backend.dto.OpenAiAnswerDto;
 import com.autojudge.backend.model.Answer;
 import com.autojudge.backend.model.Option;
 import com.autojudge.backend.model.Question;
 import com.autojudge.backend.model.QuestionType;
 import com.autojudge.backend.repository.OptionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class AnswerEvaluationService {
     private final ChatClient chatClient;
     private final OptionRepository optionRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void evaluateAnswer(Answer answer) {
         Question question = answer.getQuestion();
@@ -117,16 +120,17 @@ public class AnswerEvaluationService {
 //        ChatResponse response = chatModel.call(prompt);
 //        String responseContent = response.getResult().getOutput().getText();
 
-        // Extract score and evaluation from JSON response
+        // Parse JSON response using ObjectMapper and DTO
         try {
-            // Simple extraction using string manipulation for now
-            // In production, use proper JSON parsing
-            String scoreStr = responseContent.replaceAll(".*\"score\"\\s*:\\s*([0-9.]+).*", "$1");
-            String evaluation = responseContent.replaceAll(".*\"evaluation\"\\s*:\\s*\"([^\"]*)\".*", "$1");
+            // Clean up the response if it contains markdown code blocks
+            String cleanedResponse = responseContent.replaceAll("```json|```", "").trim();
             
-            double score = Double.parseDouble(scoreStr);
-            answer.setScore(score);
-            answer.setAiEvaluation(evaluation);
+            // Parse the JSON response into our DTO
+            OpenAiAnswerDto aiAnswer = objectMapper.readValue(cleanedResponse, OpenAiAnswerDto.class);
+            
+            // Set the score and evaluation from the parsed DTO
+            answer.setScore(aiAnswer.getScore() != null ? aiAnswer.getScore() : 0.0);
+            answer.setAiEvaluation(aiAnswer.getEvaluation());
         } catch (Exception e) {
             answer.setScore(0.0);
             answer.setAiEvaluation("Error evaluating answer: " + e.getMessage());

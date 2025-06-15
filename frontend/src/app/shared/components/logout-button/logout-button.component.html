@@ -1,0 +1,7 @@
+<button 
+  class="btn btn-outline-danger" 
+  (click)="logout()" 
+  [disabled]="isLoggingOut">
+  <span *ngIf="isLoggingOut" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+  Logout
+</button> 
