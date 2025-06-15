@@ -7,60 +7,68 @@
         </a>
       </div>
       
-      <nav>
-        <ul class="neo-nav">
-          <!-- Show these links only when logged in -->
-          <ng-container *ngIf="isLoggedIn()">
-            <!-- Interviewer/Admin links -->
-            <ng-container *ngIf="isInterviewer() || isAdmin()">
-              <li class="neo-nav-item">
-                <a class="text-primary-foreground" routerLink="/interviewer/dashboard" routerLinkActive="underline">Dashboard</a>
-              </li>
-              <li class="neo-dropdown">
-                <a class="text-primary-foreground cursor-pointer" (click)="toggleManageDropdown()">
-                  Manage
-                </a>
-                <ul *ngIf="showManageDropdown" class="neo-dropdown-menu">
-                  <li><a class="neo-dropdown-item" routerLink="/interviewer/interviews/create">Create Interview</a></li>
-                  <li><a class="neo-dropdown-item" routerLink="/interviewer/interviews">View Interviews</a></li>
-                </ul>
-              </li>
-              <li class="neo-nav-item">
-                <a class="text-primary-foreground" routerLink="/analytics/dashboard" routerLinkActive="underline">Analytics</a>
-              </li>
-            </ng-container>
+      <app-neo-menubar className="bg-transparent border-0 shadow-none p-0">
+        <!-- Show these links only when logged in -->
+        <ng-container *ngIf="isLoggedIn()">
+          <!-- Interviewer/Admin links -->
+          <ng-container *ngIf="isInterviewer() || isAdmin()">
+            <app-neo-menubar-menu>
+              <div menuTrigger>Dashboard</div>
+              <div menuContent>
+                <app-neo-menubar-item>
+                  <a class="block w-full" routerLink="/interviewer/dashboard">Interviewer Dashboard</a>
+                </app-neo-menubar-item>
+                <app-neo-menubar-item>
+                  <a class="block w-full" routerLink="/analytics/dashboard">Analytics Dashboard</a>
+                </app-neo-menubar-item>
+              </div>
+            </app-neo-menubar-menu>
             
-            <!-- Candidate links -->
-            <ng-container *ngIf="isCandidate()">
-              <li class="neo-nav-item">
-                <a class="text-primary-foreground" routerLink="/candidate/sessions" routerLinkActive="underline">My Sessions</a>
-              </li>
-            </ng-container>
-            
-            <!-- User menu -->
-            <li class="neo-dropdown">
-              <a class="text-primary-foreground cursor-pointer" (click)="toggleUserDropdown()">
-                {{ currentUser?.firstName || 'User' }}
-              </a>
-              <ul *ngIf="showUserDropdown" class="neo-dropdown-menu">
-                <li><a class="neo-dropdown-item" routerLink="/profile">Profile</a></li>
-                <li><hr class="my-2 border-t border-black"></li>
-                <li><a class="neo-dropdown-item" href="#" (click)="logout(); $event.preventDefault()">Logout</a></li>
-              </ul>
-            </li>
+            <app-neo-menubar-menu>
+              <div menuTrigger>Manage</div>
+              <div menuContent>
+                <app-neo-menubar-item>
+                  <a class="block w-full" routerLink="/interviewer/interviews/create">Create Interview</a>
+                </app-neo-menubar-item>
+                <app-neo-menubar-item>
+                  <a class="block w-full" routerLink="/interviewer/interviews">View Interviews</a>
+                </app-neo-menubar-item>
+              </div>
+            </app-neo-menubar-menu>
           </ng-container>
           
-          <!-- Show these links when not logged in -->
-          <ng-container *ngIf="!isLoggedIn()">
-            <li class="neo-nav-item">
-              <a class="text-primary-foreground" routerLink="/auth/login" routerLinkActive="underline">Login</a>
-            </li>
-            <li class="neo-nav-item">
-              <a class="text-primary-foreground" routerLink="/auth/register" routerLinkActive="underline">Register</a>
-            </li>
+          <!-- Candidate links -->
+          <ng-container *ngIf="isCandidate()">
+            <app-neo-menubar-item>
+              <a class="block w-full" routerLink="/candidate/sessions">My Sessions</a>
+            </app-neo-menubar-item>
           </ng-container>
-        </ul>
-      </nav>
+          
+          <!-- User menu -->
+          <app-neo-menubar-menu>
+            <div menuTrigger>{{ currentUser?.firstName || 'User' }}</div>
+            <div menuContent>
+              <app-neo-menubar-item>
+                <a class="block w-full" routerLink="/profile">Profile</a>
+              </app-neo-menubar-item>
+              <app-neo-menubar-separator></app-neo-menubar-separator>
+              <app-neo-menubar-item>
+                <a class="block w-full" href="#" (click)="logout(); $event.preventDefault()">Logout</a>
+              </app-neo-menubar-item>
+            </div>
+          </app-neo-menubar-menu>
+        </ng-container>
+        
+        <!-- Show these links when not logged in -->
+        <ng-container *ngIf="!isLoggedIn()">
+          <app-neo-menubar-item>
+            <a class="block w-full" routerLink="/auth/login">Login</a>
+          </app-neo-menubar-item>
+          <app-neo-menubar-item>
+            <a class="block w-full" routerLink="/auth/register">Register</a>
+          </app-neo-menubar-item>
+        </ng-container>
+      </app-neo-menubar>
     </div>
   </div>
 </header> 
