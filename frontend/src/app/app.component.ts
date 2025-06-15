@@ -13,6 +13,6 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     // Apply default theme (yellow)
     // You can change to any of these themes: theme-blue, theme-green, theme-orange, theme-violet
-    this.renderer.addClass(document.body, 'theme-orange');
+    // this.renderer.addClass(document.body, 'theme-orange');
   }
 } 

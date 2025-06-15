@@ -1,8 +1,10 @@
 package com.autojudge.backend.service;
 
 import com.autojudge.backend.model.InterviewSession;
+import com.autojudge.backend.model.ProctorSnapshot;
 import com.autojudge.backend.payload.request.StartSessionRequest.DeviceInfo;
 import com.autojudge.backend.repository.InterviewSessionRepository;
+import com.autojudge.backend.repository.ProctorSnapshotRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,18 +12,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
 public class ProctorService {
 
     private final InterviewSessionRepository sessionRepository;
+    private final ProctorSnapshotRepository snapshotRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     // Store IP and device info for sessions
     private final Map<String, String> sessionIpMap = new HashMap<>();
     private final Map<String, DeviceInfo> sessionDeviceMap = new HashMap<>();
+    
+    // List of event types that should be flagged for review
+    private final List<String> suspiciousEventTypes = Arrays.asList(
+        "VISIBILITY_HIDDEN", 
+        "KEYBOARD_SHORTCUT", 
+        "PRINT_SCREEN"
+    );
 
     /**
      * Validates if the session can be started from the given IP and device
@@ -85,22 +97,107 @@ public class ProctorService {
      * @param session The interview session
      * @param imageBase64 Base64 encoded webcam image
      * @param timestamp Timestamp when the image was taken
+     * @param eventType Type of event that triggered the snapshot
      * @return true if recorded successfully
      */
-    public boolean recordWebcamSnapshot(InterviewSession session, String imageBase64, long timestamp) {
-        // In a real implementation, you would:
-        // 1. Store the image in a blob storage or file system
-        // 2. Record metadata in the database
-        // 3. Potentially analyze the image with AI for suspicious activity
-        
-        // For this implementation, we'll just validate the image format
+    @Transactional
+    public boolean recordWebcamSnapshot(InterviewSession session, String imageBase64, long timestamp, String eventType) {
         try {
-            // Check if it's a valid Base64 image
-            Base64.getDecoder().decode(imageBase64.split(",")[1]);
+            // Validate the image format
+            if (!isValidBase64Image(imageBase64)) {
+                return false;
+            }
+            
+            // Check if this is a suspicious event type
+            boolean shouldFlag = suspiciousEventTypes.contains(eventType);
+            String flagReason = shouldFlag ? "Suspicious activity: " + eventType : null;
+            
+            // Create and save the snapshot
+            ProctorSnapshot snapshot = ProctorSnapshot.builder()
+                    .session(session)
+                    .timestamp(timestamp)
+                    .imageData(imageBase64)
+                    .eventType(eventType)
+                    .flagged(shouldFlag)
+                    .flagReason(flagReason)
+                    .build();
+            
+            snapshotRepository.save(snapshot);
+            
+            // If this is a suspicious event, add a note to the session
+            if (shouldFlag) {
+                recordProctorNote(session, "Suspicious activity detected: " + eventType + " at timestamp " + timestamp);
+            }
+            
+            // Optionally analyze the image for suspicious activity
+            analyzeSnapshot(snapshot);
+            
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+    
+    // For backward compatibility
+    @Transactional
+    public boolean recordWebcamSnapshot(InterviewSession session, String imageBase64, long timestamp) {
+        return recordWebcamSnapshot(session, imageBase64, timestamp, "NORMAL");
+    }
+    
+    /**
+     * Validates if the provided string is a valid Base64 image
+     */
+    private boolean isValidBase64Image(String imageBase64) {
+        try {
+            // Check if it's a valid Base64 image
+            if (imageBase64 == null || imageBase64.isEmpty()) {
+                return false;
+            }
+            
+            // Handle data URLs (e.g., "data:image/jpeg;base64,...")
+            String base64Data = imageBase64;
+            if (imageBase64.contains(",")) {
+                base64Data = imageBase64.split(",")[1];
+            }
+            
+            Base64.getDecoder().decode(base64Data);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Analyzes a snapshot for suspicious activity
+     * This is a placeholder for more advanced AI-based analysis
+     */
+    private void analyzeSnapshot(ProctorSnapshot snapshot) {
+        // In a real implementation, you would:
+        // 1. Use computer vision to detect multiple people
+        // 2. Check for suspicious objects
+        // 3. Verify the candidate's identity
+        // 4. Flag the snapshot if issues are detected
+        
+        // For now, we'll just implement a placeholder
+        // In a real implementation, this would be an asynchronous process
+    }
+    
+    /**
+     * Gets all snapshots for a session
+     * @param session The interview session
+     * @return List of snapshots
+     */
+    public List<ProctorSnapshot> getSessionSnapshots(InterviewSession session) {
+        return snapshotRepository.findBySessionOrderByTimestampAsc(session);
+    }
+    
+    /**
+     * Gets flagged snapshots for a session
+     * @param session The interview session
+     * @return List of flagged snapshots
+     */
+    public List<ProctorSnapshot> getFlaggedSnapshots(InterviewSession session) {
+        return snapshotRepository.findBySessionAndFlaggedTrue(session);
     }
     
     /**
@@ -155,5 +252,34 @@ public class ProctorService {
         }
         
         return true;
+    }
+    
+    /**
+     * Gets snapshots for a session by event type
+     * @param session The interview session
+     * @param eventType The event type to filter by
+     * @return List of snapshots with the specified event type
+     */
+    public List<ProctorSnapshot> getSessionSnapshotsByEventType(InterviewSession session, String eventType) {
+        return snapshotRepository.findBySessionAndEventType(session, eventType);
+    }
+    
+    /**
+     * Gets snapshots for a session by multiple event types
+     * @param session The interview session
+     * @param eventTypes List of event types to filter by
+     * @return List of snapshots with any of the specified event types
+     */
+    public List<ProctorSnapshot> getSessionSnapshotsByEventTypes(InterviewSession session, List<String> eventTypes) {
+        return snapshotRepository.findBySessionAndEventTypeIn(session, eventTypes);
+    }
+    
+    /**
+     * Gets all suspicious snapshots for a session
+     * @param session The interview session
+     * @return List of suspicious snapshots
+     */
+    public List<ProctorSnapshot> getSuspiciousSnapshots(InterviewSession session) {
+        return snapshotRepository.findBySessionAndEventTypeIn(session, suspiciousEventTypes);
     }
 } 

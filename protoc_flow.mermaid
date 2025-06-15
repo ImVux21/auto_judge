@@ -1,0 +1,37 @@
+flowchart TD
+    subgraph "Frontend"
+        A[Candidate Browser] --> |"1. Starts session"| B[Interview Session Component]
+        B --> |"2. Initializes webcam"| C[Adaptive Snapshot System]
+        C --> |"3. Takes initial snapshot"| D[captureAndSubmitSnapshot]
+        C --> |"4. Schedules next snapshot<br/>(3 min interval)"| E[setTimeout]
+        F[Event Listeners] --> |"5. Detects events"| D
+        F --> |"6. Escalates monitoring<br/>(10 sec interval)"| E
+    end
+    
+    subgraph "Events"
+        G[Tab visibility change]
+        H[Keyboard shortcuts]
+        I[Print Screen]
+        J[Question navigation]
+        K[Answer submission]
+    end
+    
+    G --> F
+    H --> F
+    I --> F
+    J --> F
+    K --> F
+    
+    subgraph "Backend"
+        L[CandidateController] --> |"7. Receives snapshot"| M[ProctorService]
+        M --> |"8. Analyzes & flags<br/>suspicious activity"| N[ProctorSnapshot]
+        N --> |"9. Stores in DB"| O[(Database)]
+    end
+    
+    D --> |"API call with<br/>eventType"| L
+    
+    subgraph "Analytics"
+        P[AnalyticsController] --> |"10. Retrieves data"| O
+        P --> |"11. Provides statistics<br/>& snapshots"| Q[Session Analytics Component]
+        Q --> |"12. Visualizes data"| R[Charts & UI]
+    end

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -78,8 +78,8 @@ export class ApiService {
     return this.http.post(`${API_URL}/candidate/session/${token}/answer/open-ended`, { questionId, textAnswer });
   }
 
-  submitProctorSnapshot(token: string, imageBase64: string, timestamp: number): Observable<any> {
-    return this.http.post(`${API_URL}/candidate/session/${token}/proctor/snapshot?timestamp=${timestamp}`, imageBase64);
+  submitProctorSnapshot(token: string, imageBase64: string, timestamp: number, eventType: string = 'NORMAL'): Observable<any> {
+    return this.http.post(`${API_URL}/candidate/session/${token}/proctor/snapshot?timestamp=${timestamp}&eventType=${eventType}`, imageBase64);
   }
 
   completeSession(token: string): Observable<any> {
@@ -101,5 +101,21 @@ export class ApiService {
 
   getSessionAnalytics(id: number): Observable<any> {
     return this.http.get(`${API_URL}/analytics/session/${id}`);
+  }
+  
+  getSessionProctorSnapshots(sessionId: number, eventType?: string): Observable<any> {
+    let params = new HttpParams();
+    if (eventType) {
+      params = params.set('eventType', eventType);
+    }
+    return this.http.get(`${API_URL}/analytics/session/${sessionId}/proctor/snapshots`, { params });
+  }
+  
+  getSessionSuspiciousSnapshots(sessionId: number): Observable<any> {
+    return this.http.get(`${API_URL}/analytics/session/${sessionId}/proctor/snapshots/suspicious`);
+  }
+  
+  getProctorSnapshot(sessionId: number, snapshotId: number): Observable<any> {
+    return this.http.get(`${API_URL}/analytics/session/${sessionId}/proctor/snapshots/${snapshotId}`);
   }
 } 

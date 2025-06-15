@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public class AnswerEvaluationService {
         
         // Simple scoring: 1.0 if all correct options are selected and no incorrect ones
         if (selectedOptions.size() == correctOptions.size() && 
-            selectedOptions.containsAll(correctOptions)) {
+            new HashSet<>(selectedOptions).containsAll(correctOptions)) {
             answer.setScore(1.0);
             answer.setAiEvaluation("All correct options selected.");
         } else {

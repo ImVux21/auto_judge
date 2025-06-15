@@ -21,6 +21,7 @@
           <p class="mb-2">You are about to start an interview for: <span class="font-bold">{{ session.interview?.title }}</span></p>
           <p class="mb-2">This interview contains multiple-choice and open-ended questions related to the {{ session.interview?.jobRole }} role.</p>
           <p class="mb-2">You will have {{ session.interview?.timeLimit }} minutes to complete the interview once you start.</p>
+          <p class="mb-2 text-destructive font-medium">Note: This session uses webcam proctoring. Please allow camera access when prompted.</p>
         </div>
         <div>
           <button type="button" (click)="startSession()" [disabled]="isSubmitting"
@@ -55,6 +56,18 @@
         </div>
       </div>
     </app-neo-card>
+
+    <!-- Hidden webcam elements for proctoring -->
+    <div class="hidden">
+      <video #webcamVideo autoplay muted playsinline></video>
+      <canvas #webcamCanvas></canvas>
+    </div>
+    
+    <!-- Webcam Status Indicator -->
+    <div *ngIf="webcamInitialized" class="fixed top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs flex items-center">
+      <span class="inline-block w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+      Proctoring active
+    </div>
 
     <!-- Current Question -->
     <app-neo-card>

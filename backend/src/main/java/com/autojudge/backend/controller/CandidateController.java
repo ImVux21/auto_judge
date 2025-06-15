@@ -210,7 +210,8 @@ public class CandidateController {
     public ResponseEntity<?> submitProctorSnapshot(
             @PathVariable String token, 
             @RequestBody String imageBase64,
-            @RequestParam long timestamp) {
+            @RequestParam long timestamp,
+            @RequestParam(required = false, defaultValue = "NORMAL") String eventType) {
         
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
         
@@ -220,7 +221,7 @@ public class CandidateController {
         
         InterviewSession session = sessionOpt.get();
         
-        boolean recorded = proctorService.recordWebcamSnapshot(session, imageBase64, timestamp);
+        boolean recorded = proctorService.recordWebcamSnapshot(session, imageBase64, timestamp, eventType);
         
         if (!recorded) {
             return ResponseEntity.badRequest().body(new MessageResponse(

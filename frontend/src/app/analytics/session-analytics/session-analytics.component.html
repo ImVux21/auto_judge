@@ -65,6 +65,105 @@
       </div>
     </app-neo-card>
 
+    <!-- Proctoring Data -->
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Proctoring Data</h5>
+        </div>
+        <div class="p-6">
+          <div *ngIf="!analytics.proctorData" class="text-center py-3">
+            <p class="text-muted-foreground">No proctoring data available.</p>
+          </div>
+          <div *ngIf="analytics.proctorData" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <app-neo-card>
+                  <div class="p-4 text-center">
+                    <h6 class="font-bold mb-2">Total Snapshots</h6>
+                    <p class="text-3xl font-bold">{{ analytics.proctorData.totalSnapshots }}</p>
+                  </div>
+                </app-neo-card>
+                <app-neo-card>
+                  <div class="p-4 text-center" [ngClass]="{'bg-destructive text-destructive-foreground': analytics.proctorData.flaggedSnapshots > 0}">
+                    <h6 class="font-bold mb-2">Flagged Snapshots</h6>
+                    <p class="text-3xl font-bold">{{ analytics.proctorData.flaggedSnapshots }}</p>
+                  </div>
+                </app-neo-card>
+              </div>
+              
+              <div *ngIf="analytics.proctorData.eventTypeStats">
+                <h6 class="font-bold mb-3">Event Type Distribution</h6>
+                <div class="mb-4" style="max-height: 300px; height: max-content;">
+                  <canvas baseChart
+                    [type]="'pie'"
+                    [data]="eventTypeChartData"
+                    [options]="eventTypeChartOptions">
+                  </canvas>
+                </div>
+              </div>
+              
+              <div class="mt-4">
+                <h6 class="font-bold mb-3">View Snapshots</h6>
+                <div class="flex flex-wrap gap-2">
+                  <button class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" 
+                    (click)="loadProctorSnapshots()">
+                    All Snapshots
+                  </button>
+                  <button class="neo-button bg-destructive text-destructive-foreground" 
+                    (click)="loadSuspiciousSnapshots()">
+                    Suspicious Activity
+                  </button>
+                  <button class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" 
+                    (click)="loadProctorSnapshots('VISIBILITY_HIDDEN')">
+                    Tab Switches
+                  </button>
+                  <button class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" 
+                    (click)="loadProctorSnapshots('KEYBOARD_SHORTCUT')">
+                    Keyboard Shortcuts
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h6 class="font-bold mb-3">Proctor Notes</h6>
+              <div *ngIf="!analytics.proctorData.proctorNotes" class="bg-muted p-4 border-brutal border-black">
+                <p class="mb-0 text-muted-foreground">No proctor notes available.</p>
+              </div>
+              <div *ngIf="analytics.proctorData.proctorNotes" class="bg-muted p-4 border-brutal border-black">
+                <p class="mb-0 whitespace-pre-line">{{ analytics.proctorData.proctorNotes }}</p>
+              </div>
+              
+              <div *ngIf="proctorSnapshots.length > 0" class="mt-6">
+                <h6 class="font-bold mb-3">Snapshot List</h6>
+                <div *ngIf="loadingSnapshots" class="text-center my-3">
+                  <div class="inline-block animate-spin text-2xl">⟳</div>
+                  <p class="mt-1">Loading snapshots...</p>
+                </div>
+                <div *ngIf="!loadingSnapshots" class="space-y-3 max-h-[400px] overflow-y-auto">
+                  <app-neo-card *ngFor="let snapshot of proctorSnapshots">
+                    <div class="p-4">
+                      <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm">{{ formatTimestamp(snapshot.timestamp) }}</span>
+                        <span class="px-2 py-1 text-sm border-brutal border-black" 
+                          [ngClass]="getEventTypeClass(snapshot.eventType)">
+                          {{ formatEventType(snapshot.eventType) }}
+                        </span>
+                      </div>
+                      <div *ngIf="snapshot.flagged" class="mb-3 p-2 bg-destructive text-destructive-foreground border-brutal border-black">
+                        <p class="mb-0 text-sm">{{ snapshot.flagReason }}</p>
+                      </div>
+                    </div>
+                  </app-neo-card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-neo-card>
+
     <!-- Category Performance -->
     <app-neo-card class="mb-6">
       <div class="p-0">
@@ -139,7 +238,7 @@
                   <div *ngIf="answer.questionType === 'OPEN_ENDED'">
                     <p class="font-bold mb-2">Answer:</p>
                     <div class="p-4 bg-muted border-brutal border-black">
-                      <p class="mb-0">{{ answer.textAnswer }}</p>
+                      <p class="mb-0">{{ answer.answer }}</p>
                     </div>
                   </div>
                   

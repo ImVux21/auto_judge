@@ -80,7 +80,7 @@
                     </span>
                   </div>
                   <p class="mb-1 text-sm text-muted-foreground">Category: {{ question.category }}</p>
-                  <p class="mb-2 text-sm text-muted-foreground">Difficulty: {{ question.difficulty }}</p>
+                  <p class="mb-2 text-sm text-muted-foreground">Difficulty: {{ question.difficultyLevel }}</p>
                   
                   <div *ngIf="question.type === 'MULTIPLE_CHOICE' && question.options?.length" class="mt-3">
                     <p class="font-bold mb-2">Options:</p>

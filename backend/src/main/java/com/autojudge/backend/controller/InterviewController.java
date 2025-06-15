@@ -101,7 +101,7 @@ public class InterviewController {
     public ResponseEntity<?> createSession(@PathVariable Long id, @Valid @RequestBody CreateSessionRequest request) {
         Optional<Interview> interviewOpt = interviewService.getInterviewById(id);
         
-        if (!interviewOpt.isPresent()) {
+        if (interviewOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         

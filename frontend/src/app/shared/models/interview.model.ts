@@ -22,7 +22,7 @@ export interface Question {
   text: string;
   type: 'MULTIPLE_CHOICE' | 'OPEN_ENDED';
   category: string;
-  difficulty: string;
+  difficultyLevel: string;
   orderIndex: number;
   options?: Option[];
 }
