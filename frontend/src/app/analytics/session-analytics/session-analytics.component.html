@@ -1,153 +1,158 @@
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Session Analytics</h1>
-    <div>
-      <button class="btn btn-outline-primary me-2" (click)="viewInterviewAnalytics()" *ngIf="analytics.session?.interview?.id">
+<div class="neo-container">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <h1 class="text-3xl font-bold mb-4 md:mb-0">Session Analytics</h1>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <button class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" (click)="viewInterviewAnalytics()" *ngIf="analytics.session?.interview?.id">
         View Interview Analytics
       </button>
-      <button class="btn btn-outline-secondary" (click)="goBack()">
-        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      <button class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" (click)="goBack()">
+        Back to Dashboard
       </button>
     </div>
   </div>
 
   <div *ngIf="loading" class="text-center my-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+    <div class="inline-block animate-spin text-4xl">⟳</div>
     <p class="mt-2">Loading session analytics...</p>
   </div>
 
-  <div *ngIf="error" class="alert alert-danger">
+  <div *ngIf="error" class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal">
     {{ error }}
   </div>
 
   <div *ngIf="!loading && !error">
     <!-- Session Details -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <h5 class="mb-0">Session Details</h5>
-      </div>
-      <div class="card-body">
-        <div *ngIf="analytics.session" class="row">
-          <div class="col-md-6">
-            <h4>{{ analytics.session.interview.title }}</h4>
-            <p class="text-muted">{{ analytics.session.interview.jobRole }}</p>
-            <p><strong>Candidate:</strong> {{ analytics.session.candidate.firstName }} {{ analytics.session.candidate.lastName }}</p>
-            <p><strong>Email:</strong> {{ analytics.session.candidate.email }}</p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Status:</strong> 
-              <span class="badge rounded-pill" [ngClass]="{
-                'bg-success': analytics.session.status === 'COMPLETED',
-                'bg-warning': analytics.session.status === 'IN_PROGRESS',
-                'bg-secondary': analytics.session.status === 'PENDING',
-                'bg-danger': analytics.session.status === 'EXPIRED'
-              }">{{ analytics.session.status }}</span>
-            </p>
-            <p><strong>Started:</strong> {{ formatDate(analytics.session.startTime) }} at {{ formatTime(analytics.session.startTime) }}</p>
-            <p *ngIf="analytics.session.endTime"><strong>Ended:</strong> {{ formatDate(analytics.session.endTime) }} at {{ formatTime(analytics.session.endTime) }}</p>
-            <p><strong>Score:</strong> {{ analytics.session.score !== null ? (analytics.session.score | percent) : 'N/A' }}</p>
-          </div>
-          
-          <div *ngIf="analytics.session.evaluationSummary" class="col-12 mt-3">
-            <h5>Evaluation Summary</h5>
-            <p>{{ analytics.session.evaluationSummary }}</p>
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Session Details</h5>
+        </div>
+        <div class="p-6">
+          <div *ngIf="analytics.session" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 class="text-xl font-bold mb-2">{{ analytics.session.interview.title }}</h4>
+              <p class="text-muted-foreground mb-3">{{ analytics.session.interview.jobRole }}</p>
+              <p class="mb-2"><span class="font-bold">Candidate:</span> {{ analytics.session.candidate.firstName }} {{ analytics.session.candidate.lastName }}</p>
+              <p class="mb-2"><span class="font-bold">Email:</span> {{ analytics.session.candidate.email }}</p>
+            </div>
+            <div>
+              <p class="mb-2"><span class="font-bold">Status:</span> 
+                <span class="px-2 py-1 border-brutal border-black" [ngClass]="{
+                  'bg-primary text-primary-foreground': analytics.session.status === 'COMPLETED',
+                  'bg-secondary text-secondary-foreground': analytics.session.status === 'IN_PROGRESS',
+                  'bg-muted text-muted-foreground': analytics.session.status === 'PENDING',
+                  'bg-destructive text-destructive-foreground': analytics.session.status === 'EXPIRED'
+                }">{{ analytics.session.status }}</span>
+              </p>
+              <p class="mb-2"><span class="font-bold">Started:</span> {{ formatDate(analytics.session.startTime) }} at {{ formatTime(analytics.session.startTime) }}</p>
+              <p *ngIf="analytics.session.endTime" class="mb-2"><span class="font-bold">Ended:</span> {{ formatDate(analytics.session.endTime) }} at {{ formatTime(analytics.session.endTime) }}</p>
+              <p class="mb-2">
+                <span class="font-bold">Score:</span> 
+                <span class="px-2 py-1 border-brutal border-black" [ngClass]="getScoreClass(analytics.session.score || 0)">
+                  {{ analytics.session.score !== null ? (analytics.session.score | percent) : 'N/A' }}
+                </span>
+              </p>
+            </div>
+            
+            <div *ngIf="analytics.session.evaluationSummary" class="col-span-1 md:col-span-2 mt-4">
+              <h5 class="text-lg font-bold mb-2">Evaluation Summary</h5>
+              <div class="bg-muted p-4 border-brutal border-black">
+                <p class="mb-0">{{ analytics.session.evaluationSummary }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </app-neo-card>
 
     <!-- Category Performance -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">Category Performance</h5>
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Category Performance</h5>
+        </div>
+        <div class="p-6">
+          <div *ngIf="!analytics.categoryPerformance" class="text-center py-3">
+            <p class="text-muted-foreground">No category performance data available.</p>
           </div>
-          <div class="card-body">
-            <div *ngIf="!analytics.categoryPerformance" class="text-center py-3">
-              <p class="text-muted">No category performance data available.</p>
-            </div>
-            <div *ngIf="analytics.categoryPerformance" class="row">
-              <div class="col-md-4 mb-3" *ngFor="let item of getCategoryPerformanceItems()">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h6 class="mb-2">{{ item.category }}</h6>
-                    <div class="d-flex align-items-center">
-                      <div class="progress flex-grow-1 me-2">
-                        <div class="progress-bar" 
-                          [ngClass]="getProgressBarClass(item.score)" 
-                          [style.width.%]="item.score * 100" 
-                          role="progressbar" 
-                          [attr.aria-valuenow]="item.score * 100" 
-                          aria-valuemin="0" 
-                          aria-valuemax="100">
-                        </div>
-                      </div>
-                      <span>{{ item.score | percent }}</span>
+          <div *ngIf="analytics.categoryPerformance" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <app-neo-card *ngFor="let item of getCategoryPerformanceItems()">
+              <div class="p-4">
+                <h6 class="font-bold mb-3">{{ item.category }}</h6>
+                <div class="flex items-center">
+                  <div class="flex-grow h-3 bg-muted border-brutal border-black relative mr-2">
+                    <div class="absolute top-0 left-0 h-full" 
+                      [ngClass]="getScoreClass(item.score)" 
+                      [style.width.%]="item.score * 100">
                     </div>
                   </div>
+                  <span>{{ item.score | percent }}</span>
                 </div>
               </div>
-            </div>
+            </app-neo-card>
           </div>
         </div>
       </div>
-    </div>
+    </app-neo-card>
 
     <!-- Answer Performance -->
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0">Answer Performance</h5>
-      </div>
-      <div class="card-body">
-        <div *ngIf="!analytics.answerPerformance || analytics.answerPerformance.length === 0" class="text-center py-3">
-          <p class="text-muted">No answer performance data available.</p>
+    <app-neo-card>
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Answer Performance</h5>
         </div>
-        <div *ngIf="analytics.answerPerformance && analytics.answerPerformance.length > 0">
-          <div *ngFor="let answer of analytics.answerPerformance; let i = index" class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h6 class="mb-0">Question {{ i + 1 }}</h6>
-              <div>
-                <span class="badge me-2" [ngClass]="answer.questionType === 'MULTIPLE_CHOICE' ? 'bg-info' : 'bg-warning'">
-                  {{ answer.questionType === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
-                </span>
-                <span class="badge" [ngClass]="getProgressBarClass(answer.score || 0)">
-                  {{ answer.score !== null ? (answer.score | percent) : 'N/A' }}
-                </span>
-              </div>
-            </div>
-            <div class="card-body">
-              <p><strong>{{ answer.questionText }}</strong></p>
-              
-              <div *ngIf="answer.questionType === 'MULTIPLE_CHOICE'">
-                <p><strong>Selected Options:</strong></p>
-                <ul class="list-group">
-                  <li *ngFor="let option of answer.selectedOptions" class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ option.text }}
-                    <span *ngIf="option.isCorrect" class="badge bg-success">Correct</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div *ngIf="answer.questionType === 'OPEN_ENDED'">
-                <p><strong>Answer:</strong></p>
-                <div class="card">
-                  <div class="card-body bg-light">
-                    <p class="mb-0">{{ answer.textAnswer }}</p>
+        <div class="p-6">
+          <div *ngIf="!analytics.answerPerformance || analytics.answerPerformance.length === 0" class="text-center py-3">
+            <p class="text-muted-foreground">No answer performance data available.</p>
+          </div>
+          <div *ngIf="analytics.answerPerformance && analytics.answerPerformance.length > 0" class="space-y-6">
+            <app-neo-card *ngFor="let answer of analytics.answerPerformance; let i = index">
+              <div class="p-0">
+                <div class="bg-muted p-4 border-b-brutal border-black flex justify-between items-center">
+                  <h6 class="font-bold mb-0">Question {{ i + 1 }}</h6>
+                  <div class="flex items-center">
+                    <span class="px-2 py-1 mr-2 border-brutal border-black" 
+                      [ngClass]="answer.questionType === 'MULTIPLE_CHOICE' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'">
+                      {{ answer.questionType === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
+                    </span>
+                    <span class="px-2 py-1 border-brutal border-black" [ngClass]="getScoreClass(answer.score || 0)">
+                      {{ answer.score !== null ? (answer.score | percent) : 'N/A' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <p class="font-bold mb-4">{{ answer.questionText }}</p>
+                  
+                  <div *ngIf="answer.questionType === 'MULTIPLE_CHOICE'">
+                    <p class="font-bold mb-2">Selected Options:</p>
+                    <div class="space-y-2">
+                      <div *ngFor="let option of answer.selectedOptions" 
+                        class="p-3 border-brutal border-black flex justify-between items-center">
+                        {{ option.text }}
+                        <span *ngIf="option.isCorrect" class="px-2 py-1 bg-primary text-primary-foreground border-brutal border-black">
+                          Correct
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="answer.questionType === 'OPEN_ENDED'">
+                    <p class="font-bold mb-2">Answer:</p>
+                    <div class="p-4 bg-muted border-brutal border-black">
+                      <p class="mb-0">{{ answer.textAnswer }}</p>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="answer.evaluation" class="mt-4">
+                    <p class="font-bold mb-2">Evaluation:</p>
+                    <p>{{ answer.evaluation }}</p>
                   </div>
                 </div>
               </div>
-              
-              <div *ngIf="answer.evaluation" class="mt-3">
-                <p><strong>Evaluation:</strong></p>
-                <p>{{ answer.evaluation }}</p>
-              </div>
-            </div>
+            </app-neo-card>
           </div>
         </div>
       </div>
-    </div>
+    </app-neo-card>
   </div>
 </div> 

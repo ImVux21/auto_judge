@@ -1,65 +1,62 @@
-<header class="bg-dark text-white py-3">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center">
+<header class="bg-primary text-primary-foreground py-3 border-b-brutal border-black">
+  <div class="neo-container">
+    <div class="flex justify-between items-center">
       <div class="logo">
-        <a routerLink="/" class="text-white text-decoration-none">
-          <h1 class="h4 m-0">AutoJudge</h1>
+        <a routerLink="/" class="text-primary-foreground no-underline">
+          <h1 class="text-xl font-bold m-0">AutoJudge</h1>
         </a>
       </div>
       
       <nav>
-        <ul class="nav">
+        <ul class="neo-nav">
           <!-- Show these links only when logged in -->
           <ng-container *ngIf="isLoggedIn()">
             <!-- Interviewer/Admin links -->
             <ng-container *ngIf="isInterviewer() || isAdmin()">
-              <li class="nav-item">
-                <a class="nav-link text-white" routerLink="/interviewer/dashboard" routerLinkActive="active">Dashboard</a>
+              <li class="neo-nav-item">
+                <a class="text-primary-foreground" routerLink="/interviewer/dashboard" routerLinkActive="underline">Dashboard</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link text-white" routerLink="/interviewer/interviews" routerLinkActive="active">Interviews</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" href="#" id="interviewDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <li class="neo-dropdown">
+                <a class="text-primary-foreground cursor-pointer" (click)="toggleManageDropdown()">
                   Manage
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="interviewDropdown">
-                  <li><a class="dropdown-item" routerLink="/interviewer/create">Create Interview</a></li>
-                  <li><a class="dropdown-item" routerLink="/interviewer/interviews">View Interviews</a></li>
+                <ul *ngIf="showManageDropdown" class="neo-dropdown-menu">
+                  <li><a class="neo-dropdown-item" routerLink="/interviewer/interviews/create">Create Interview</a></li>
+                  <li><a class="neo-dropdown-item" routerLink="/interviewer/interviews">View Interviews</a></li>
                 </ul>
               </li>
-              <li class="nav-item">
-                <a class="nav-link text-white" routerLink="/analytics/dashboard" routerLinkActive="active">Analytics</a>
+              <li class="neo-nav-item">
+                <a class="text-primary-foreground" routerLink="/analytics/dashboard" routerLinkActive="underline">Analytics</a>
               </li>
             </ng-container>
             
             <!-- Candidate links -->
             <ng-container *ngIf="isCandidate()">
-              <li class="nav-item">
-                <a class="nav-link text-white" routerLink="/candidate/sessions" routerLinkActive="active">My Sessions</a>
+              <li class="neo-nav-item">
+                <a class="text-primary-foreground" routerLink="/candidate/sessions" routerLinkActive="underline">My Sessions</a>
               </li>
             </ng-container>
             
             <!-- User menu -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <li class="neo-dropdown">
+              <a class="text-primary-foreground cursor-pointer" (click)="toggleUserDropdown()">
                 {{ currentUser?.firstName || 'User' }}
               </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#" (click)="logout(); $event.preventDefault()">Logout</a></li>
+              <ul *ngIf="showUserDropdown" class="neo-dropdown-menu">
+                <li><a class="neo-dropdown-item" routerLink="/profile">Profile</a></li>
+                <li><hr class="my-2 border-t border-black"></li>
+                <li><a class="neo-dropdown-item" href="#" (click)="logout(); $event.preventDefault()">Logout</a></li>
               </ul>
             </li>
           </ng-container>
           
           <!-- Show these links when not logged in -->
           <ng-container *ngIf="!isLoggedIn()">
-            <li class="nav-item">
-              <a class="nav-link text-white" routerLink="/auth/login" routerLinkActive="active">Login</a>
+            <li class="neo-nav-item">
+              <a class="text-primary-foreground" routerLink="/auth/login" routerLinkActive="underline">Login</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link text-white" routerLink="/auth/register" routerLinkActive="active">Register</a>
+            <li class="neo-nav-item">
+              <a class="text-primary-foreground" routerLink="/auth/register" routerLinkActive="underline">Register</a>
             </li>
           </ng-container>
         </ul>

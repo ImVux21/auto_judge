@@ -1,187 +1,165 @@
-<div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex justify-center py-10">
-      <svg class="spinner h-10 w-10 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    </div>
+<div class="neo-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="inline-block animate-spin text-4xl">⟳</div>
+    <p class="mt-2">Loading session...</p>
+  </div>
 
-    <!-- Error State -->
-    <div *ngIf="!isLoading && error" class="bg-danger-100 border border-danger-400 text-danger-700 px-4 py-3 rounded relative mb-6" role="alert">
-      <span class="block sm:inline">{{ error }}</span>
-    </div>
+  <!-- Error State -->
+  <div *ngIf="!isLoading && error" class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal">
+    {{ error }}
+  </div>
 
-    <!-- Session Welcome Screen -->
-    <div *ngIf="!isLoading && !error && !sessionStarted && session" class="question-container">
-      <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
+  <!-- Session Welcome Screen -->
+  <div *ngIf="!isLoading && !error && !sessionStarted && session">
+    <app-neo-card>
+      <div class="p-6">
+        <h3 class="text-xl font-bold mb-4">
           Welcome to your interview session
         </h3>
-        <div class="mt-2 max-w-xl text-sm text-gray-500">
-          <p>You are about to start an interview for: <strong>{{ session.interview?.title }}</strong></p>
-          <p class="mt-2">This interview contains multiple-choice and open-ended questions related to the {{ session.interview?.jobRole }} role.</p>
-          <p class="mt-2">You will have {{ session.interview?.timeLimit }} minutes to complete the interview once you start.</p>
+        <div class="mb-6">
+          <p class="mb-2">You are about to start an interview for: <span class="font-bold">{{ session.interview?.title }}</span></p>
+          <p class="mb-2">This interview contains multiple-choice and open-ended questions related to the {{ session.interview?.jobRole }} role.</p>
+          <p class="mb-2">You will have {{ session.interview?.timeLimit }} minutes to complete the interview once you start.</p>
         </div>
-        <div class="mt-5">
+        <div>
           <button type="button" (click)="startSession()" [disabled]="isSubmitting"
-            class="btn-nav btn-primary-custom">
-            <span *ngIf="isSubmitting" class="mr-2">
-              <svg class="spinner h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
+            class="neo-button">
+            <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
             Start Interview
           </button>
         </div>
       </div>
-    </div>
+    </app-neo-card>
+  </div>
 
-    <!-- Interview in Progress -->
-    <div *ngIf="!isLoading && !error && sessionStarted && questions.length > 0" class="space-y-6">
-      <!-- Timer and Progress -->
-      <div class="question-container">
-        <div class="px-4 py-4 sm:px-6 flex justify-between items-center">
-          <div>
-            <p class="text-sm font-medium text-gray-900">
-              Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}
-            </p>
-            <div class="progress-bar-container w-48 mt-2">
-              <div class="progress-bar" [style.width.%]="((currentQuestionIndex + 1) / questions.length) * 100"></div>
-            </div>
-          </div>
-          <div class="text-right">
-            <p class="text-sm font-medium text-gray-500">Time Remaining</p>
-            <p class="timer" [ngClass]="timeRemaining < 300 ? 'timer-warning' : ''">
-              {{ formatTime(timeRemaining) }}
-            </p>
+  <!-- Interview in Progress -->
+  <div *ngIf="!isLoading && !error && sessionStarted && questions.length > 0" class="space-y-6">
+    <!-- Timer and Progress -->
+    <app-neo-card>
+      <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <p class="font-bold mb-2">
+            Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}
+          </p>
+          <div class="w-48 h-3 bg-muted border-brutal border-black relative">
+            <div class="absolute top-0 left-0 h-full bg-primary" 
+              [style.width.%]="((currentQuestionIndex + 1) / questions.length) * 100"></div>
           </div>
         </div>
+        <div class="mt-4 sm:mt-0 text-right">
+          <p class="font-medium text-muted-foreground">Time Remaining</p>
+          <p class="text-xl font-bold" [ngClass]="timeRemaining < 300 ? 'text-destructive' : ''">
+            {{ formatTime(timeRemaining) }}
+          </p>
+        </div>
       </div>
+    </app-neo-card>
 
-      <!-- Current Question -->
-      <div class="question-container">
-        <div class="px-4 py-5 sm:p-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-            {{ questions[currentQuestionIndex]?.text }}
-          </h3>
+    <!-- Current Question -->
+    <app-neo-card>
+      <div class="p-6">
+        <h3 class="text-xl font-bold mb-6">
+          {{ questions[currentQuestionIndex]?.text }}
+        </h3>
 
-          <!-- Multiple Choice Question -->
-          <div *ngIf="questions[currentQuestionIndex]?.type === 'MULTIPLE_CHOICE'">
-            <form [formGroup]="mcqForm" (ngSubmit)="submitMCQAnswer()">
-              <div class="space-y-4">
-                <div *ngFor="let option of questions[currentQuestionIndex]?.options" 
-                     class="mcq-option"
-                     [ngClass]="{'mcq-option-selected': isOptionSelected(option.id)}"
-                     (click)="toggleOption(option.id)">
-                  <div class="option-checkbox"
-                       [ngClass]="{'option-checkbox-selected': isOptionSelected(option.id)}">
-                    <svg *ngIf="isOptionSelected(option.id)" class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
+        <!-- Multiple Choice Question -->
+        <div *ngIf="questions[currentQuestionIndex]?.type === 'MULTIPLE_CHOICE'">
+          <form [formGroup]="mcqForm" (ngSubmit)="submitMCQAnswer()">
+            <div class="space-y-3">
+              <div *ngFor="let option of questions[currentQuestionIndex]?.options" 
+                   class="p-3 border-brutal border-black cursor-pointer transition-all hover:bg-muted"
+                   [ngClass]="{'bg-primary/20': isOptionSelected(option.id)}"
+                   (click)="toggleOption(option.id)">
+                <div class="flex items-center">
+                  <div class="relative h-6 w-6 border-brutal border-black mr-3">
+                    <div *ngIf="isOptionSelected(option.id)" class="absolute inset-0 bg-primary flex items-center justify-center">
+                      <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
                   </div>
-                  <label class="ml-3 block text-sm font-medium text-gray-700 cursor-pointer">
+                  <label class="font-medium cursor-pointer">
                     {{ option.text }}
                   </label>
                 </div>
               </div>
+            </div>
 
-              <div *ngIf="mcqForm.get('selectedOptions')?.invalid && mcqForm.get('selectedOptions')?.touched" class="text-danger-600 text-sm mt-4">
-                Please select at least one option
-              </div>
+            <div *ngIf="mcqForm.get('selectedOptions')?.invalid && mcqForm.get('selectedOptions')?.touched" class="text-destructive mt-4">
+              Please select at least one option
+            </div>
 
-              <div class="mt-6 flex justify-between">
-                <button type="button" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0"
-                  class="btn-nav btn-secondary-custom">
-                  Previous
-                </button>
-                <button type="submit" [disabled]="mcqForm.invalid || isSubmitting"
-                  class="btn-nav btn-primary-custom">
-                  <span *ngIf="isSubmitting" class="mr-2">
-                    <svg class="spinner h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  </span>
-                  {{ currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit' }}
-                </button>
-              </div>
-            </form>
-          </div>
+            <div class="mt-8 flex justify-between">
+              <button type="button" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0"
+                class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground">
+                Previous
+              </button>
+              <button type="submit" [disabled]="mcqForm.invalid || isSubmitting"
+                class="neo-button">
+                <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+                {{ currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit' }}
+              </button>
+            </div>
+          </form>
+        </div>
 
-          <!-- Open-Ended Question -->
-          <div *ngIf="questions[currentQuestionIndex]?.type === 'OPEN_ENDED'">
-            <form [formGroup]="openEndedForm" (ngSubmit)="submitOpenEndedAnswer()">
-              <div>
-                <textarea formControlName="textAnswer" rows="8"
-                  class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Type your answer here..."></textarea>
-                <div *ngIf="openEndedForm.get('textAnswer')?.invalid && openEndedForm.get('textAnswer')?.touched" class="text-danger-600 text-sm mt-2">
-                  <div *ngIf="openEndedForm.get('textAnswer')?.errors?.['required']">Answer is required</div>
-                  <div *ngIf="openEndedForm.get('textAnswer')?.errors?.['minlength']">Answer must be at least 10 characters</div>
-                </div>
+        <!-- Open-Ended Question -->
+        <div *ngIf="questions[currentQuestionIndex]?.type === 'OPEN_ENDED'">
+          <form [formGroup]="openEndedForm" (ngSubmit)="submitOpenEndedAnswer()">
+            <div>
+              <app-neo-input type="textarea" formControlName="textAnswer" rows="8"
+                placeholder="Type your answer here..."></app-neo-input>
+              <div *ngIf="openEndedForm.get('textAnswer')?.invalid && openEndedForm.get('textAnswer')?.touched" class="text-destructive mt-2">
+                <div *ngIf="openEndedForm.get('textAnswer')?.errors?.['required']">Answer is required</div>
+                <div *ngIf="openEndedForm.get('textAnswer')?.errors?.['minlength']">Answer must be at least 10 characters</div>
               </div>
+            </div>
 
-              <div class="mt-6 flex justify-between">
-                <button type="button" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0"
-                  class="btn-nav btn-secondary-custom">
-                  Previous
-                </button>
-                <button type="submit" [disabled]="openEndedForm.invalid || isSubmitting"
-                  class="btn-nav btn-primary-custom">
-                  <span *ngIf="isSubmitting" class="mr-2">
-                    <svg class="spinner h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  </span>
-                  {{ currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit' }}
-                </button>
-              </div>
-            </form>
-          </div>
+            <div class="mt-8 flex justify-between">
+              <button type="button" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0"
+                class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground">
+                Previous
+              </button>
+              <button type="submit" [disabled]="openEndedForm.invalid || isSubmitting"
+                class="neo-button">
+                <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+                {{ currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
+    </app-neo-card>
 
-      <!-- Complete Interview Button -->
-      <div class="flex justify-end">
-        <button type="button" (click)="completeSession()" [disabled]="isSubmitting"
-          class="btn-nav btn-danger-custom">
-          <span *ngIf="isSubmitting" class="mr-2">
-            <svg class="spinner h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </span>
-          End Interview
-        </button>
-      </div>
+    <!-- Complete Interview Button -->
+    <div class="flex justify-end">
+      <button type="button" (click)="completeSession()" [disabled]="isSubmitting"
+        class="neo-button bg-destructive text-destructive-foreground hover:bg-destructive/90">
+        <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+        End Interview
+      </button>
     </div>
+  </div>
 
-    <!-- No Questions Available -->
-    <div *ngIf="!isLoading && !error && sessionStarted && questions.length === 0" class="question-container">
-      <div class="px-4 py-5 sm:p-6 text-center">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
+  <!-- No Questions Available -->
+  <div *ngIf="!isLoading && !error && sessionStarted && questions.length === 0">
+    <app-neo-card>
+      <div class="p-6 text-center">
+        <h3 class="text-xl font-bold mb-4">
           No questions available
         </h3>
-        <div class="mt-2 max-w-xl text-sm text-gray-500 mx-auto">
+        <div class="mb-6">
           <p>There are no questions available for this interview. Please contact the interviewer.</p>
         </div>
-        <div class="mt-5">
+        <div>
           <button type="button" (click)="completeSession()" [disabled]="isSubmitting"
-            class="btn-nav btn-primary-custom">
-            <span *ngIf="isSubmitting" class="mr-2">
-              <svg class="spinner h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
+            class="neo-button">
+            <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
             Return to Dashboard
           </button>
         </div>
       </div>
-    </div>
+    </app-neo-card>
   </div>
 </div> 

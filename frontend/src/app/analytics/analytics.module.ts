@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
+import { SharedModule } from '../shared/shared.module';
 
 import { AnalyticsDashboardComponent } from './analytics-dashboard/analytics-dashboard.component';
 import { InterviewAnalyticsComponent } from './interview-analytics/interview-analytics.component';
@@ -21,7 +22,8 @@ const routes: Routes = [
   ],
   imports: [
     CommonModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    SharedModule
   ]
 })
 export class AnalyticsModule { } 

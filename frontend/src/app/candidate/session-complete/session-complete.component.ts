@@ -65,6 +65,12 @@ export class SessionCompleteComponent implements OnInit {
     if (score < 0.7) return 'bg-warning';
     return 'bg-success';
   }
+  
+  getScoreClass(score: number): string {
+    if (score < 0.4) return 'bg-destructive text-destructive-foreground';
+    if (score < 0.7) return 'bg-secondary text-secondary-foreground';
+    return 'bg-primary text-primary-foreground';
+  }
 
   goToSessions(): void {
     this.router.navigate(['/candidate/sessions']);

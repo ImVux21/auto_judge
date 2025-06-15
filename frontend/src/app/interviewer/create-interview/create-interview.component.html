@@ -1,133 +1,135 @@
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow">
-        <div class="card-header">
-          <h2 class="mb-0">Create New Interview</h2>
-        </div>
-        <div class="card-body">
-          <div *ngIf="error" class="alert alert-danger">
-            {{ error }}
+<div class="neo-container">
+  <div class="flex justify-center">
+    <div class="w-full max-w-3xl">
+      <app-neo-card>
+        <div class="p-0">
+          <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+            <h2 class="text-2xl font-bold mb-0">Create New Interview</h2>
           </div>
-          
-          <div *ngIf="success" class="alert alert-success">
-            {{ success }}
-          </div>
-          
-          <form [formGroup]="interviewForm" (ngSubmit)="onSubmit()">
-            <div class="mb-3">
-              <label for="title" class="form-label">Interview Title</label>
-              <input 
-                type="text" 
-                id="title" 
-                formControlName="title" 
-                class="form-control" 
-                [ngClass]="{'is-invalid': interviewForm.get('title')?.invalid && interviewForm.get('title')?.touched}"
-                placeholder="Enter interview title"
-              >
-              <div *ngIf="interviewForm.get('title')?.invalid && interviewForm.get('title')?.touched" class="invalid-feedback">
-                <div *ngIf="interviewForm.get('title')?.errors?.['required']">Title is required</div>
-                <div *ngIf="interviewForm.get('title')?.errors?.['minlength']">Title must be at least 3 characters</div>
-              </div>
+          <div class="p-6">
+            <div *ngIf="error" class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal-sm">
+              {{ error }}
             </div>
             
-            <div class="mb-3">
-              <label for="jobRole" class="form-label">Job Role</label>
-              <input 
-                type="text" 
-                id="jobRole" 
-                formControlName="jobRole" 
-                class="form-control" 
-                [ngClass]="{'is-invalid': interviewForm.get('jobRole')?.invalid && interviewForm.get('jobRole')?.touched}"
-                placeholder="Enter job role (e.g. Software Engineer, Product Manager)"
-              >
-              <div *ngIf="interviewForm.get('jobRole')?.invalid && interviewForm.get('jobRole')?.touched" class="invalid-feedback">
-                <div *ngIf="interviewForm.get('jobRole')?.errors?.['required']">Job role is required</div>
-                <div *ngIf="interviewForm.get('jobRole')?.errors?.['minlength']">Job role must be at least 3 characters</div>
-              </div>
+            <div *ngIf="success" class="bg-primary text-primary-foreground p-4 mb-6 border-brutal border-black shadow-brutal-sm">
+              {{ success }}
             </div>
             
-            <div class="mb-3">
-              <label for="description" class="form-label">Description (Optional)</label>
-              <textarea 
-                id="description" 
-                formControlName="description" 
-                class="form-control" 
-                rows="3"
-                placeholder="Enter interview description"
-              ></textarea>
-            </div>
-            
-            <div class="mb-3">
-              <label for="timeLimit" class="form-label">Time Limit (minutes)</label>
-              <input 
-                type="number" 
-                id="timeLimit" 
-                formControlName="timeLimit" 
-                class="form-control" 
-                [ngClass]="{'is-invalid': interviewForm.get('timeLimit')?.invalid && interviewForm.get('timeLimit')?.touched}"
-              >
-              <div *ngIf="interviewForm.get('timeLimit')?.invalid && interviewForm.get('timeLimit')?.touched" class="invalid-feedback">
-                <div *ngIf="interviewForm.get('timeLimit')?.errors?.['required']">Time limit is required</div>
-                <div *ngIf="interviewForm.get('timeLimit')?.errors?.['min']">Time limit must be at least 10 minutes</div>
-                <div *ngIf="interviewForm.get('timeLimit')?.errors?.['max']">Time limit cannot exceed 180 minutes</div>
-              </div>
-            </div>
-            
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="mcqCount" class="form-label">Number of Multiple Choice Questions</label>
+            <form [formGroup]="interviewForm" (ngSubmit)="onSubmit()">
+              <div class="mb-4">
+                <label for="title" class="block text-sm font-bold mb-2">Interview Title</label>
                 <input 
-                  type="number" 
-                  id="mcqCount" 
-                  formControlName="mcqCount" 
-                  class="form-control" 
-                  [ngClass]="{'is-invalid': interviewForm.get('mcqCount')?.invalid && interviewForm.get('mcqCount')?.touched}"
+                  type="text" 
+                  id="title" 
+                  formControlName="title" 
+                  class="neo-input" 
+                  [ngClass]="{'border-destructive': interviewForm.get('title')?.invalid && interviewForm.get('title')?.touched}"
+                  placeholder="Enter interview title"
                 >
-                <div *ngIf="interviewForm.get('mcqCount')?.invalid && interviewForm.get('mcqCount')?.touched" class="invalid-feedback">
-                  <div *ngIf="interviewForm.get('mcqCount')?.errors?.['required']">MCQ count is required</div>
-                  <div *ngIf="interviewForm.get('mcqCount')?.errors?.['min']">MCQ count must be at least 0</div>
-                  <div *ngIf="interviewForm.get('mcqCount')?.errors?.['max']">MCQ count cannot exceed 20</div>
+                <div *ngIf="interviewForm.get('title')?.invalid && interviewForm.get('title')?.touched" class="text-destructive text-sm mt-1">
+                  <div *ngIf="interviewForm.get('title')?.errors?.['required']">Title is required</div>
+                  <div *ngIf="interviewForm.get('title')?.errors?.['minlength']">Title must be at least 3 characters</div>
                 </div>
               </div>
               
-              <div class="col-md-6">
-                <label for="openEndedCount" class="form-label">Number of Open-Ended Questions</label>
+              <div class="mb-4">
+                <label for="jobRole" class="block text-sm font-bold mb-2">Job Role</label>
                 <input 
-                  type="number" 
-                  id="openEndedCount" 
-                  formControlName="openEndedCount" 
-                  class="form-control" 
-                  [ngClass]="{'is-invalid': interviewForm.get('openEndedCount')?.invalid && interviewForm.get('openEndedCount')?.touched}"
+                  type="text" 
+                  id="jobRole" 
+                  formControlName="jobRole" 
+                  class="neo-input" 
+                  [ngClass]="{'border-destructive': interviewForm.get('jobRole')?.invalid && interviewForm.get('jobRole')?.touched}"
+                  placeholder="Enter job role (e.g. Software Engineer, Product Manager)"
                 >
-                <div *ngIf="interviewForm.get('openEndedCount')?.invalid && interviewForm.get('openEndedCount')?.touched" class="invalid-feedback">
-                  <div *ngIf="interviewForm.get('openEndedCount')?.errors?.['required']">Open-ended count is required</div>
-                  <div *ngIf="interviewForm.get('openEndedCount')?.errors?.['min']">Open-ended count must be at least 0</div>
-                  <div *ngIf="interviewForm.get('openEndedCount')?.errors?.['max']">Open-ended count cannot exceed 10</div>
+                <div *ngIf="interviewForm.get('jobRole')?.invalid && interviewForm.get('jobRole')?.touched" class="text-destructive text-sm mt-1">
+                  <div *ngIf="interviewForm.get('jobRole')?.errors?.['required']">Job role is required</div>
+                  <div *ngIf="interviewForm.get('jobRole')?.errors?.['minlength']">Job role must be at least 3 characters</div>
                 </div>
               </div>
               
-              <div *ngIf="interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0" class="col-12 mt-2">
-                <div class="alert alert-warning">
-                  You must include at least one question (MCQ or open-ended).
+              <div class="mb-4">
+                <label for="description" class="block text-sm font-bold mb-2">Description (Optional)</label>
+                <textarea 
+                  id="description" 
+                  formControlName="description" 
+                  class="neo-input" 
+                  rows="3"
+                  placeholder="Enter interview description"
+                ></textarea>
+              </div>
+              
+              <div class="mb-4">
+                <label for="timeLimit" class="block text-sm font-bold mb-2">Time Limit (minutes)</label>
+                <input 
+                  type="number" 
+                  id="timeLimit" 
+                  formControlName="timeLimit" 
+                  class="neo-input" 
+                  [ngClass]="{'border-destructive': interviewForm.get('timeLimit')?.invalid && interviewForm.get('timeLimit')?.touched}"
+                >
+                <div *ngIf="interviewForm.get('timeLimit')?.invalid && interviewForm.get('timeLimit')?.touched" class="text-destructive text-sm mt-1">
+                  <div *ngIf="interviewForm.get('timeLimit')?.errors?.['required']">Time limit is required</div>
+                  <div *ngIf="interviewForm.get('timeLimit')?.errors?.['min']">Time limit must be at least 10 minutes</div>
+                  <div *ngIf="interviewForm.get('timeLimit')?.errors?.['max']">Time limit cannot exceed 180 minutes</div>
                 </div>
               </div>
-            </div>
-            
-            <div class="d-flex justify-content-between mt-4">
-              <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-              <button 
-                type="submit" 
-                class="btn btn-primary" 
-                [disabled]="interviewForm.invalid || isSubmitting || (interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0)"
-              >
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Create Interview
-              </button>
-            </div>
-          </form>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label for="mcqCount" class="block text-sm font-bold mb-2">Number of Multiple Choice Questions</label>
+                  <input 
+                    type="number" 
+                    id="mcqCount" 
+                    formControlName="mcqCount" 
+                    class="neo-input" 
+                    [ngClass]="{'border-destructive': interviewForm.get('mcqCount')?.invalid && interviewForm.get('mcqCount')?.touched}"
+                  >
+                  <div *ngIf="interviewForm.get('mcqCount')?.invalid && interviewForm.get('mcqCount')?.touched" class="text-destructive text-sm mt-1">
+                    <div *ngIf="interviewForm.get('mcqCount')?.errors?.['required']">MCQ count is required</div>
+                    <div *ngIf="interviewForm.get('mcqCount')?.errors?.['min']">MCQ count must be at least 0</div>
+                    <div *ngIf="interviewForm.get('mcqCount')?.errors?.['max']">MCQ count cannot exceed 20</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label for="openEndedCount" class="block text-sm font-bold mb-2">Number of Open-Ended Questions</label>
+                  <input 
+                    type="number" 
+                    id="openEndedCount" 
+                    formControlName="openEndedCount" 
+                    class="neo-input" 
+                    [ngClass]="{'border-destructive': interviewForm.get('openEndedCount')?.invalid && interviewForm.get('openEndedCount')?.touched}"
+                  >
+                  <div *ngIf="interviewForm.get('openEndedCount')?.invalid && interviewForm.get('openEndedCount')?.touched" class="text-destructive text-sm mt-1">
+                    <div *ngIf="interviewForm.get('openEndedCount')?.errors?.['required']">Open-ended count is required</div>
+                    <div *ngIf="interviewForm.get('openEndedCount')?.errors?.['min']">Open-ended count must be at least 0</div>
+                    <div *ngIf="interviewForm.get('openEndedCount')?.errors?.['max']">Open-ended count cannot exceed 10</div>
+                  </div>
+                </div>
+                
+                <div *ngIf="interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0" class="md:col-span-2 mt-2">
+                  <div class="bg-secondary text-secondary-foreground p-3 border-brutal border-black shadow-brutal-sm">
+                    You must include at least one question (MCQ or open-ended).
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex justify-between mt-6">
+                <button type="button" class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" (click)="cancel()">Cancel</button>
+                <button 
+                  type="submit" 
+                  class="neo-button" 
+                  [disabled]="interviewForm.invalid || isSubmitting || (interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0)"
+                >
+                  <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+                  Create Interview
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      </app-neo-card>
     </div>
   </div>
 </div> 

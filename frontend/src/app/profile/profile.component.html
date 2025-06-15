@@ -1,57 +1,56 @@
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <h2 class="mb-0">Your Profile</h2>
-        </div>
-        <div class="card-body">
-          <div *ngIf="updateSuccess" class="alert alert-success">
-            Profile updated successfully!
+<div class="neo-container">
+  <div class="flex justify-center">
+    <div class="w-full max-w-3xl">
+      <app-neo-card>
+        <div class="p-0">
+          <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+            <h2 class="text-2xl font-bold mb-0">Your Profile</h2>
           </div>
-          <div *ngIf="updateError" class="alert alert-danger">
-            {{ updateError }}
-          </div>
-          
-          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-            <div class="mb-3">
-              <label for="firstName" class="form-label">First Name</label>
-              <input type="text" class="form-control" id="firstName" formControlName="firstName">
-              <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-danger">
-                First name is required
+          <div class="p-6">
+            <div *ngIf="updateSuccess" class="bg-primary/20 border-brutal border-black p-4 mb-6 shadow-brutal">
+              Profile updated successfully!
+            </div>
+            <div *ngIf="updateError" class="bg-destructive text-destructive-foreground border-brutal border-black p-4 mb-6 shadow-brutal">
+              {{ updateError }}
+            </div>
+            
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="mb-6">
+                <app-neo-input type="text" id="firstName" formControlName="firstName" class="w-full" [label]="'First Name'"></app-neo-input>
+                <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-destructive mt-2">
+                  First name is required
+                </div>
               </div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="lastName" class="form-label">Last Name</label>
-              <input type="text" class="form-control" id="lastName" formControlName="lastName">
-              <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-danger">
-                Last name is required
+              
+              <div class="mb-6">
+                <app-neo-input type="text" id="lastName" formControlName="lastName" class="w-full" [label]="'Last Name'"></app-neo-input>
+                <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-destructive mt-2">
+                  Last name is required
+                </div>
               </div>
-            </div>
+              
+              <div class="mb-6">
+                <app-neo-input type="email" id="email" formControlName="email" class="w-full" [label]="'Email'"></app-neo-input>
+                <small class="text-muted-foreground block mt-2">Email cannot be changed</small>
+              </div>
+              
+              <div class="mt-8">
+                <button type="submit" class="neo-button w-full" [disabled]="profileForm.invalid || isSubmitting">
+                  <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+                  Update Profile
+                </button>
+              </div>
+            </form>
             
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
-              <input type="email" class="form-control" id="email" formControlName="email">
-              <small class="text-muted">Email cannot be changed</small>
-            </div>
+            <div class="border-t border-black my-8"></div>
             
-            <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isSubmitting">
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Update Profile
-              </button>
+            <div class="flex justify-between items-center">
+              <h5 class="text-lg font-bold mb-0">Account Actions</h5>
+              <app-logout-button></app-logout-button>
             </div>
-          </form>
-          
-          <hr class="my-4">
-          
-          <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Account Actions</h5>
-            <app-logout-button></app-logout-button>
           </div>
         </div>
-      </div>
+      </app-neo-card>
     </div>
   </div>
 </div> 

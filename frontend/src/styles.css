@@ -1,95 +1,174 @@
-/* Import Bootstrap CSS */
-@import 'bootstrap/dist/css/bootstrap.min.css';
-
-/* Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global styles */
-html,
-body {
-    height: 100%;
-    margin: 0;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 47.9 95.8% 53.1%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+    --shadow: 0 0% 0%;
+  }
+
+  .theme-blue {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 215 20.2% 65.1%;
+    --radius: 0.5rem;
+    --shadow: 221.2 83.2% 53.3%;
+  }
+
+  .theme-green {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
+    --shadow: 142.1 76.2% 36.3%;
+  }
+
+  .theme-orange {
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 24.6 95% 53.1%;
+    --radius: 0.5rem;
+    --shadow: 24.6 95% 53.1%;
+  }
+
+  .theme-violet {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.5rem;
+    --shadow: 262.1 83.3% 57.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
     font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  }
 }
 
-/* Bootstrap overrides and custom styling */
-.btn-primary {
-    background-color: #3f51b5;
-    border-color: #3f51b5;
+/* Neobrutalism styles */
+.neo-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-.btn-primary:hover {
-    background-color: #303f9f;
-    border-color: #303f9f;
+.neo-button {
+  @apply bg-primary text-primary-foreground border-brutal border-black shadow-brutal 
+         hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all 
+         font-bold py-2 px-4 focus:outline-none;
 }
 
-.card {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.neo-card {
+  @apply bg-background border-brutal border-black shadow-brutal p-4;
 }
 
-.form-control:focus {
-    border-color: #3f51b5;
-    box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+.neo-input {
+  @apply bg-background border-brutal border-black shadow-brutal-sm p-2 w-full focus:outline-none;
 }
 
-/* Custom color variables */
-:root {
-    --primary-color: #3f51b5;
-    --primary-hover: #303f9f;
-    --danger-color: #dc3545;
-    --danger-hover: #bd2130;
-    --success-color: #28a745;
-    --success-hover: #218838;
+.neo-nav {
+  @apply flex space-x-4;
 }
 
-/* Text colors */
-.text-primary-600 {
-    color: var(--primary-color);
+.neo-nav-item {
+  @apply hover:underline font-bold;
 }
 
-.text-danger-600 {
-    color: var(--danger-color);
+.neo-dropdown {
+  @apply relative;
 }
 
-/* Background colors */
-.bg-primary-600 {
-    background-color: var(--primary-color);
+.neo-dropdown-menu {
+  @apply absolute right-0 mt-2 w-48 bg-background border-brutal border-black shadow-brutal p-2;
 }
 
-.bg-primary-700 {
-    background-color: var(--primary-hover);
-}
-
-.bg-danger-600 {
-    background-color: var(--danger-color);
-}
-
-.bg-danger-700 {
-    background-color: var(--danger-hover);
-}
-
-/* Border colors */
-.border-primary-500 {
-    border-color: var(--primary-color);
-}
-
-.border-danger-500 {
-    border-color: var(--danger-color);
-}
-
-/* Focus ring styles */
-.focus\:ring-primary-500:focus {
-    box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
-}
-
-.focus\:ring-danger-500:focus {
-    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-}
-
-/* Fix potential conflicts between Bootstrap and Tailwind */
-.dropdown-menu {
-    position: absolute !important;
-    z-index: 1000 !important;
+.neo-dropdown-item {
+  @apply block px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground cursor-pointer;
 }

@@ -1,37 +1,34 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '../shared/services/auth.service';
+import { Component } from "@angular/core";
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { AuthService } from "../shared/services/auth.service";
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.css']
+  selector: "app-profile",
+  templateUrl: "./profile.component.html",
+  styleUrls: ["./profile.component.css"],
 })
-export class ProfileComponent implements OnInit {
-  profileForm: FormGroup;
+export class ProfileComponent {
+  profileForm: FormGroup = new FormGroup({});
   user: any;
   isSubmitting = false;
   updateSuccess = false;
-  updateError = '';
+  updateError = "";
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService
   ) {
-    this.profileForm = this.formBuilder.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: [{ value: '', disabled: true }]
-    });
-  }
-
-  ngOnInit(): void {
     this.user = this.authService.currentUserValue;
     if (this.user) {
-      this.profileForm.patchValue({
-        firstName: this.user.firstName || '',
-        lastName: this.user.lastName || '',
-        email: this.user.email || ''
+      this.profileForm = this.formBuilder.group({
+        firstName: new FormControl(this.user.firstName, Validators.required),
+        lastName: new FormControl(this.user.lastName, Validators.required),
+        email: new FormControl(this.user.email, Validators.required),
       });
     }
   }
@@ -43,7 +40,7 @@ export class ProfileComponent implements OnInit {
 
     this.isSubmitting = true;
     this.updateSuccess = false;
-    this.updateError = '';
+    this.updateError = "";
 
     // This is a placeholder - you would need to implement the updateProfile method in your AuthService
     // this.authService.updateProfile(this.profileForm.value).subscribe(
@@ -57,12 +54,15 @@ export class ProfileComponent implements OnInit {
     //     this.updateError = error.message || 'Failed to update profile';
     //   }
     // );
-    
+
     // For now, just simulate a successful update
     setTimeout(() => {
       this.isSubmitting = false;
       this.updateSuccess = true;
-      this.authService.saveUser({...this.user, ...this.profileForm.getRawValue()});
+      this.authService.saveUser({
+        ...this.user,
+        ...this.profileForm.getRawValue(),
+      });
     }, 1000);
   }
-} 
+}

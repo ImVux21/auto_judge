@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { LogoutButtonComponent } from './components/logout-button/logout-button.component';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { UiModule } from './components/ui/ui.module';
 
 @NgModule({
   declarations: [
@@ -13,12 +14,14 @@ import { FooterComponent } from './components/footer/footer.component';
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    UiModule
   ],
   exports: [
     LogoutButtonComponent,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    UiModule
   ]
 })
 export class SharedModule { } 
