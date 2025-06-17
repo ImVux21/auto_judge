@@ -1,0 +1,21 @@
+{
+  "name": "@autojudge/core",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json"
+  },
+  "peerDependencies": {
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "rxjs": "~7.8.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.0.0",
+    "@angular/cli": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
+    "ng-packagr": "^19.0.0",
+    "typescript": "~5.5.2",
+    "tslib": "2.8.1"
+  }
+} 

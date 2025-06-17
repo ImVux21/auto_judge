@@ -1,40 +1,19 @@
 {
-  "name": "autojudge-frontend",
+  "name": "autojudge-monorepo",
   "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development"
-  },
   "private": true,
-  "dependencies": {
-    "@angular/animations": "^17.0.0",
-    "@angular/common": "^17.0.0",
-    "@angular/compiler": "^17.0.0",
-    "@angular/core": "^17.0.0",
-    "@angular/forms": "^17.0.0",
-    "@angular/platform-browser": "^17.0.0",
-    "@angular/platform-browser-dynamic": "^17.0.0",
-    "@angular/router": "^17.0.0",
-    "chart.js": "^4.5.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-angular": "^0.294.0",
-    "ng2-charts": "^5.0.4",
-    "rxjs": "~7.8.0",
-    "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.14.2"
+  "scripts": {
+    "start": "pnpm --filter @autojudge/main start",
+    "build": "pnpm --filter @autojudge/core build && pnpm --filter @autojudge/ui build && pnpm --filter @autojudge/main build",
+    "build:core": "pnpm --filter @autojudge/core build",
+    "build:ui": "pnpm --filter @autojudge/ui build",
+    "build:main": "pnpm --filter @autojudge/main build"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.0.0",
-    "@angular/cli": "^17.0.0",
-    "@angular/compiler-cli": "^17.0.0",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.5",
-    "typescript": "~5.2.2"
+    "typescript": "~5.5.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   }
 }

@@ -1,37 +1,34 @@
 #!/bin/bash
 
-# Make the script executable
-chmod +x setup.sh
+# Exit on error
+set -e
 
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    echo "Node.js is not installed. Please install Node.js v18+ and try again."
-    exit 1
-fi
+echo "Setting up AutoJudge frontend monorepo..."
 
-# Check if npm is installed
-if ! command -v npm &> /dev/null; then
-    echo "npm is not installed. Please install npm and try again."
-    exit 1
-fi
+# First, install dependencies for core package
+echo "Setting up core library..."
+cd packages/core
+pnpm install --ignore-scripts
+cd ../..
 
-# Install Angular CLI globally if not already installed
-if ! command -v ng &> /dev/null; then
-    echo "Installing Angular CLI..."
-    npm install -g @angular/cli
-fi
+# Then, install dependencies for UI package
+echo "Setting up UI library..."
+cd packages/ui
+pnpm install --ignore-scripts
+cd ../..
 
-# Create new Angular workspace
-echo "Creating Angular workspace..."
-ng new autojudge-frontend --directory . --routing true --style css --skip-git --skip-tests --skip-install
+# Build core library
+echo "Building core library..."
+pnpm --filter @autojudge/core build
 
-# Install dependencies
-echo "Installing dependencies..."
-npm install
-# npm install tailwindcss @tailwindcss/forms postcss autoprefixer --save-dev
+# Build UI library
+echo "Building UI library..."
+pnpm --filter @autojudge/ui build
 
-# Initialize Tailwind CSS
-echo "Initializing Tailwind CSS..."
-npx tailwindcss init
+# Now install main app dependencies
+echo "Installing main app dependencies..."
+cd packages/main
+pnpm install
+cd ../..
 
-echo "Setup complete! You can now run 'npm start' to start the development server." 
+echo "Setup complete! You can now run 'pnpm start' to start the application." 

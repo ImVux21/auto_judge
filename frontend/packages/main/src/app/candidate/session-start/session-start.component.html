@@ -1,0 +1,142 @@
+<div class="neo-container">
+  @if (loading) {
+  <div class="text-center my-5">
+    <div class="inline-block animate-spin text-4xl">⟳</div>
+    <p class="mt-2">Loading session information...</p>
+  </div>
+  } @if (error) {
+  <div
+    class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal"
+  >
+    {{ error }}
+  </div>
+  } @if (!loading && !error && session) {
+  <div class="flex justify-center">
+    <div class="w-full max-w-3xl">
+      <app-neo-card>
+        <div class="p-0">
+          <div
+            class="bg-primary text-primary-foreground p-4 border-b-brutal border-black"
+          >
+            <h2 class="text-2xl font-bold mb-0">
+              {{ session.interview.title }}
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="mb-8">
+              <h4 class="text-xl font-bold mb-2">
+                Welcome to your interview session!
+              </h4>
+              <p class="text-muted-foreground mb-4">
+                {{ session.interview.jobRole }}
+              </p>
+
+              <div
+                class="bg-primary/20 p-4 border-brutal border-black shadow-brutal mb-6"
+              >
+                <h5 class="text-lg font-bold mb-2">Interview Information</h5>
+                <ul class="mb-0 space-y-2">
+                  <li>
+                    <span class="font-bold">Time Limit:</span>
+                    {{ session.interview.timeLimit }} minutes
+                  </li>
+                  <li>
+                    <span class="font-bold">Questions:</span>
+                    {{
+                      session.interview.mcqCount +
+                        session.interview.openEndedCount
+                    }}
+                  </li>
+                  <li>
+                    <span class="font-bold">Multiple Choice Questions:</span>
+                    {{ session.interview.mcqCount }}
+                  </li>
+                  <li>
+                    <span class="font-bold">Open-Ended Questions:</span>
+                    {{ session.interview.openEndedCount }}
+                  </li>
+                </ul>
+              </div>
+
+              @if (session.interview.description) {
+              <div class="mb-6">
+                <h5 class="text-lg font-bold mb-2">Description</h5>
+                <p>{{ session.interview.description }}</p>
+              </div>
+              }
+            </div>
+
+            <div class="mb-8">
+              <h5 class="text-lg font-bold mb-2">Before You Begin</h5>
+              <ul class="list-disc pl-5 space-y-2">
+                <li>Ensure you have a stable internet connection</li>
+                <li>Find a quiet place without distractions</li>
+                <li>Have a pen and paper ready if needed</li>
+                <li>Your webcam will be used for proctoring purposes</li>
+                <li>Once started, the timer cannot be paused</li>
+              </ul>
+            </div>
+
+            <form [formGroup]="deviceInfoForm" (ngSubmit)="startSession()">
+              @if (submitError) {
+              <div
+                class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal"
+              >
+                {{ submitError }}
+              </div>
+              }
+
+              <div class="mb-6">
+                <app-neo-input
+                  formControlName="deviceName"
+                  id="deviceName"
+                  [label]="'Device Name'"
+                  [error]="deviceInfoForm.get('deviceName')?.errors?.['required'] ? 'Device name is required' : ''"
+                ></app-neo-input>
+              </div>
+
+              <div class="mb-6">
+                <app-neo-input
+                  formControlName="browserInfo"
+                  id="browserInfo"
+                  [label]="'Browser'"
+                  [error]="deviceInfoForm.get('browserInfo')?.errors?.['required'] ? 'Browser information is required' : ''"
+                ></app-neo-input>
+              </div>
+
+              <app-neo-checkbox
+                formControlName="allowCamera"
+                id="allowCamera"
+                label="Allow camera access (required for proctoring)"
+                [error]="!deviceInfoForm.value.allowCamera ? 'Camera access is required for proctoring' : ''"
+              ></app-neo-checkbox>
+
+              <app-neo-checkbox
+                formControlName="allowMicrophone"
+                id="allowMicrophone"
+                label="Allow microphone access (optional)"
+              ></app-neo-checkbox>
+
+              <div class="mt-8">
+                <app-neo-button
+                  type="submit"
+                  class="w-full text-lg py-3"
+                  [disabled]="
+                    deviceInfoForm.invalid ||
+                    isSubmitting ||
+                    !deviceInfoForm.value.allowCamera
+                  "
+                >
+                  @if (isSubmitting) {
+                  <span class="inline-block animate-spin mr-2">⟳</span>
+                  } Start Interview
+                </app-neo-button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </app-neo-card>
+    </div>
+  </div>
+  }
+</div>

@@ -1,0 +1,10 @@
+<app-neo-button
+  variant="outline"
+  color="destructive"
+  (click)="logout()" 
+  [disabled]="isLoggingOut">
+  @if (isLoggingOut) {
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+  }
+  Logout
+</app-neo-button>

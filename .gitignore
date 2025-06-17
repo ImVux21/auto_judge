@@ -32,6 +32,15 @@ frontend/tmp/
 frontend/.env
 frontend/npm-debug.log
 frontend/yarn-error.log
+frontend/packages/main/.angular/cache
+frontend/packages/main/node_modules
+frontend/packages/main/dist
+frontend/packages/core/node_modules
+frontend/packages/core/dist
+frontend/packages/core/.angular/cache
+frontend/packages/ui/node_modules
+frontend/packages/ui/dist
+frontend/packages/ui/.angular/cache
 
 # System files
 .DS_Store
@@ -39,4 +48,4 @@ Thumbs.db
 
 # Sensitive information
 *.pem
-*.key 
+*.key

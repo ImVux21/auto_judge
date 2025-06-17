@@ -18,7 +18,13 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
-    "lib": ["ES2022", "dom"]
+    "lib": ["ES2022", "dom"],
+    "paths": {
+      "@autojudge/core": ["packages/core/src/public-api.ts"],
+      "@autojudge/core/*": ["packages/core/src/*"],
+      "@autojudge/ui": ["packages/ui/src/public-api.ts"],
+      "@autojudge/ui/*": ["packages/ui/src/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -1,0 +1,302 @@
+<div class="neo-container">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <h1 class="text-3xl font-bold mb-4 md:mb-0">Session Analytics</h1>
+    <div class="flex flex-col sm:flex-row gap-2">
+      @if (analytics.session?.interview?.id) {
+        <app-neo-button variant="outline" (click)="viewInterviewAnalytics()">
+          View Interview Analytics
+        </app-neo-button>
+      }
+      <app-neo-button variant="outline" (click)="goBack()">
+        Back to Dashboard
+      </app-neo-button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center my-5">
+      <div class="inline-block animate-spin text-4xl">⟳</div>
+      <p class="mt-2">Loading session analytics...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal">
+      {{ error }}
+    </div>
+  }
+
+  @if (!loading && !error) {
+    <!-- Session Details -->
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Session Details</h5>
+        </div>
+        <div class="p-6">
+          @if (analytics.session) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 class="text-xl font-bold mb-2">{{ analytics.session.interview.title }}</h4>
+                <p class="text-muted-foreground mb-3">{{ analytics.session.interview.jobRole }}</p>
+                <p class="mb-2"><span class="font-bold">Candidate:</span> {{ analytics.session.candidate.firstName }} {{ analytics.session.candidate.lastName }}</p>
+                <p class="mb-2"><span class="font-bold">Email:</span> {{ analytics.session.candidate.email }}</p>
+              </div>
+              <div>
+                <p class="mb-2"><span class="font-bold">Status:</span> 
+                  <span class="px-2 py-1 border-brutal border-black" [ngClass]="{
+                    'bg-primary text-primary-foreground': analytics.session.status === 'COMPLETED',
+                    'bg-secondary text-secondary-foreground': analytics.session.status === 'IN_PROGRESS',
+                    'bg-muted text-muted-foreground': analytics.session.status === 'PENDING',
+                    'bg-destructive text-destructive-foreground': analytics.session.status === 'EXPIRED'
+                  }">{{ analytics.session.status }}</span>
+                </p>
+                <p class="mb-2"><span class="font-bold">Started:</span> {{ formatDate(analytics.session.startTime) }} at {{ formatTime(analytics.session.startTime) }}</p>
+                @if (analytics.session.endTime) {
+                  <p class="mb-2"><span class="font-bold">Ended:</span> {{ formatDate(analytics.session.endTime) }} at {{ formatTime(analytics.session.endTime) }}</p>
+                }
+                <p class="mb-2">
+                  <span class="font-bold">Score:</span> 
+                  <span class="px-2 py-1 border-brutal border-black" [ngClass]="getScoreClass(analytics.session.score || 0)">
+                    {{ analytics.session.score !== null ? (analytics.session.score | percent) : 'N/A' }}
+                  </span>
+                </p>
+              </div>
+              
+              @if (analytics.session.evaluationSummary) {
+                <div class="col-span-1 md:col-span-2 mt-4">
+                  <h5 class="text-lg font-bold mb-2">Evaluation Summary</h5>
+                  <div class="bg-muted p-4 border-brutal border-black">
+                    <p class="mb-0">{{ analytics.session.evaluationSummary }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </app-neo-card>
+
+    <!-- Proctoring Data -->
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Proctoring Data</h5>
+        </div>
+        <div class="p-6">
+          @if (!analytics.proctorData) {
+            <div class="text-center py-3">
+              <p class="text-muted-foreground">No proctoring data available.</p>
+            </div>
+          }
+          @if (analytics.proctorData) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                  <app-neo-card>
+                    <div class="p-4 text-center">
+                      <h6 class="font-bold mb-2">Total Snapshots</h6>
+                      <p class="text-3xl font-bold">{{ analytics.proctorData.totalSnapshots }}</p>
+                    </div>
+                  </app-neo-card>
+                  <app-neo-card>
+                    <div class="p-4 text-center" [ngClass]="{'bg-destructive text-destructive-foreground': analytics.proctorData.flaggedSnapshots > 0}">
+                      <h6 class="font-bold mb-2">Flagged Snapshots</h6>
+                      <p class="text-3xl font-bold">{{ analytics.proctorData.flaggedSnapshots }}</p>
+                    </div>
+                  </app-neo-card>
+                </div>
+                
+                @if (analytics.proctorData.eventTypeStats) {
+                  <div>
+                    <h6 class="font-bold mb-3">Event Type Distribution</h6>
+                    <div class="mb-4" style="max-height: 300px; height: max-content;">
+                      <canvas baseChart
+                        [type]="'pie'"
+                        [data]="eventTypeChartData"
+                        [options]="eventTypeChartOptions">
+                      </canvas>
+                    </div>
+                  </div>
+                }
+                
+                <div class="mt-4">
+                  <h6 class="font-bold mb-3">View Snapshots</h6>
+                  <div class="flex flex-wrap gap-2">
+                    <app-neo-button variant="outline" (click)="loadProctorSnapshots()">
+                      All Snapshots
+                    </app-neo-button>
+                    <app-neo-button variant="destructive" (click)="loadSuspiciousSnapshots()">
+                      Suspicious Activity
+                    </app-neo-button>
+                    <app-neo-button variant="outline" (click)="loadProctorSnapshots('VISIBILITY_HIDDEN')">
+                      Tab Switches
+                    </app-neo-button>
+                    <app-neo-button variant="outline" (click)="loadProctorSnapshots('KEYBOARD_SHORTCUT')">
+                      Keyboard Shortcuts
+                    </app-neo-button>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h6 class="font-bold mb-3">Proctor Notes</h6>
+                @if (!analytics.proctorData.proctorNotes) {
+                  <div class="bg-muted p-4 border-brutal border-black">
+                    <p class="mb-0 text-muted-foreground">No proctor notes available.</p>
+                  </div>
+                }
+                @if (analytics.proctorData.proctorNotes) {
+                  <div class="bg-muted p-4 border-brutal border-black">
+                    <p class="mb-0 whitespace-pre-line">{{ analytics.proctorData.proctorNotes }}</p>
+                  </div>
+                }
+                
+                @if (proctorSnapshots.length > 0) {
+                  <div class="mt-6">
+                    <h6 class="font-bold mb-3">Snapshot List</h6>
+                    @if (loadingSnapshots) {
+                      <div class="text-center my-3">
+                        <div class="inline-block animate-spin text-2xl">⟳</div>
+                        <p class="mt-1">Loading snapshots...</p>
+                      </div>
+                    }
+                    @if (!loadingSnapshots) {
+                      <div class="space-y-3 max-h-[400px] overflow-y-auto">
+                        @for (snapshot of proctorSnapshots; track snapshot.id) {
+                          <app-neo-card>
+                            <div class="p-4">
+                              <div class="flex justify-between items-center mb-3">
+                                <span class="text-sm">{{ formatTimestamp(snapshot.timestamp) }}</span>
+                                <span class="px-2 py-1 text-sm border-brutal border-black" 
+                                  [ngClass]="getEventTypeClass(snapshot.eventType)">
+                                  {{ formatEventType(snapshot.eventType) }}
+                                </span>
+                              </div>
+                              @if (snapshot.flagged) {
+                                <div class="mb-3 p-2 bg-destructive text-destructive-foreground border-brutal border-black">
+                                  <p class="mb-0 text-sm">{{ snapshot.flagReason }}</p>
+                                </div>
+                              }
+                            </div>
+                          </app-neo-card>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </app-neo-card>
+
+    <!-- Category Performance -->
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Category Performance</h5>
+        </div>
+        <div class="p-6">
+          @if (!analytics.categoryPerformance) {
+            <div class="text-center py-3">
+              <p class="text-muted-foreground">No category performance data available.</p>
+            </div>
+          }
+          @if (analytics.categoryPerformance) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              @for (item of getCategoryPerformanceItems(); track item.category) {
+                <app-neo-card>
+                  <div class="p-4">
+                    <h6 class="font-bold mb-3">{{ item.category }}</h6>
+                    <div class="flex items-center">
+                      <div class="flex-grow h-3 bg-muted border-brutal border-black relative mr-2">
+                        <div class="absolute top-0 left-0 h-full" 
+                          [ngClass]="getScoreClass(item.score)" 
+                          [style.width.%]="item.score * 100">
+                        </div>
+                      </div>
+                      <span>{{ item.score | percent }}</span>
+                    </div>
+                  </div>
+                </app-neo-card>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </app-neo-card>
+
+    <!-- Answer Performance -->
+    <app-neo-card>
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Answer Performance</h5>
+        </div>
+        <div class="p-6">
+          @if (!analytics.answerPerformance || analytics.answerPerformance.length === 0) {
+            <div class="text-center py-3">
+              <p class="text-muted-foreground">No answer performance data available.</p>
+            </div>
+          }
+          @if (analytics.answerPerformance && analytics.answerPerformance.length > 0) {
+            <div class="space-y-6">
+              @for (answer of analytics.answerPerformance; track answer.id; let i = $index) {
+                <app-neo-card>
+                  <div class="p-0">
+                    <div class="bg-muted p-4 border-b-brutal border-black flex justify-between items-center">
+                      <h6 class="font-bold mb-0">Question {{ i + 1 }}</h6>
+                      <div class="flex items-center">
+                        <span class="px-2 py-1 mr-2 border-brutal border-black" 
+                          [ngClass]="answer.questionType === 'MULTIPLE_CHOICE' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'">
+                          {{ answer.questionType === 'MULTIPLE_CHOICE' ? 'MCQ' : 'Open-ended' }}
+                        </span>
+                        <span class="px-2 py-1 border-brutal border-black" [ngClass]="getScoreClass(answer.score || 0)">
+                          {{ answer.score !== null ? (answer.score | percent) : 'N/A' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="p-4">
+                      <p class="font-bold mb-4">{{ answer.questionText }}</p>
+                      
+                      @if (answer.questionType === 'MULTIPLE_CHOICE') {
+                        <p class="font-bold mb-2">Selected Options:</p>
+                        <div class="space-y-2">
+                          @for (option of answer.selectedOptions; track option.id) {
+                            <div class="p-3 border-brutal border-black flex justify-between items-center">
+                              {{ option.text }}
+                              @if (option.isCorrect) {
+                                <span class="px-2 py-1 bg-primary text-primary-foreground border-brutal border-black">
+                                  Correct
+                                </span>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                      
+                      @if (answer.questionType === 'OPEN_ENDED') {
+                        <p class="font-bold mb-2">Answer:</p>
+                        <div class="p-4 bg-muted border-brutal border-black">
+                          <p class="mb-0">{{ answer.answer }}</p>
+                        </div>
+                      }
+                      
+                      @if (answer.evaluation) {
+                        <div class="mt-4">
+                          <p class="font-bold mb-2">Evaluation:</p>
+                          <p>{{ answer.evaluation }}</p>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </app-neo-card>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </app-neo-card>
+  }
+</div> 

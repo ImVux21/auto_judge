@@ -1,0 +1,124 @@
+<div class="neo-container">
+  <div class="flex justify-center">
+    <div class="w-full max-w-3xl">
+      <app-neo-card>
+        <div class="p-0">
+          <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+            <h2 class="text-2xl font-bold mb-0">Create New Interview</h2>
+          </div>
+          <div class="p-6">
+            @if (error) {
+              <div class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal-sm">
+                {{ error }}
+              </div>
+            }
+            
+            @if (success) {
+              <div class="bg-primary text-primary-foreground p-4 mb-6 border-brutal border-black shadow-brutal-sm">
+                {{ success }}
+              </div>
+            }
+            
+            <form [formGroup]="interviewForm" (ngSubmit)="onSubmit()">
+              <div class="mb-4">
+                <app-neo-input
+                  label="Interview Title"
+                  id="title"
+                  formControlName="title"
+                  placeholder="Enter interview title"
+                  [error]="interviewForm.get('title')?.invalid && interviewForm.get('title')?.touched ? 
+                    (interviewForm.get('title')?.errors?.['required'] ? 'Title is required' : 
+                     interviewForm.get('title')?.errors?.['minlength'] ? 'Title must be at least 3 characters' : '') : ''"
+                ></app-neo-input>
+              </div>
+              
+              <div class="mb-4">
+                <app-neo-input
+                  label="Job Role"
+                  id="jobRole"
+                  formControlName="jobRole"
+                  placeholder="Enter job role (e.g. Software Engineer, Product Manager)"
+                  [error]="interviewForm.get('jobRole')?.invalid && interviewForm.get('jobRole')?.touched ? 
+                    (interviewForm.get('jobRole')?.errors?.['required'] ? 'Job role is required' : 
+                     interviewForm.get('jobRole')?.errors?.['minlength'] ? 'Job role must be at least 3 characters' : '') : ''"
+                ></app-neo-input>
+              </div>
+              
+              <div class="mb-4">
+                <app-neo-textarea
+                  label="Description (Optional)"
+                  id="description"
+                  formControlName="description"
+                  placeholder="Enter interview description"
+                  [rows]="3"
+                ></app-neo-textarea>
+              </div>
+              
+              <div class="mb-4">
+                <app-neo-input
+                  label="Time Limit (minutes)"
+                  id="timeLimit"
+                  formControlName="timeLimit"
+                  type="number"
+                  [error]="interviewForm.get('timeLimit')?.invalid && interviewForm.get('timeLimit')?.touched ? 
+                    (interviewForm.get('timeLimit')?.errors?.['required'] ? 'Time limit is required' : 
+                     interviewForm.get('timeLimit')?.errors?.['min'] ? 'Time limit must be at least 10 minutes' :
+                     interviewForm.get('timeLimit')?.errors?.['max'] ? 'Time limit cannot exceed 180 minutes' : '') : ''"
+                ></app-neo-input>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <app-neo-input
+                    label="Number of Multiple Choice Questions"
+                    id="mcqCount"
+                    formControlName="mcqCount"
+                    type="number"
+                    [error]="interviewForm.get('mcqCount')?.invalid && interviewForm.get('mcqCount')?.touched ? 
+                      (interviewForm.get('mcqCount')?.errors?.['required'] ? 'MCQ count is required' : 
+                       interviewForm.get('mcqCount')?.errors?.['min'] ? 'MCQ count must be at least 0' :
+                       interviewForm.get('mcqCount')?.errors?.['max'] ? 'MCQ count cannot exceed 20' : '') : ''"
+                  ></app-neo-input>
+                </div>
+                
+                <div>
+                  <app-neo-input
+                    label="Number of Open-Ended Questions"
+                    id="openEndedCount"
+                    formControlName="openEndedCount"
+                    type="number"
+                    [error]="interviewForm.get('openEndedCount')?.invalid && interviewForm.get('openEndedCount')?.touched ? 
+                      (interviewForm.get('openEndedCount')?.errors?.['required'] ? 'Open-ended count is required' : 
+                       interviewForm.get('openEndedCount')?.errors?.['min'] ? 'Open-ended count must be at least 0' :
+                       interviewForm.get('openEndedCount')?.errors?.['max'] ? 'Open-ended count cannot exceed 10' : '') : ''"
+                  ></app-neo-input>
+                </div>
+                
+                @if (interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0) {
+                  <div class="md:col-span-2 mt-2">
+                    <div class="bg-secondary text-secondary-foreground p-3 border-brutal border-black shadow-brutal-sm">
+                      You must include at least one question (MCQ or open-ended).
+                    </div>
+                  </div>
+                }
+              </div>
+              
+              <div class="flex justify-between mt-6">
+                <button type="button" class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground" (click)="cancel()">Cancel</button>
+                <app-neo-button
+                  type="submit" 
+                  [disabled]="interviewForm.invalid || isSubmitting || (interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0)"
+                >
+                  @if (isSubmitting) {
+                    <span class="inline-block animate-spin mr-2">⟳</span>
+                  }
+                  Create Interview
+                </app-neo-button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </app-neo-card>
+    </div>
+  </div>
+</div> 

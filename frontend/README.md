@@ -1,6 +1,14 @@
-# AutoJudge Frontend
+# AutoJudge Frontend Monorepo
 
-This is the frontend application for AutoJudge, an automated interview assessment platform.
+This is the frontend monorepo for AutoJudge, an automated interview assessment platform.
+
+## Monorepo Structure
+
+The project is organized as a pnpm workspace with the following packages:
+
+- **main**: The main Angular application
+- **core**: Shared logic (API services, interceptors, guards, models)
+- **ui**: Reusable neobrutalism UI components
 
 ## Neobrutalism UI
 
@@ -39,8 +47,8 @@ To change the theme, add the appropriate class to the body:
 
 ### Prerequisites
 
-- Node.js 14.x or higher
-- npm 6.x or higher
+- Node.js 18.x or higher
+- pnpm 8.x or higher
 
 ### Setup
 
@@ -48,23 +56,31 @@ To change the theme, add the appropriate class to the body:
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Start the development server:
 
 ```bash
-npm start
+pnpm start
 ```
 
 4. Open your browser to `http://localhost:4200`
 
 ### Build
 
-To build the project for production:
+To build all packages:
 
 ```bash
-npm run build
+pnpm build
+```
+
+To build individual packages:
+
+```bash
+pnpm build:core
+pnpm build:ui
+pnpm build:main
 ```
 
 ## Component Usage Examples
@@ -106,36 +122,50 @@ npm run build
 
 ## Technology Stack
 
-- Angular 17
+- Angular 19
 - Tailwind CSS
 - RxJS
-- Angular Router
+- pnpm Workspaces
 
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── analytics/       # Analytics dashboard components
-│   ├── auth/            # Authentication components (login, register)
-│   ├── candidate/       # Candidate interview session components
-│   ├── interviewer/     # Interviewer dashboard and management components
-│   ├── shared/          # Shared components, services, guards, etc.
-│   ├── app.component.*  # Root component
-│   ├── app.module.ts    # Root module
-│   └── app-routing.module.ts # Main routing configuration
-├── assets/              # Static assets (images, icons, etc.)
-├── environments/        # Environment configuration
-└── styles.css           # Global styles (includes Tailwind CSS)
+/
+├─ packages/
+│  ├─ main/             # Main Angular app
+│  │  └─ src/
+│  │     ├─ app/        # Application features
+│  │     │  ├─ analytics/       # Analytics dashboard components
+│  │     │  ├─ auth/            # Authentication components (login, register)
+│  │     │  ├─ candidate/       # Candidate interview session components
+│  │     │  ├─ interviewer/     # Interviewer dashboard and management components
+│  │     │  ├─ profile/         # User profile components
+│  │     │  ├─ app.component.*  # Root component
+│  │     │  ├─ app.module.ts    # Root module
+│  │     │  └─ app-routing.module.ts # Main routing configuration
+│  │     ├─ assets/             # Static assets (images, icons, etc.)
+│  │     └─ environments/       # Environment configuration
+│  │
+│  ├─ core/             # Shared logic
+│  │  └─ src/
+│  │     └─ lib/
+│  │        ├─ services/        # API and other services
+│  │        ├─ guards/          # Route guards
+│  │        ├─ interceptors/    # HTTP interceptors
+│  │        └─ models/          # Data models
+│  │
+│  └─ ui/               # UI components
+│     └─ src/
+│        └─ lib/
+│           └─ components/      # Reusable UI components
+│              ├─ neo-button/
+│              ├─ neo-card/
+│              ├─ neo-input/
+│              └─ neo-menubar/
+│
+├─ package.json         # Root package.json with workspace config
+└─ pnpm-workspace.yaml  # pnpm workspace configuration
 ```
-
-## Building for Production
-
-```bash
-npm run build
-```
-
-The build artifacts will be stored in the `dist/` directory.
 
 ## Features
 

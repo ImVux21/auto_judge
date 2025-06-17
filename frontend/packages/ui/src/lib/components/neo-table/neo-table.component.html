@@ -1,0 +1,162 @@
+<div class="neo-table-container">
+  <!-- Table Search and Column Selection -->
+  <div class="flex justify-between items-center mb-4">
+    <div class="neo-table-search">
+      <input
+        type="text"
+        class="neo-input"
+        placeholder="Search..."
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+      />
+    </div>
+
+    <div class="relative inline-block">
+      <button 
+        class="neo-button column-menu-button"
+        [class.active]="showColumnMenu" 
+        (click)="toggleColumnMenu()"
+      >
+        Columns <span class="ml-1 transform transition-transform" [class.rotate-180]="showColumnMenu">▼</span>
+      </button>
+
+      @if (showColumnMenu) {
+      <div
+        class="column-menu mt-2 bg-primary border-brutal border-black shadow-brutal z-10"
+      >
+        <div class="p-2 border-b-2 border-black font-bold bg-primary text-primary-foreground">
+          Select Columns
+        </div>
+        @for (column of columns; track column.key) {
+        <div class="column-option p-3 border-b border-black last:border-b-0">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="column.visible !== false"
+              (change)="toggleColumn(column)"
+              class="neo-checkbox mr-3"
+            />
+            <span class="font-bold">{{ column.header }}</span>
+          </label>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full border-brutal border-black">
+      <thead class="bg-primary text-primary-foreground">
+        <tr>
+          @if (selectable) {
+          <th class="p-3 border-r border-black">
+            <input
+              type="checkbox"
+              class="neo-checkbox"
+              [checked]="allSelected"
+              (change)="toggleSelectAll()"
+            />
+          </th>
+          } @for (column of visibleColumns; track column.key) {
+          <th
+            class="p-3 border-r border-black last:border-r-0"
+            [class.cursor-pointer]="column.sortable"
+            (click)="column.sortable ? sort(column.key) : null"
+          >
+            <div class="flex items-center justify-between">
+              {{ column.header }}
+              @if (column.sortable) {
+              <div class="ml-1">
+                @if (sortConfig.column === column.key && sortConfig.direction
+                === 'asc') {
+                <span>↑</span>
+                } @else if (sortConfig.column === column.key &&
+                sortConfig.direction === 'desc') {
+                <span>↓</span>
+                } @else {
+                <span class="text-gray-400">↕</span>
+                }
+              </div>
+              }
+            </div>
+          </th>
+          } @if (showActions) {
+          <th class="p-3 border-r border-black last:border-r-0 w-16">
+            Actions
+          </th>
+          }
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (item of displayedData; track trackBy(item)) {
+        <tr class="border-b border-black last:border-b-0">
+          @if (selectable) {
+          <td class="p-3 border-r border-black">
+            <input
+              type="checkbox"
+              class="neo-checkbox"
+              [checked]="isSelected(item)"
+              (change)="toggleSelect(item)"
+            />
+          </td>
+          } @for (column of visibleColumns; track column.key) {
+          <td class="p-3 border-r border-black last:border-r-0">
+            @if (column.template) {
+            <ng-container
+              [ngTemplateOutlet]="column.template"
+              [ngTemplateOutletContext]="{ $implicit: item, column: column }"
+            ></ng-container>
+            } @else {
+            {{ column.cellFn ? column.cellFn(item) : getCellValue(item, column.key) }}
+            }
+          </td>
+          } @if (showActions) {
+          <td class="p-3 border-r border-black last:border-r-0">
+            <button
+              class="neo-button py-1 px-3 text-sm"
+              (click)="onAction(item)"
+            >
+              •••
+            </button>
+          </td>
+          }
+        </tr>
+        } @if (displayedData.length === 0) {
+        <tr>
+          <td [attr.colspan]="colSpan" class="p-6 text-center text-gray-500">
+            No data available
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-between items-center mt-4">
+    <div class="text-sm">
+      {{ selectedItems.length }} of {{ displayedData.length }} row(s) selected.
+    </div>
+
+    <div class="flex gap-2">
+      <button
+        class="neo-button"
+        [disabled]="pagination.page === 1"
+        (click)="goToPage(pagination.page - 1)"
+      >
+        Previous
+      </button>
+
+      <button
+        class="neo-button"
+        [disabled]="pagination.page * pagination.pageSize >= pagination.total"
+        (click)="goToPage(pagination.page + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,108 @@
+.neo-table-container {
+  width: 100%;
+}
+
+.neo-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 3px solid #000;
+  background-color: #fff;
+  box-shadow: 3px 3px 0px #000;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.neo-button {
+  padding: 0.5rem 1rem;
+  border: 3px solid #000;
+  background-color: #3b82f6;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 3px 3px 0px #000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.neo-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #000;
+}
+
+.neo-button:disabled {
+  cursor: not-allowed;
+}
+
+/* Column Menu Styles */
+.column-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 120px;
+  
+  &.active {
+    box-shadow: 1px 1px 0px #000;
+    transform: translate(2px, 2px);
+  }
+}
+
+.column-menu {
+  position: absolute;
+  right: 0;
+  width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.column-option {
+  background-color: #fff;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f0f0f0;
+    transform: translateX(3px);
+  }
+}
+
+/* Custom Checkbox */
+.neo-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #000;
+  background-color: #fff;
+  box-shadow: 2px 2px 0px #000;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  
+  &:checked {
+    background-color: #FFF133;
+    
+    &::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      font-size: 14px;
+      color: #000;
+    }
+  }
+  
+  &:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #000;
+  }
+}
+
+.border-brutal {
+  border-width: 3px;
+  border-style: solid;
+}
+
+.shadow-brutal {
+  box-shadow: 3px 3px 0px #000;
+} 

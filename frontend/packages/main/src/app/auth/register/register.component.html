@@ -1,0 +1,109 @@
+<div class="flex justify-center items-center p-4">
+  <div class="w-full max-w-lg">
+    <app-neo-card>
+      <div class="p-6">
+        <h2 class="text-2xl font-bold text-center mb-6">Register</h2>
+        
+        @if (errorMessage) {
+          <div class="bg-destructive text-destructive-foreground p-3 mb-4 border-brutal border-black shadow-brutal-sm">
+            {{ errorMessage }}
+          </div>
+        }
+        
+        @if (successMessage) {
+          <div class="bg-primary text-primary-foreground p-3 mb-4 border-brutal border-black shadow-brutal-sm">
+            {{ successMessage }}
+          </div>
+        }
+        
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <app-neo-input
+                type="text"
+                id="firstName"
+                formControlName="firstName"
+                label="First Name"
+                placeholder="Enter your first name"
+                [error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched ? 'First name is required' : ''"
+              ></app-neo-input>
+            </div>
+            
+            <div>
+              <app-neo-input
+                type="text"
+                id="lastName"
+                formControlName="lastName"
+                label="Last Name"
+                placeholder="Enter your last name"
+                [error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched ? 'Last name is required' : ''"
+              ></app-neo-input>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <app-neo-input
+              type="email"
+              id="email"
+              formControlName="email"
+              label="Email"
+              placeholder="Enter your email"
+              [error]="registerForm.get('email')?.errors?.['required'] && registerForm.get('email')?.touched ? 'Email is required' : 
+                      registerForm.get('email')?.errors?.['email'] && registerForm.get('email')?.touched ? 'Please enter a valid email address' : ''"
+            ></app-neo-input>
+          </div>
+          
+          <div class="mb-4">
+            <app-neo-input
+              type="password"
+              id="password"
+              formControlName="password"
+              label="Password"
+              placeholder="Enter your password"
+              [error]="registerForm.get('password')?.errors?.['required'] && registerForm.get('password')?.touched ? 'Password is required' : 
+                      registerForm.get('password')?.errors?.['minlength'] && registerForm.get('password')?.touched ? 'Password must be at least 6 characters' : ''"
+            ></app-neo-input>
+          </div>
+          
+          <div class="mb-4">
+            <app-neo-input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              [error]="registerForm.get('confirmPassword')?.errors?.['required'] && registerForm.get('confirmPassword')?.touched ? 'Confirm password is required' : 
+                      registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched ? 'Passwords do not match' : ''"
+            ></app-neo-input>
+          </div>
+          
+          <div class="mb-6">
+            <app-neo-select
+              id="role"
+              formControlName="role"
+              label="Register as"
+              [options]="roleOptions"
+            ></app-neo-select>
+          </div>
+          
+          <div class="mb-6">
+            <app-neo-button 
+              type="submit" 
+              class="w-full"
+              [disabled]="registerForm.invalid || isSubmitting"
+            >
+              @if (isSubmitting) {
+                <span class="inline-block animate-spin mr-2">⟳</span>
+              }
+              Register
+            </app-neo-button>
+          </div>
+        </form>
+        
+        <div class="text-center mt-4">
+          <p>Already have an account? <a routerLink="/auth/login" class="font-bold hover:underline">Login</a></p>
+        </div>
+      </div>
+    </app-neo-card>
+  </div>
+</div> 

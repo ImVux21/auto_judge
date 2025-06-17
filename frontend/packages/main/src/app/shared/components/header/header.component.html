@@ -1,0 +1,80 @@
+<header class="bg-primary text-primary-foreground py-3 border-b-brutal border-black">
+  <div class="neo-container">
+    <div class="flex justify-between items-center">
+      <div class="logo">
+        <a routerLink="/" class="text-primary-foreground no-underline">
+          <h1 class="text-xl font-bold m-0">AutoJudge</h1>
+        </a>
+      </div>
+      
+      <app-neo-menubar className="bg-transparent border-0 shadow-none p-0">
+        <!-- Show these links only when logged in -->
+        @if (isLoggedIn()) {
+          <!-- Interviewer/Admin links -->
+          @if (isInterviewer() || isAdmin()) {
+            <app-neo-menubar-menu>
+              <app-neo-menubar-trigger [open]="showDashboardMenu" (openChange)="toggleDashboardMenu($event)">
+                Dashboard
+              </app-neo-menubar-trigger>
+              <app-neo-menubar-content [open]="showDashboardMenu">
+                <app-neo-menubar-item>
+                  <a routerLink="/interviewer/dashboard" routerLinkActive="active">Interviewer Dashboard</a>
+                </app-neo-menubar-item>
+                <app-neo-menubar-item>
+                  <a routerLink="/analytics/dashboard" routerLinkActive="active">Analytics Dashboard</a>
+                </app-neo-menubar-item>
+              </app-neo-menubar-content>
+            </app-neo-menubar-menu>
+            
+            <app-neo-menubar-menu>
+              <app-neo-menubar-trigger [open]="showManageMenu" (openChange)="toggleManageMenu($event)">
+                Manage
+              </app-neo-menubar-trigger>
+              <app-neo-menubar-content [open]="showManageMenu">
+                <app-neo-menubar-item>
+                  <a routerLink="/interviewer/interviews/create" routerLinkActive="active">Create Interview</a>
+                </app-neo-menubar-item>
+                <app-neo-menubar-item>
+                  <a routerLink="/interviewer/interviews" routerLinkActive="active">View Interviews</a>
+                </app-neo-menubar-item>
+              </app-neo-menubar-content>
+            </app-neo-menubar-menu>
+          }
+          
+          <!-- Candidate links -->
+          @if (isCandidate()) {
+            <app-neo-menubar-item>
+              <a routerLink="/candidate/sessions" routerLinkActive="active">My Sessions</a>
+            </app-neo-menubar-item>
+          }
+          
+          <!-- User menu -->
+          <app-neo-menubar-menu>
+            <app-neo-menubar-trigger [open]="showUserMenu" (openChange)="toggleUserMenu($event)">
+              {{ currentUser?.firstName || 'User' }}
+            </app-neo-menubar-trigger>
+            <app-neo-menubar-content [open]="showUserMenu">
+              <app-neo-menubar-item>
+                <a routerLink="/profile" routerLinkActive="active">Profile</a>
+              </app-neo-menubar-item>
+              <app-neo-menubar-separator></app-neo-menubar-separator>
+              <app-neo-menubar-item>
+                <a href="#" (click)="logout(); $event.preventDefault()">Logout</a>
+              </app-neo-menubar-item>
+            </app-neo-menubar-content>
+          </app-neo-menubar-menu>
+        }
+        
+        <!-- Show these links when not logged in -->
+        @if (!isLoggedIn()) {
+          <app-neo-menubar-item>
+            <a routerLink="/auth/login" routerLinkActive="active">Login</a>
+          </app-neo-menubar-item>
+          <app-neo-menubar-item>
+            <a routerLink="/auth/register" routerLinkActive="active">Register</a>
+          </app-neo-menubar-item>
+        }
+      </app-neo-menubar>
+    </div>
+  </div>
+</header> 

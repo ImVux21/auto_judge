@@ -1,0 +1,57 @@
+<div class="flex justify-center items-center p-4">
+  <div class="w-full max-w-md">
+    <app-neo-card>
+      <div class="p-6">
+        <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+        
+        @if (errorMessage) {
+          <div class="bg-destructive text-destructive-foreground p-3 mb-4 border-brutal border-black shadow-brutal-sm">
+            {{ errorMessage }}
+          </div>
+        }
+        
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="mb-4">
+            <app-neo-input
+              type="email"
+              id="email"
+              formControlName="email"
+              label="Email"
+              placeholder="Enter your email"
+              [error]="loginForm.get('email')?.errors?.['required'] && loginForm.get('email')?.touched ? 'Email is required' : 
+                      loginForm.get('email')?.errors?.['email'] && loginForm.get('email')?.touched ? 'Please enter a valid email address' : ''"
+            ></app-neo-input>
+          </div>
+          
+          <div class="mb-6">
+            <app-neo-input
+              type="password"
+              id="password"
+              formControlName="password"
+              label="Password"
+              placeholder="Enter your password"
+              [error]="loginForm.get('password')?.errors?.['required'] && loginForm.get('password')?.touched ? 'Password is required' : ''"
+            ></app-neo-input>
+          </div>
+          
+          <div class="mb-6">
+            <app-neo-button 
+              type="submit" 
+              class="w-full"
+              [disabled]="loginForm.invalid || isSubmitting"
+            >
+              @if (isSubmitting) {
+                <span class="inline-block animate-spin mr-2">⟳</span>
+              }
+              Login
+            </app-neo-button>
+          </div>
+        </form>
+        
+        <div class="text-center mt-4">
+          <p>Don't have an account? <a routerLink="/auth/register" class="font-bold hover:underline">Register</a></p>
+        </div>
+      </div>
+    </app-neo-card>
+  </div>
+</div> 
