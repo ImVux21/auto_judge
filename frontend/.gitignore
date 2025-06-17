@@ -22,11 +22,6 @@ yarn-error.log
 *.sublime-workspace
 
 # Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 .history/*
 
 # Miscellaneous
@@ -47,5 +42,10 @@ Thumbs.db
 
 packages/main/node_modules
 packages/main/dist
-packages/main/build
 packages/main/.angular/cache
+packages/ui/node_modules
+packages/ui/dist
+packages/ui/.angular/cache
+packages/core/node_modules
+packages/core/dist
+packages/core/.angular/cache
