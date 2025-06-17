@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/packages/main",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*",
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///@autojudge/core/*": "${workspaceFolder}/packages/core/*",
+        "webpack:///@autojudge/ui/*": "${workspaceFolder}/packages/ui/*"
+      },
+      "preLaunchTask": "Serve Angular Application"
+    }
+  ]
+} 

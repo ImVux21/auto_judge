@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "angular.ng-template",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "johnpapa.angular-essentials",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "nrwl.angular-console",
+    "firsttris.vscode-jest-runner",
+    "editorconfig.editorconfig",
+    "pkief.material-icon-theme"
+  ]
+}
