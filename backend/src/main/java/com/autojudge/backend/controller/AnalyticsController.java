@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -179,6 +180,7 @@ public class AnalyticsController {
     }
     
     @GetMapping("/session/{id}")
+    @Transactional
     public ResponseEntity<?> getSessionAnalytics(@PathVariable Long id) {
         Optional<InterviewSession> sessionOpt = sessionRepository.findById(id);
         
@@ -252,7 +254,7 @@ public class AnalyticsController {
     }
     
     @GetMapping("/session/{id}/proctor/snapshots")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> getSessionProctorSnapshots(
             @PathVariable Long id,
             @RequestParam(required = false) String eventType) {
@@ -291,7 +293,7 @@ public class AnalyticsController {
     }
     
     @GetMapping("/session/{id}/proctor/snapshots/suspicious")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> getSuspiciousSnapshots(@PathVariable Long id) {
         Optional<InterviewSession> sessionOpt = sessionRepository.findById(id);
         
@@ -321,7 +323,7 @@ public class AnalyticsController {
     }
     
     @GetMapping("/session/{sessionId}/proctor/snapshots/{snapshotId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> getProctorSnapshot(
             @PathVariable Long sessionId, 
             @PathVariable Long snapshotId) {

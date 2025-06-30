@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "interviews")
 public class Interview {
     @Id

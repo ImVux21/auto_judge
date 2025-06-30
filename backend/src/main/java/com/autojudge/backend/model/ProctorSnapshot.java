@@ -31,7 +31,7 @@ public class ProctorSnapshot {
     private Instant createdAt;
     
     @Lob
-    @Column(name = "image_data", columnDefinition = "LONGTEXT")
+    @Column(name = "image_data", columnDefinition = "text")
     private String imageData;
     
     @Column(name = "flagged", nullable = false)

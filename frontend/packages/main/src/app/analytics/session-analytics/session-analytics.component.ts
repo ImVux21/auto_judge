@@ -1,10 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AnalyticsService } from '../../shared/services/analytics.service';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
-import { CommonModule } from '@angular/common';
 import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autojudge/ui/dist';
+import { ChartConfiguration, ChartData } from 'chart.js';
+import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
+import { AnalyticsService } from '../../shared/services/analytics.service';
 
 @Component({
   selector: 'app-session-analytics',
@@ -125,20 +125,22 @@ export class SessionAnalyticsComponent implements OnInit {
     const labels: string[] = [];
     const data: number[] = [];
     
-    // Format the labels to be more readable
+
     for (const [key, value] of Object.entries(stats)) {
-      if (value && typeof value === 'number' && value > 0) {
-        let label = key.replace(/_/g, ' ').toLowerCase();
-        label = label.charAt(0).toUpperCase() + label.slice(1);
-        labels.push(label);
-        data.push(value);
-      }
+      let label = key.replace(/_/g, ' ').toLowerCase();
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      labels.push(label);
+      data.push(typeof value === 'number' ? value : 0);
+    }
+    
+    if (data.length === 0 || data.every(val => val === 0)) {
+      labels.push('No events recorded');
+      data.push(1);
     }
     
     this.eventTypeChartData.labels = labels;
     this.eventTypeChartData.datasets[0].data = data;
     
-    // Update the chart if it exists
     if (this.chart) {
       this.chart.update();
     }
