@@ -30,3 +30,40 @@
   right: 1rem;
   z-index: 100;
 }
+
+/* Security feature styles */
+.border-brutal {
+  border-width: 2px;
+  border-style: solid;
+}
+
+.shadow-brutal {
+  box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Fullscreen mode - disable text selection */
+:host ::ng-deep {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Only allow text selection in the textarea for open-ended questions */
+:host ::ng-deep app-neo-textarea textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Security warning animation */
+@keyframes pulse-warning {
+  0% { background-color: rgba(239, 68, 68, 0.2); }
+  50% { background-color: rgba(239, 68, 68, 0.5); }
+  100% { background-color: rgba(239, 68, 68, 0.2); }
+}
+
+.security-warning {
+  animation: pulse-warning 2s infinite;
+}

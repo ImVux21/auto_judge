@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, HostListener, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { CandidateService } from '../../shared/services/candidate.service';
-import { interval, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { NeoCardComponent, NeoInputComponent, NeoButtonComponent, NeoTextareaComponent } from '@autojudge/ui/dist';
+import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NeoButtonComponent, NeoCardComponent, NeoTextareaComponent } from '@autojudge/ui/dist';
+import { interval, Subscription } from 'rxjs';
+import { CandidateService } from '../../shared/services/candidate.service';
 
 @Component({
   selector: 'app-interview-session',
@@ -49,6 +49,14 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   escalatedSnapshotCount = 0;
   maxEscalatedSnapshots = 6; // After 6 snapshots (1 minute) return to base interval
   
+  // Lockdown variables
+  isFullScreen = false;
+  fullScreenWarningCount = 0;
+  maxFullScreenWarnings = 3;
+  tabSwitchWarningCount = 0;
+  maxTabSwitchWarnings = 3;
+  lockdownEnforced = false;
+  
   // Answer forms
   mcqForm!: FormGroup;
   openEndedForm!: FormGroup;
@@ -68,6 +76,12 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     
     // Add visibility change listener
     document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    
+    // Add fullscreen change event listener
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange.bind(this));
+    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange.bind(this));
   }
 
   ngOnDestroy(): void {
@@ -79,9 +93,14 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       window.clearTimeout(this.snapshotTimerId);
     }
     
-    // Remove event listener
+    // Remove event listeners
     document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange.bind(this));
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange.bind(this));
     
+    this.exitLockdown();
     this.stopWebcam();
   }
 
@@ -163,6 +182,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
         this.submitting = false;
         this.isSubmitting = false;
         this.initializeWebcam();
+        this.enforceLockdown();
       },
       error: (err) => {
         this.error = err.error?.message || 'Failed to start session. Please try again.';
@@ -193,6 +213,95 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     } catch (err) {
       console.error('Error initializing webcam:', err);
       // Don't block the session if webcam fails, just log the error
+    }
+  }
+  
+  enforceLockdown(): void {
+    this.lockdownEnforced = true;
+    
+    // Request fullscreen mode
+    this.requestFullScreen();
+    
+    // Disable browser features that could be used to cheat
+    this.disableCopyPaste();
+    
+    // Set an interval to check and enforce fullscreen mode
+    this.checkFullScreenInterval();
+  }
+  
+  requestFullScreen(): void {
+    const docElm = document.documentElement;
+    
+    if (docElm.requestFullscreen) {
+      docElm.requestFullscreen();
+    } else if ((docElm as any).webkitRequestFullscreen) { /* Safari */
+      (docElm as any).webkitRequestFullscreen();
+    } else if ((docElm as any).msRequestFullscreen) { /* IE11 */
+      (docElm as any).msRequestFullscreen();
+    } else if ((docElm as any).mozRequestFullscreen) { /* Firefox */
+      (docElm as any).mozRequestFullscreen();
+    }
+  }
+  
+  handleFullscreenChange(): void {
+    this.isFullScreen = !!document.fullscreenElement || 
+                       !!(document as any).webkitFullscreenElement || 
+                       !!(document as any).mozFullScreenElement || 
+                       !!(document as any).msFullscreenElement;
+    
+    if (!this.isFullScreen && this.lockdownEnforced) {
+      this.fullScreenWarningCount++;
+      
+      // Take a snapshot when exiting fullscreen
+      this.captureAndSubmitSnapshot('FULLSCREEN_EXIT');
+      
+      if (this.fullScreenWarningCount <= this.maxFullScreenWarnings) {
+        // Show warning and force back to fullscreen
+        this.error = `Warning: Please remain in full-screen mode. (Warning ${this.fullScreenWarningCount}/${this.maxFullScreenWarnings})`;
+        setTimeout(() => {
+          if (this.lockdownEnforced) {
+            this.requestFullScreen();
+          }
+        }, 1000);
+      } else {
+        // If the user has exited fullscreen too many times, flag the session as suspicious
+        this.captureAndSubmitSnapshot('FULLSCREEN_VIOLATION');
+      }
+    } else if (this.isFullScreen && this.error && this.error.includes('full-screen mode')) {
+      // Clear the error message if the user complies
+      this.error = '';
+    }
+  }
+  
+  disableCopyPaste(): void {
+    // This will be handled in the @HostListener events
+  }
+  
+  checkFullScreenInterval(): void {
+    // Check every 10 seconds if still in full screen
+    setTimeout(() => {
+      if (this.lockdownEnforced && !this.isFullScreen) {
+        this.requestFullScreen();
+      }
+      
+      if (this.lockdownEnforced) {
+        this.checkFullScreenInterval();
+      }
+    }, 10000);
+  }
+  
+  exitLockdown(): void {
+    this.lockdownEnforced = false;
+    
+    // Exit full screen if we're in it
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if ((document as any).webkitExitFullscreen) {
+      (document as any).webkitExitFullscreen();
+    } else if ((document as any).msExitFullscreen) {
+      (document as any).msExitFullscreen();
+    } else if ((document as any).mozCancelFullScreen) {
+      (document as any).mozCancelFullScreen();
     }
   }
   
@@ -235,6 +344,24 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     if (document.visibilityState === 'visible' || document.visibilityState === 'hidden') {
       const eventType = document.visibilityState === 'hidden' ? 'VISIBILITY_HIDDEN' : 'VISIBILITY_VISIBLE';
       this.captureAndSubmitSnapshot(eventType);
+      
+      if (document.visibilityState === 'hidden' && this.lockdownEnforced) {
+        this.tabSwitchWarningCount++;
+        
+        if (this.tabSwitchWarningCount <= this.maxTabSwitchWarnings) {
+          // Set error to be shown when the user returns
+          this.error = `Warning: Tab/window switching detected. Please remain on the interview tab. (Warning ${this.tabSwitchWarningCount}/${this.maxTabSwitchWarnings})`;
+        } else {
+          this.captureAndSubmitSnapshot('TAB_SWITCH_VIOLATION');
+        }
+      } else if (document.visibilityState === 'visible' && this.error && this.error.includes('Tab/window switching')) {
+        // Remind them they've been warned, but don't clear the error message immediately
+        setTimeout(() => {
+          if (this.error.includes('Tab/window switching')) {
+            this.error = '';
+          }
+        }, 5000);
+      }
       
       // Escalate monitoring frequency
       this.escalateMonitoring();
@@ -383,6 +510,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
       window.clearTimeout(this.snapshotTimerId);
     }
     
+    this.exitLockdown();
     this.stopWebcam();
     
     this.submitting = true;
@@ -447,17 +575,100 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   // Monitor for keyboard shortcuts
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
-    // Check for common copy/paste shortcuts
-    if ((event.ctrlKey || event.metaKey) && 
-        (event.key === 'c' || event.key === 'v' || event.key === 'x')) {
-      this.captureAndSubmitSnapshot('KEYBOARD_SHORTCUT');
+    if (this.lockdownEnforced) {
+      // Check for common copy/paste shortcuts
+      if ((event.ctrlKey || event.metaKey) && 
+          (event.key === 'c' || event.key === 'v' || event.key === 'x')) {
+        event.preventDefault();
+        this.captureAndSubmitSnapshot('KEYBOARD_SHORTCUT');
+        this.escalateMonitoring();
+        this.error = 'Copy, cut and paste functions are disabled during the interview.';
+        
+        // Clear the error message after 3 seconds
+        setTimeout(() => {
+          if (this.error === 'Copy, cut and paste functions are disabled during the interview.') {
+            this.error = '';
+          }
+        }, 3000);
+      }
+      
+      // Check for PrintScreen key
+      if (event.key === 'PrintScreen') {
+        event.preventDefault();
+        this.captureAndSubmitSnapshot('PRINT_SCREEN');
+        this.escalateMonitoring();
+        this.error = 'Screen capture is prohibited during the interview.';
+        
+        // Clear the error message after 3 seconds
+        setTimeout(() => {
+          if (this.error === 'Screen capture is prohibited during the interview.') {
+            this.error = '';
+          }
+        }, 3000);
+      }
+      
+      // Check for Alt+Tab
+      if (event.altKey && event.key === 'Tab') {
+        this.captureAndSubmitSnapshot('ALT_TAB');
+        this.escalateMonitoring();
+      }
+      
+      // Check for Windows key/Super key
+      if (event.key === 'Meta' || event.key === 'OS') {
+        this.captureAndSubmitSnapshot('SYSTEM_KEY');
+        this.escalateMonitoring();
+      }
+    }
+  }
+  
+  // Monitor for right-click (context menu)
+  @HostListener('window:contextmenu', ['$event'])
+  onRightClick(event: MouseEvent): void {
+    if (this.lockdownEnforced) {
+      event.preventDefault();
+      this.captureAndSubmitSnapshot('CONTEXT_MENU');
       this.escalateMonitoring();
     }
-    
-    // Check for PrintScreen key
-    if (event.key === 'PrintScreen') {
-      this.captureAndSubmitSnapshot('PRINT_SCREEN');
+  }
+  
+  // Monitor for cut/copy/paste events
+  @HostListener('window:cut', ['$event'])
+  onCut(event: ClipboardEvent): void {
+    if (this.lockdownEnforced) {
+      event.preventDefault();
+      this.captureAndSubmitSnapshot('CLIPBOARD_CUT');
       this.escalateMonitoring();
+    }
+  }
+  
+  @HostListener('window:copy', ['$event'])
+  onCopy(event: ClipboardEvent): void {
+    if (this.lockdownEnforced) {
+      event.preventDefault();
+      this.captureAndSubmitSnapshot('CLIPBOARD_COPY');
+      this.escalateMonitoring();
+    }
+  }
+  
+  @HostListener('window:paste', ['$event'])
+  onPaste(event: ClipboardEvent): void {
+    if (this.lockdownEnforced) {
+      event.preventDefault();
+      this.captureAndSubmitSnapshot('CLIPBOARD_PASTE');
+      this.escalateMonitoring();
+    }
+  }
+  
+  // Monitor for browser refresh/navigation attempts
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnloadHandler(event: BeforeUnloadEvent): void {
+    if (this.lockdownEnforced && this.sessionStarted) {
+      event.preventDefault();
+      event.returnValue = '';
+      
+      // Take a snapshot when trying to leave the page
+      this.captureAndSubmitSnapshot('PAGE_UNLOAD_ATTEMPT');
+      return event.returnValue;
     }
   }
 } 
