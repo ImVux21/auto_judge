@@ -15,5 +15,11 @@
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@angular/cdk": "^20.0.4",
+    "@ng-web-apis/common": "^4.12.0",
+    "monaco-editor": "^0.52.2",
+    "ngx-monaco-editor": "^12.0.0"
   }
 }

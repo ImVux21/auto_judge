@@ -1,0 +1,142 @@
+<div #fullscreenContainer class="fullscreen-container">
+  <div class="coding-challenge-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center my-5">
+      <div class="inline-block animate-spin text-4xl">⟳</div>
+      <p class="mt-2">Loading coding challenge...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal">
+      {{ error }}
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!loading && !error && codingTask">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Task Information -->
+        <div class="lg:col-span-1">
+          <app-neo-card>
+            <div class="p-6 space-y-6">
+              <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold">{{ codingTask.title }}</h1>
+                
+                <!-- Difficulty Badge -->
+                <span 
+                  class="px-3 py-1 text-xs font-medium rounded-full"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': codingTask.difficulty === 'Easy',
+                    'bg-blue-100 text-blue-800': codingTask.difficulty === 'Medium',
+                    'bg-orange-100 text-orange-800': codingTask.difficulty === 'Hard',
+                    'bg-red-100 text-red-800': codingTask.difficulty === 'Expert'
+                  }">
+                  {{ codingTask.difficulty }}
+                </span>
+              </div>
+              
+              <div>
+                <p class="text-muted-foreground mb-1 text-sm">Time Remaining:</p>
+                <p 
+                  class="font-bold text-2xl"
+                  [ngClass]="timeRemaining < 300 ? 'text-destructive' : ''"
+                >
+                  {{ formatTime(timeRemaining) }}
+                </p>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-4">
+                <h2 class="font-bold mb-2">Description:</h2>
+                <p class="text-sm mb-4">{{ codingTask.description }}</p>
+                
+                <h2 class="font-bold mb-2">Instructions:</h2>
+                <p class="text-sm mb-4">{{ codingTask.instructions }}</p>
+              </div>
+
+              <!-- Execution Results -->
+              <div *ngIf="executionResults.length > 0" class="border-t border-gray-200 pt-4">
+                <h2 class="font-bold mb-2">Test Results:</h2>
+                
+                <div class="space-y-2">
+                  <div *ngFor="let result of executionResults" 
+                      class="p-2 text-sm rounded-md"
+                      [ngClass]="result.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'"
+                      >
+                    <div class="flex items-center">
+                      <span *ngIf="result.passed" class="text-green-500 mr-2">✓</span>
+                      <span *ngIf="!result.passed" class="text-red-500 mr-2">✗</span>
+                      <div>
+                        <div><strong>Input:</strong> {{ result.input }}</div>
+                        <div><strong>Expected:</strong> {{ result.expectedOutput }}</div>
+                        <div *ngIf="!result.passed">
+                          <strong>Actual:</strong> {{ result.actualOutput }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="executionError" class="mt-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded">
+                <h3 class="font-bold mb-1">Error:</h3>
+                <pre class="text-xs overflow-auto whitespace-pre-wrap">{{ executionError }}</pre>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-4">
+                <form [formGroup]="notesForm">
+                  <app-neo-textarea
+                    label="Notes for the interviewer (optional):"
+                    formControlName="notes"
+                    placeholder="Explain your thought process or approach..."
+                    [rows]="3"
+                  ></app-neo-textarea>
+                </form>
+              </div>
+              
+              <div class="flex justify-between mt-6">
+                <app-neo-button type="button" (click)="executeCode()" [disabled]="isExecuting">
+                  <span *ngIf="isExecuting" class="inline-block animate-spin mr-2">⟳</span>
+                  {{ isExecuting ? 'Running...' : 'Run Tests' }}
+                </app-neo-button>
+                
+                <app-neo-button type="button" (click)="submitSolution()" [disabled]="isSubmitting">
+                  <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+                  {{ isSubmitting ? 'Submitting...' : 'Submit Solution' }}
+                </app-neo-button>
+              </div>
+              
+              <!-- Security Status Indicators -->
+              <div class="fixed bottom-4 right-4 flex flex-col space-y-2 items-end">
+                <!-- Fullscreen Status Indicator -->
+                <div
+                  class="px-3 py-1 rounded-full text-xs flex items-center"
+                  [ngClass]="isFullScreen ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'"
+                >
+                  <span class="inline-block w-2 h-2 rounded-full mr-2" [ngClass]="isFullScreen ? 'bg-green-400' : 'bg-red-400'"></span>
+                  {{ isFullScreen ? 'Fullscreen mode' : 'NOT in fullscreen' }}
+                </div>
+              </div>
+            </div>
+          </app-neo-card>
+        </div>
+        
+        <!-- Code Editor -->
+        <div class="lg:col-span-2">
+          <app-neo-card>
+            <div class="p-4">
+              <form [formGroup]="codeForm">
+                <app-neo-code-editor
+                  formControlName="code"
+                  [language]="codingTask.language"
+                  [height]="'calc(100vh - 200px)'"
+                  [initialCode]="codingTask.initialCode"
+                  [showToolbar]="true"
+                  (run)="executeCode()"
+                ></app-neo-code-editor>
+              </form>
+            </div>
+          </app-neo-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

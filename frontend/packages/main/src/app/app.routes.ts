@@ -46,6 +46,28 @@ export const routes: Routes = [
         loadComponent: () => import('./interviewer/interview-detail/interview-detail.component').then(c => c.InterviewDetailComponent)
       },
       {
+        path: 'live-coding',
+        children: [
+          {
+            path: '',
+            redirectTo: 'tasks',
+            pathMatch: 'full'
+          },
+          {
+            path: 'tasks',
+            loadComponent: () => import('./interviewer/live-coding/coding-session/coding-session').then(c => c.CodingSessionComponent)
+          },
+          {
+            path: 'tasks/create',
+            loadComponent: () => import('./interviewer/live-coding/create-coding-task/create-coding-task').then(c => c.CreateCodingTaskComponent)
+          },
+          {
+            path: 'tasks/:id',
+            loadComponent: () => import('./interviewer/live-coding/coding-session/coding-session').then(c => c.CodingSessionComponent)
+          }
+        ]
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
@@ -72,6 +94,10 @@ export const routes: Routes = [
       {
         path: 'session/:token/complete',
         loadComponent: () => import('./candidate/session-complete/session-complete.component').then(c => c.SessionCompleteComponent)
+      },
+      {
+        path: 'coding/:token',
+        loadComponent: () => import('./candidate/coding-challenge/coding-challenge').then(c => c.CodingChallengeComponent)
       },
       {
         path: '',

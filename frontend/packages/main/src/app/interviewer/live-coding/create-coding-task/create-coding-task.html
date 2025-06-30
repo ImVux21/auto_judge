@@ -1,0 +1,173 @@
+<div class="container mx-auto p-4 max-w-5xl">
+  <app-neo-card>
+    <div class="p-6">
+      <h1 class="text-2xl font-bold mb-6">Create Coding Task</h1>
+      
+      <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="taskForm" (ngSubmit)="createTask()">
+        <!-- Basic Information Section -->
+        <div class="mb-8">
+          <h2 class="text-xl font-bold mb-4 border-b pb-2">Task Information</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <app-neo-input
+                label="Title"
+                formControlName="title"
+                [error]="hasError('title', 'required') ? 'Title is required' : 
+                        hasError('title', 'minlength') ? 'Title must be at least 5 characters' : 
+                        hasError('title', 'maxlength') ? 'Title cannot exceed 100 characters' : ''">
+              </app-neo-input>
+            </div>
+            
+            <div>
+              <app-neo-select 
+                label="Difficulty"
+                formControlName="difficulty"
+                [options]="difficultyLevels">
+              </app-neo-select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <app-neo-select 
+                label="Programming Language"
+                formControlName="language"
+                [options]="programmingLanguages">
+              </app-neo-select>
+            </div>
+            
+            <div>
+              <app-neo-select 
+                label="Task Type"
+                formControlName="taskType"
+                [options]="taskTypes">
+              </app-neo-select>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <app-neo-input
+              label="Time Limit (minutes)"
+              type="number"
+              formControlName="timeLimit"
+              [error]="hasError('timeLimit', 'required') ? 'Time limit is required' : 
+                      hasError('timeLimit', 'min') ? 'Time limit must be at least 5 minutes' : 
+                      hasError('timeLimit', 'max') ? 'Time limit cannot exceed 120 minutes' : ''">
+            </app-neo-input>
+          </div>
+          
+          <div class="mb-4">
+            <app-neo-textarea
+              label="Description"
+              formControlName="description"
+              [rows]="3"
+              [error]="hasError('description', 'required') ? 'Description is required' : 
+                      hasError('description', 'minlength') ? 'Description must be at least 20 characters' : ''">
+            </app-neo-textarea>
+          </div>
+          
+          <div class="mb-4">
+            <app-neo-textarea
+              label="Instructions"
+              formControlName="instructions"
+              [rows]="3"
+              [error]="hasError('instructions', 'required') ? 'Instructions are required' : 
+                      hasError('instructions', 'minlength') ? 'Instructions must be at least 20 characters' : ''">
+            </app-neo-textarea>
+          </div>
+        </div>
+
+        <!-- Code Section -->
+        <div class="mb-8">
+          <h2 class="text-xl font-bold mb-4 border-b pb-2">Task Code</h2>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">Initial Code (Provided to Candidate)</label>
+            <app-neo-code-editor
+              formControlName="initialCode"
+              [language]="taskForm.get('language')?.value"
+              height="300px">
+            </app-neo-code-editor>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">Solution Code (For Reference Only)</label>
+            <app-neo-code-editor
+              formControlName="solutionCode"
+              [language]="taskForm.get('language')?.value"
+              height="300px">
+            </app-neo-code-editor>
+          </div>
+        </div>
+        
+        <!-- Test Cases Section -->
+        <div class="mb-8">
+          <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h2 class="text-xl font-bold">Test Cases</h2>
+            <app-neo-button type="button" (click)="addTestCase()">
+              Add Test Case
+            </app-neo-button>
+          </div>
+          
+          <div formArrayName="testCases">
+            <div *ngFor="let testCase of testCasesFormArray.controls; let i = index" 
+                 [formGroupName]="i"
+                 class="border rounded-md p-4 mb-4">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold">Test Case #{{ i + 1 }}</h3>
+                <button 
+                  *ngIf="testCasesFormArray.length > 1"
+                  type="button"
+                  class="text-red-500 hover:text-red-700"
+                  (click)="removeTestCase(i)">
+                  Remove
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <app-neo-textarea
+                    label="Input"
+                    formControlName="input"
+                    [rows]="3"
+                    [error]="isTestCaseInvalid(i, 'input') ? 'Input is required' : ''">
+                  </app-neo-textarea>
+                </div>
+                
+                <div>
+                  <app-neo-textarea
+                    label="Expected Output"
+                    formControlName="expectedOutput"
+                    [rows]="3"
+                    [error]="isTestCaseInvalid(i, 'expectedOutput') ? 'Expected output is required' : ''">
+                  </app-neo-textarea>
+                </div>
+              </div>
+              
+              <div class="flex items-center">
+                <input type="checkbox" id="isHidden{{i}}" formControlName="isHidden" class="mr-2">
+                <label for="isHidden{{i}}">Hidden from candidate (used only for evaluation)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex justify-end">
+          <app-neo-button type="button" class="mr-2" routerLink="/interviewer/live-coding/tasks">
+            Cancel
+          </app-neo-button>
+          <app-neo-button type="submit" [disabled]="isSubmitting">
+            <span *ngIf="isSubmitting" class="inline-block animate-spin mr-2">⟳</span>
+            Create Task
+          </app-neo-button>
+        </div>
+      </form>
+    </div>
+  </app-neo-card>
+</div> 

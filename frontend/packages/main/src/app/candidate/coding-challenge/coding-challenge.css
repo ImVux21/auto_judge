@@ -1,0 +1,52 @@
+/* Coding Challenge Styles */
+
+.fullscreen-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #fff;
+  overflow: auto;
+}
+
+.coding-challenge-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.border-brutal {
+  border-width: 2px;
+  border-style: solid;
+}
+
+.shadow-brutal {
+  box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Ensure text selection is enabled in the code editor */
+:host ::ng-deep .monaco-editor {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Disable text selection outside the code editor */
+:host ::ng-deep :not(.monaco-editor) {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+} 

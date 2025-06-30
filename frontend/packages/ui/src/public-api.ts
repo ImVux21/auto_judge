@@ -16,6 +16,7 @@ export * from './lib/components/neo-menubar/neo-menubar.component';
 export * from './lib/components/neo-select/neo-select.component';
 export * from './lib/components/neo-table/neo-table.component';
 export * from './lib/components/neo-textarea/neo-textarea.component';
+export * from './lib/components/neo-code-editor/neo-code-editor.component';
 
 // Modules
 export * from './lib/ui.module';
