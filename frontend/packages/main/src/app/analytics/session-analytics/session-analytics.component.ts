@@ -59,6 +59,8 @@ export class SessionAnalyticsComponent implements OnInit {
       legend: {
         display: true,
         position: 'right',
+        maxHeight: 600,
+        maxWidth: 600,
       }
     }
   };
