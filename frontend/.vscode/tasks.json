@@ -22,7 +22,8 @@
       "group": {
         "kind": "build",
         "isDefault": true
-      }
+      },
+      "dependsOn": ["Build Core Library", "Build UI Library"]
     },
     {
       "label": "Build Core Library",
@@ -38,7 +39,8 @@
       "command": "pnpm",
       "args": ["build:ui"],
       "group": "build",
-      "problemMatcher": ["$tsc"]
+      "problemMatcher": ["$tsc"],
+      "dependsOn": ["Build Core Library"]
     },
     {
       "label": "Build All",

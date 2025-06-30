@@ -1,8 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { AnalyticsService } from '../../shared/services/analytics.service';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NeoCardComponent, NeoButtonComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent } from '@autojudge/ui/dist';
+import { AnalyticsService } from '../../shared/services/analytics.service';
 
 @Component({
   selector: 'app-analytics-dashboard',
@@ -29,7 +29,7 @@ export class AnalyticsDashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.loading = true;
-    this.analyticsService.getDashboardData().subscribe({
+    this.analyticsService.getDashboardAnalytics().subscribe({
       next: (data: any) => {
         this.dashboardData = data;
         this.loading = false;

@@ -2,7 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { editor } from 'monaco-editor';
-import { ProgrammingLanguage } from '../../../../main/src/app/shared/models/coding.model';
+
+export enum ProgrammingLanguage {
+  JAVASCRIPT = 'javascript',
+  TYPESCRIPT = 'typescript',
+  PYTHON = 'python',
+  JAVA = 'java',
+  C = 'c',
+  CPP = 'cpp',
+  CSHARP = 'csharp',
+  RUBY = 'ruby',
+  PHP = 'php',
+}
 
 @Component({
   selector: 'app-neo-code-editor',
@@ -209,7 +220,10 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
       [ProgrammingLanguage.PYTHON]: 'python',
       [ProgrammingLanguage.JAVA]: 'java',
       [ProgrammingLanguage.CPP]: 'cpp',
-      [ProgrammingLanguage.CSHARP]: 'csharp'
+      [ProgrammingLanguage.CSHARP]: 'csharp',
+      [ProgrammingLanguage.RUBY]: 'ruby',
+      [ProgrammingLanguage.PHP]: 'php',
+      [ProgrammingLanguage.C]: 'c'
     };
     return mapping[lang] || 'plaintext';
   }

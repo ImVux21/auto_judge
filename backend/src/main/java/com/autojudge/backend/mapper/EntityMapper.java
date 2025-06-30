@@ -118,6 +118,17 @@ public class EntityMapper {
             return null;
         }
         
+        // Check if the interview associated with this session has a coding challenge
+        boolean hasCodingChallenge = false;
+        Long codingTaskId = null;
+        
+        if (session.getInterview() != null) {
+            hasCodingChallenge = session.getInterview().isHasCodingChallenge();
+            if (session.getInterview().getCodingTask() != null) {
+                codingTaskId = session.getInterview().getCodingTask().getId();
+            }
+        }
+        
         return new InterviewSessionDto(
                 session.getId(),
                 session.getAccessToken(),
@@ -131,7 +142,9 @@ public class EntityMapper {
                 session.getIpAddress(),
                 session.getDeviceInfo(),
                 session.isProctored(),
-                session.getProctorNotes()
+                session.getProctorNotes(),
+                hasCodingChallenge,
+                codingTaskId
         );
     }
     

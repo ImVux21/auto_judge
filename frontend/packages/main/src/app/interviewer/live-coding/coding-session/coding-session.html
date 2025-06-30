@@ -5,18 +5,22 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-    {{ error }}
-  </div>
+  @if (error) {
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+      {{ error }}
+    </div>
+  }
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="text-center my-10">
-    <div class="inline-block animate-spin text-4xl">⟳</div>
-    <p class="mt-2">Loading coding tasks...</p>
-  </div>
+  @if (loading) {
+    <div class="text-center my-10">
+      <div class="inline-block animate-spin text-4xl">⟳</div>
+      <p class="mt-2">Loading coding tasks...</p>
+    </div>
+  }
 
   <!-- Empty State -->
-  <div *ngIf="!loading && codingTasks.length === 0 && !error">
+  @if (!loading && codingTasks.length === 0 && !error) {
     <app-neo-card>
       <div class="p-8 text-center">
         <h2 class="text-xl font-bold mb-4">No Coding Tasks Available</h2>
@@ -24,57 +28,32 @@
         <app-neo-button (click)="createTask()">Create Task</app-neo-button>
       </div>
     </app-neo-card>
-  </div>
+  }
 
   <!-- Task List -->
-  <div *ngIf="!loading && codingTasks.length > 0">
+  @if (!loading && codingTasks.length > 0) {
     <app-neo-card>
-      <table class="w-full">
-        <thead>
-          <tr class="border-b">
-            <th class="py-3 px-4 text-left">Title</th>
-            <th class="py-3 px-4 text-left">Type</th>
-            <th class="py-3 px-4 text-left">Language</th>
-            <th class="py-3 px-4 text-left">Difficulty</th>
-            <th class="py-3 px-4 text-left">Time Limit</th>
-            <th class="py-3 px-4 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let task of codingTasks" class="border-b hover:bg-gray-50">
-            <td class="py-3 px-4">{{ task.title }}</td>
-            <td class="py-3 px-4">{{ task.taskType }}</td>
-            <td class="py-3 px-4">{{ task.language }}</td>
-            <td class="py-3 px-4">
-              <span 
-                class="px-2 py-1 text-xs font-medium rounded-full"
-                [ngClass]="{
-                  'bg-green-100 text-green-800': task.difficulty === 'Easy',
-                  'bg-blue-100 text-blue-800': task.difficulty === 'Medium',
-                  'bg-orange-100 text-orange-800': task.difficulty === 'Hard',
-                  'bg-red-100 text-red-800': task.difficulty === 'Expert'
-                }">
-                {{ task.difficulty }}
-              </span>
-            </td>
-            <td class="py-3 px-4">{{ task.timeLimit }} min</td>
-            <td class="py-3 px-4">
-              <div class="flex space-x-2">
-                <button 
-                  class="px-2 py-1 text-sm font-medium text-blue-600 hover:text-blue-800"
-                  (click)="viewTask(task.id!)">
-                  View
-                </button>
-                <button 
-                  class="px-2 py-1 text-sm font-medium text-red-600 hover:text-red-800"
-                  (click)="deleteTask(task.id!)">
-                  Delete
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <app-neo-table
+        [data]="codingTasks"
+        [columns]="tableColumns"
+        [trackByFn]="trackByTaskId"
+        (rowAction)="handleRowAction($event)"
+        (rowSelect)="handleRowSelect($event)"
+      >
+        <!-- Difficulty Column Template -->
+        <ng-template #difficultyTemplate let-task>
+          <span 
+            class="px-2 py-1 text-xs font-medium rounded-full"
+            [ngClass]="{
+              'bg-green-100 text-green-800': task.difficulty === 'Easy',
+              'bg-blue-100 text-blue-800': task.difficulty === 'Medium',
+              'bg-orange-100 text-orange-800': task.difficulty === 'Hard',
+              'bg-red-100 text-red-800': task.difficulty === 'Expert'
+            }">
+            {{ task.difficulty }}
+          </span>
+        </ng-template>
+      </app-neo-table>
     </app-neo-card>
-  </div>
+  }
 </div> 

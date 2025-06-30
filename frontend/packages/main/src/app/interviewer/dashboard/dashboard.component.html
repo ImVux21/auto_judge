@@ -129,9 +129,35 @@
             <a routerLink="/interviewer/interviews/create" class="neo-button">Create New Interview</a>
             <a routerLink="/interviewer/interviews" class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground">Manage Interviews</a>
             <a routerLink="/analytics" class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground">View Analytics</a>
+            <a routerLink="/interviewer/live-coding/tasks" class="neo-button bg-background text-foreground hover:bg-primary hover:text-primary-foreground">Live Coding Tasks</a>
           </div>
         </div>
       </div>
     </app-neo-card>
+
+    <!-- Live Coding -->
+    <div class="mt-6">
+      <app-neo-card>
+        <div class="p-0">
+          <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+            <h5 class="font-bold text-lg mb-0">Live Coding Feature</h5>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h3 class="font-bold text-lg mb-2">Coding Assessments</h3>
+                <p class="mb-4">Create and manage coding tasks for technical assessments. Evaluate candidates with real-time coding challenges.</p>
+                <a routerLink="/interviewer/live-coding/tasks" class="neo-button">View Coding Tasks</a>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg mb-2">Create New Task</h3>
+                <p class="mb-4">Build a custom coding challenge with test cases, starter code, and automated evaluation.</p>
+                <a routerLink="/interviewer/live-coding/tasks/create" class="neo-button">Create New Task</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-neo-card>
+    </div>
   }
 </div> 

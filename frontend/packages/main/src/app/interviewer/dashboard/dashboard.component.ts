@@ -1,10 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { InterviewService } from '../../shared/services/interview.service';
-import { AnalyticsService } from '../../shared/services/analytics.service';
-import { Interview, InterviewSession } from '../../shared/models/interview.model';
 import { NeoCardComponent } from 'packages/ui/dist';
-import { CommonModule } from '@angular/common';
+import { Interview, InterviewSession } from '../../shared/models/interview.model';
+import { AnalyticsService } from '../../shared/services/analytics.service';
+import { InterviewService } from '../../shared/services/interview.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.loading = true;
-    this.analyticsService.getDashboardData().subscribe({
+    this.analyticsService.getDashboardAnalytics().subscribe({
       next: (data) => {
         this.dashboardData = data;
         this.loading = false;
@@ -79,7 +79,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadAnalytics(): void {
-    this.analyticsService.getDashboardData().subscribe({
+    this.analyticsService.getDashboardAnalytics().subscribe({
       next: (data) => {
         this.analytics = data;
         this.isLoading = false;

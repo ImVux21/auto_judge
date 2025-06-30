@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -42,6 +44,21 @@ public class Interview {
     
     @Column(nullable = false)
     private boolean active = true;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coding_task_id")
+    private CodingTask codingTask;
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "interview_coding_tasks",
+        joinColumns = @JoinColumn(name = "interview_id"),
+        inverseJoinColumns = @JoinColumn(name = "coding_task_id")
+    )
+    private Set<CodingTask> codingTasks = new HashSet<>();
+    
+    @Column(name = "has_coding_challenge")
+    private boolean hasCodingChallenge = false;
     
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL)
     private List<InterviewSession> sessions = new ArrayList<>();

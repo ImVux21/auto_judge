@@ -1,20 +1,25 @@
 package com.autojudge.backend.service;
 
 import com.autojudge.backend.model.InterviewSession;
+import com.autojudge.backend.model.ProctorEvent;
 import com.autojudge.backend.model.ProctorSnapshot;
+import com.autojudge.backend.payload.dto.ProctorEventDto;
+import com.autojudge.backend.payload.request.ProctorEventRequest;
 import com.autojudge.backend.payload.request.StartSessionRequest.DeviceInfo;
 import com.autojudge.backend.repository.InterviewSessionRepository;
+import com.autojudge.backend.repository.ProctorEventRepository;
 import com.autojudge.backend.repository.ProctorSnapshotRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class ProctorService {
 
     private final InterviewSessionRepository sessionRepository;
     private final ProctorSnapshotRepository snapshotRepository;
+    private final ProctorEventRepository eventRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     // Store IP and device info for sessions
@@ -281,5 +287,75 @@ public class ProctorService {
      */
     public List<ProctorSnapshot> getSuspiciousSnapshots(InterviewSession session) {
         return snapshotRepository.findBySessionAndEventTypeIn(session, suspiciousEventTypes);
+    }
+
+    public void saveSnapshot(String sessionToken, byte[] imageData) {
+        InterviewSession session = findSessionByToken(sessionToken);
+
+        ProctorSnapshot snapshot = new ProctorSnapshot();
+        snapshot.setSession(session);
+        snapshot.setImageData(Base64.getEncoder().encodeToString(imageData));
+        snapshot.setTimestamp(System.currentTimeMillis());
+
+        snapshotRepository.save(snapshot);
+    }
+
+    public List<ProctorSnapshot> getSnapshots(String sessionToken) {
+        InterviewSession session = findSessionByToken(sessionToken);
+        return snapshotRepository.findBySession(session);
+    }
+    
+    public void recordProctorEvent(String sessionToken, ProctorEventRequest request) {
+        InterviewSession session = findSessionByToken(sessionToken);
+        
+        ProctorEvent event = new ProctorEvent();
+        event.setInterviewSession(session);
+        event.setEventType(request.getEventType());
+        event.setEventDetails(request.getEventDetails());
+        event.setSeverity(request.getSeverity());
+        
+        eventRepository.save(event);
+    }
+    
+    public List<ProctorEventDto> getProctorEvents(String sessionToken) {
+        InterviewSession session = findSessionByToken(sessionToken);
+        List<ProctorEvent> events = eventRepository.findByInterviewSessionOrderByTimestampDesc(session);
+        
+        return events.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+    
+    public int getSecurityViolationCount(String sessionToken) {
+        InterviewSession session = findSessionByToken(sessionToken);
+        
+        int tabSwitchViolations = eventRepository.countByInterviewSessionAndEventType(session, "TAB_SWITCH");
+        int fullscreenExitViolations = eventRepository.countByInterviewSessionAndEventType(session, "FULLSCREEN_EXIT");
+        int copyPasteViolations = eventRepository.countByInterviewSessionAndEventType(session, "COPY_PASTE");
+        
+        return tabSwitchViolations + fullscreenExitViolations + copyPasteViolations;
+    }
+    
+    public boolean isSessionSecure(String sessionToken) {
+        int violationCount = getSecurityViolationCount(sessionToken);
+        
+        // Define a threshold for security violations
+        // This is a simplified implementation - in a real application you might use
+        // more complex criteria based on violation types, timing, etc.
+        return violationCount <= 3; // Allow up to 3 violations before marking as insecure
+    }
+    
+    private InterviewSession findSessionByToken(String sessionToken) {
+        return sessionRepository.findByAccessToken(sessionToken)
+                .orElseThrow(() -> new NoSuchElementException("Interview session not found"));
+    }
+    
+    private ProctorEventDto mapToDto(ProctorEvent event) {
+        ProctorEventDto dto = new ProctorEventDto();
+        dto.setId(event.getId());
+        dto.setSessionId(event.getInterviewSession().getAccessToken());
+        dto.setEventType(event.getEventType());
+        dto.setTimestamp(event.getTimestamp());
+        dto.setEventDetails(event.getEventDetails());
+        dto.setSeverity(event.getSeverity());
+        return dto;
     }
 } 

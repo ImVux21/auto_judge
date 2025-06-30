@@ -1,7 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { AnalyticsData, AnalyticsSummary } from '../models/analytics.model';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@autojudge/core/dist';
+import { Observable } from 'rxjs';
+import { AnalyticsSummary, CandidateAnalytics, InterviewAnalytics, ProctorEvent, ProctorSnapshot, SecurityStatus, SessionAnalytics } from '../models/analytics.model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,18 +9,7 @@ import { ApiService } from '@autojudge/core/dist';
 export class AnalyticsService {
   private apiService = inject(ApiService);
 
-  getCandidateAnalytics(startDate?: Date, endDate?: Date): Observable<AnalyticsData[]> {
-    const params: any = {};
-    if (startDate) params.startDate = startDate.toISOString();
-    if (endDate) params.endDate = endDate.toISOString();
-    
-    return this.apiService.get<AnalyticsData[]>({
-      api: 'analytics',
-      url: 'candidates',
-      query: params
-    });
-  }
-
+  // Dashboard and summary analytics
   getAnalyticsSummary(): Observable<AnalyticsSummary> {
     return this.apiService.get<AnalyticsSummary>({
       api: 'analytics',
@@ -28,60 +17,107 @@ export class AnalyticsService {
     });
   }
 
-  trackEvent(eventName: string, eventData: Record<string, any>): Observable<void> {
-    return this.apiService.post<void>({
-      api: 'analytics',
-      url: 'events',
-      body: {
-        eventName,
-        eventData,
-        timestamp: new Date().toISOString()
-      }
-    });
-  }
-
-  getDashboardData(): Observable<any> {
+  getDashboardAnalytics(): Observable<any> {
     return this.apiService.get<any>({
       api: 'analytics',
       url: 'dashboard'
     });
   }
 
-  getInterviewAnalytics(id: number): Observable<any> {
-    return this.apiService.get<any>({
+  // Interview analytics
+  getInterviewAnalytics(id: number): Observable<InterviewAnalytics> {
+    return this.apiService.get<InterviewAnalytics>({
       api: 'analytics',
-      url: `interview/${id}`
+      url: `interviews/${id}`
     });
   }
 
-  getSessionAnalytics(id: number): Observable<any> {
-    return this.apiService.get<any>({
+  // Session analytics
+  getSessionAnalytics(id: number): Observable<SessionAnalytics> {
+    return this.apiService.get<SessionAnalytics>({
       api: 'analytics',
-      url: `session/${id}`
+      url: `sessions/${id}`
     });
   }
-  
-  getSessionProctorSnapshots(sessionId: number, eventType?: string): Observable<any> {
-    const params: any = {};
-    if (eventType) params.eventType = eventType;
-    return this.apiService.get<any>({
+
+  // Candidate analytics
+  getCandidateAnalytics(candidateId: string): Observable<CandidateAnalytics> {
+    return this.apiService.get<CandidateAnalytics>({
       api: 'analytics',
-      url: `session/${sessionId}/proctor/snapshots`,
-      query: params
+      url: `candidates/${candidateId}`
     });
   }
-  
-  getSessionSuspiciousSnapshots(sessionId: number): Observable<any> {
-    return this.apiService.get<any>({
-      api: 'analytics',
-      url: `session/${sessionId}/proctor/snapshots/suspicious`
+
+  // Proctor snapshot methods
+  getSessionProctorSnapshots(sessionId: number, eventType?: string): Observable<ProctorSnapshot[]> {
+    const url = eventType 
+      ? `api/proctor/sessions/${sessionId}/snapshots?eventType=${eventType}`
+      : `api/proctor/sessions/${sessionId}/snapshots`;
+      
+    return this.apiService.get<ProctorSnapshot[]>({
+      api: 'proctor',
+      url: url
     });
   }
-  
-  getProctorSnapshot(sessionId: number, snapshotId: number): Observable<any> {
-    return this.apiService.get<any>({
-      api: 'analytics',
-      url: `session/${sessionId}/proctor/snapshots/${snapshotId}`
+   
+  getSessionFlaggedSnapshots(sessionId: number): Observable<ProctorSnapshot[]> {
+    return this.apiService.get<ProctorSnapshot[]>({
+      api: 'proctor',
+      url: `sessions/${sessionId}/snapshots/flagged`
+    });
+  }
+   
+  getSessionSuspiciousSnapshots(sessionId: number): Observable<ProctorSnapshot[]> {
+    return this.apiService.get<ProctorSnapshot[]>({
+      api: 'proctor',
+      url: `sessions/${sessionId}/snapshots/suspicious`
+    });
+  }
+
+  // Proctor event methods
+  getSessionProctorEvents(sessionId: number): Observable<ProctorEvent[]> {
+    return this.apiService.get<ProctorEvent[]>({
+      api: 'proctor',
+      url: `sessions/${sessionId}/events`
+    });
+  }
+
+  // Security status methods
+  getSessionSecurityStatus(sessionId: number): Observable<SecurityStatus> {
+    return this.apiService.get<SecurityStatus>({
+      api: 'proctor',
+      url: `sessions/${sessionId}/security/status`
+    });
+  }
+
+  // Note management
+  addProctorNote(sessionId: number, note: string): Observable<any> {
+    return this.apiService.post<any>({
+      api: 'proctor',
+      url: `sessions/${sessionId}/notes`,
+      body: { note }
+    });
+  }
+
+  // Lockdown specific methods
+  getSessionViolations(sessionId: number): Observable<{ violationCount: number }> {
+    return this.apiService.get<{ violationCount: number }>({
+      api: 'lockdown',
+      url: `sessions/${sessionId}/violations`
+    });
+  }
+
+  getSessionSecurityEvents(sessionId: number): Observable<ProctorEvent[]> {
+    return this.apiService.get<ProctorEvent[]>({
+      api: 'lockdown',
+      url: `sessions/${sessionId}/events`
+    });
+  }
+
+  getDetailedSecurityStatus(sessionId: number): Observable<{ secure: boolean; statusDetails: string }> {
+    return this.apiService.get<{ secure: boolean; statusDetails: string }>({
+      api: 'lockdown',
+      url: `sessions/${sessionId}/status`
     });
   }
 }

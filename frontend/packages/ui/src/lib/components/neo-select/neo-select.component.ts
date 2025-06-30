@@ -20,13 +20,34 @@ export interface SelectOption {
         class="neo-select-trigger" 
         [class.open]="isOpen"
         [class.disabled]="disabled"
+        [class.multiple]="multiple"
         (click)="toggleDropdown()"
       >
-        <span>{{ getSelectedLabel() }}</span>
-        <div class="neo-select-arrow" [class.open]="isOpen">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m6 9 6 6 6-6"/>
-          </svg>
+        <div class="neo-select-value">
+          <ng-container *ngIf="!multiple || !Array.isArray(value) || value.length === 0">
+            {{ getSelectedLabel() }}
+          </ng-container>
+          <div *ngIf="multiple && Array.isArray(value) && value.length > 0" class="neo-select-chips">
+            <div *ngFor="let val of value.slice(0, maxDisplayChips)" class="neo-select-chip">
+              {{ getOptionLabel(val) }}
+              <span class="neo-select-chip-remove" (click)="removeValue($event, val)">&times;</span>
+            </div>
+            <div *ngIf="value.length > maxDisplayChips" class="neo-select-chip neo-select-more-chip">
+              +{{ value.length - maxDisplayChips }} more
+            </div>
+          </div>
+        </div>
+        <div class="neo-select-actions">
+          <span *ngIf="multiple && Array.isArray(value) && value.length > 0" 
+                class="neo-select-clear" 
+                (click)="clearSelection($event)">
+            &times;
+          </span>
+          <div class="neo-select-arrow" [class.open]="isOpen">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
         </div>
       </div>
       
@@ -35,10 +56,24 @@ export interface SelectOption {
         <div 
           *ngFor="let option of options" 
           class="neo-select-option"
-          [class.selected]="value === option.value"
+          [class.selected]="isOptionSelected(option.value)"
           (click)="selectOption(option)"
         >
-          {{ option.label }}
+          <div class="neo-select-option-content">
+            <div *ngIf="multiple" class="neo-select-checkbox">
+              <input 
+                type="checkbox" 
+                [checked]="isOptionSelected(option.value)" 
+                (click)="$event.stopPropagation()"
+                (change)="toggleOption(option, $event)"
+              />
+              <span class="neo-select-checkbox-custom"></span>
+            </div>
+            {{ option.label }}
+          </div>
+        </div>
+        <div *ngIf="options.length === 0" class="neo-select-no-options">
+          No options available
         </div>
       </div>
       
@@ -50,9 +85,10 @@ export interface SelectOption {
         [(ngModel)]="value"
         (change)="onChange($event)"
         (blur)="onBlur()"
+        [multiple]="multiple"
       >
-        <option *ngIf="placeholder" value="" disabled>{{ placeholder }}</option>
-        <option *ngFor="let option of options" [value]="option.value">
+        <option *ngIf="placeholder && !multiple" value="" disabled>{{ placeholder }}</option>
+        <option *ngFor="let option of options" [value]="option.value" [selected]="isOptionSelected(option.value)">
           {{ option.label }}
         </option>
       </select>
@@ -92,6 +128,71 @@ export interface SelectOption {
       position: relative;
     }
     
+    .neo-select-trigger.multiple {
+      min-height: 44px;
+      height: auto;
+    }
+    
+    .neo-select-value {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .neo-select-actions {
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+    }
+    
+    .neo-select-clear {
+      margin-right: 8px;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .neo-select-clear:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .neo-select-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .neo-select-chip {
+      background-color: #f0f0f0;
+      border: 2px solid #000;
+      border-radius: 16px;
+      padding: 2px 8px;
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .neo-select-chip-remove {
+      margin-left: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .neo-select-more-chip {
+      background-color: #e0e0e0;
+    }
+    
     .neo-select-trigger.open {
       box-shadow: 3px 3px 0px #000;
       transform: translate(2px, 2px);
@@ -108,15 +209,11 @@ export interface SelectOption {
     }
     
     .neo-select-arrow {
-      position: absolute;
-      right: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
       transition: transform 0.2s ease;
     }
     
     .neo-select-arrow.open {
-      transform: translateY(-50%) rotate(180deg);
+      transform: rotate(180deg);
     }
     
     /* Custom dropdown styling */
@@ -153,6 +250,55 @@ export interface SelectOption {
     .neo-select-option.selected {
       background-color: #FFF133;
       color: black;
+    }
+    
+    .neo-select-option-content {
+      display: flex;
+      align-items: center;
+    }
+    
+    .neo-select-checkbox {
+      margin-right: 8px;
+      position: relative;
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .neo-select-checkbox input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    
+    .neo-select-checkbox-custom {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #000;
+      background-color: white;
+    }
+    
+    .neo-select-checkbox input:checked + .neo-select-checkbox-custom::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 6px;
+      width: 4px;
+      height: 8px;
+      border: solid black;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    
+    .neo-select-no-options {
+      padding: 0.75rem;
+      text-align: center;
+      color: #666;
+      font-style: italic;
     }
     
     /* Hide native select but keep it accessible for form submission */
@@ -192,12 +338,17 @@ export class NeoSelectComponent implements ControlValueAccessor {
   @Input() description = '';
   @Input() error = '';
   @Input() options: SelectOption[] = [];
+  @Input() multiple = false;
+  @Input() maxDisplayChips = 3;
   
-  value: string = '';
+  value: string | string[] = '';
   disabled = false;
   isOpen = false;
   
-  private onChangeFn: (value: string) => void = () => {};
+  // Make Array available to the template
+  Array = Array;
+  
+  private onChangeFn: (value: string | string[]) => void = () => {};
   private onTouchedFn: () => void = () => {};
   
   constructor(private elementRef: ElementRef) {}
@@ -216,13 +367,85 @@ export class NeoSelectComponent implements ControlValueAccessor {
     }
   }
   
-  selectOption(option: SelectOption) {
-    this.value = option.value;
+  isOptionSelected(optionValue: string): boolean {
+    if (this.multiple && Array.isArray(this.value)) {
+      return this.value.includes(optionValue);
+    }
+    return this.value === optionValue;
+  }
+  
+  getOptionLabel(value: string): string {
+    const option = this.options.find(opt => opt.value === value);
+    return option ? option.label : value;
+  }
+  
+  removeValue(event: Event, valueToRemove: string) {
+    event.stopPropagation();
+    if (this.multiple && Array.isArray(this.value)) {
+      const newValue = this.value.filter(val => val !== valueToRemove);
+      this.value = newValue;
+      this.onChangeFn(this.value);
+    }
+  }
+  
+  clearSelection(event: Event) {
+    event.stopPropagation();
+    if (this.multiple) {
+      this.value = [];
+      this.onChangeFn(this.value);
+    } else {
+      this.value = '';
+      this.onChangeFn(this.value);
+    }
+  }
+  
+  toggleOption(option: SelectOption, event: Event) {
+    event.stopPropagation();
+    if (!this.multiple) {
+      this.selectOption(option);
+      return;
+    }
+    
+    // For multiple selection
+    if (!Array.isArray(this.value)) {
+      this.value = [];
+    }
+    
+    const values = [...this.value];
+    const index = values.indexOf(option.value);
+    
+    if (index === -1) {
+      values.push(option.value);
+    } else {
+      values.splice(index, 1);
+    }
+    
+    this.value = values;
     this.onChangeFn(this.value);
-    this.isOpen = false;
+  }
+  
+  selectOption(option: SelectOption) {
+    if (this.multiple) {
+      this.toggleOption(option, new Event('click'));
+    } else {
+      this.value = option.value;
+      this.onChangeFn(this.value);
+      this.isOpen = false;
+    }
   }
   
   getSelectedLabel(): string {
+    if (this.multiple && Array.isArray(this.value)) {
+      if (this.value.length === 0) {
+        return this.placeholder || 'Select items';
+      }
+      if (this.value.length === 1) {
+        const option = this.options.find(opt => opt.value === this.value[0]);
+        return option ? option.label : '';
+      }
+      return `${this.value.length} items selected`;
+    }
+    
     if (!this.value && this.placeholder) {
       return this.placeholder;
     }
@@ -233,7 +456,12 @@ export class NeoSelectComponent implements ControlValueAccessor {
   
   onChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
-    this.value = target.value;
+    if (this.multiple) {
+      const selectedOptions = Array.from(target.selectedOptions).map(opt => opt.value);
+      this.value = selectedOptions;
+    } else {
+      this.value = target.value;
+    }
     this.onChangeFn(this.value);
   }
   
@@ -242,11 +470,15 @@ export class NeoSelectComponent implements ControlValueAccessor {
   }
   
   // ControlValueAccessor methods
-  writeValue(value: string): void {
-    this.value = value || '';
+  writeValue(value: string | string[]): void {
+    if (this.multiple) {
+      this.value = Array.isArray(value) ? value : (value ? [value] : []);
+    } else {
+      this.value = Array.isArray(value) ? (value.length > 0 ? value[0] : '') : (value || '');
+    }
   }
   
-  registerOnChange(fn: (value: string) => void): void {
+  registerOnChange(fn: (value: string | string[]) => void): void {
     this.onChangeFn = fn;
   }
   

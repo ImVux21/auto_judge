@@ -94,11 +94,45 @@
                   ></app-neo-input>
                 </div>
                 
-                @if (interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0) {
+                @if (interviewForm.get('mcqCount')?.value === 0 && interviewForm.get('openEndedCount')?.value === 0 && !interviewForm.get('includeCodingChallenge')?.value) {
                   <div class="md:col-span-2 mt-2">
                     <div class="bg-secondary text-secondary-foreground p-3 border-brutal border-black shadow-brutal-sm">
-                      You must include at least one question (MCQ or open-ended).
+                      You must include at least one question (MCQ or open-ended) or a coding challenge.
                     </div>
+                  </div>
+                }
+              </div>
+              
+              <!-- Coding Challenge Section -->
+              <div class="mb-6 border-t border-gray-200 pt-4">
+                <div class="flex items-start mb-4">
+                  <input 
+                    type="checkbox" 
+                    id="includeCodingChallenge"
+                    formControlName="includeCodingChallenge"
+                    class="mt-1 mr-2"
+                  />
+                  <label for="includeCodingChallenge" class="text-base font-medium">Include Coding Challenge</label>
+                </div>
+                
+                @if (interviewForm.get('includeCodingChallenge')?.value) {
+                  <div class="mb-4 pl-6">
+                    <app-neo-select
+                      label="Select Coding Tasks"
+                      id="codingTaskIds"
+                      formControlName="codingTaskIds"
+                      [options]="codingTasks | codingTasksToOptions"
+                      placeholder="Select coding tasks"
+                      [error]="interviewForm.get('codingTaskIds')?.invalid && interviewForm.get('codingTaskIds')?.touched ? 'Please select at least one coding task' : ''"
+                      [multiple]="true"
+                      [maxDisplayChips]="3"
+                    ></app-neo-select>
+                    
+                    @if (codingTasks.length === 0) {
+                      <div class="mt-2 text-sm text-muted-foreground">
+                        No coding tasks available. <a routerLink="/interviewer/live-coding/tasks/create" class="text-primary hover:underline">Create one first</a>.
+                      </div>
+                    }
                   </div>
                 }
               </div>

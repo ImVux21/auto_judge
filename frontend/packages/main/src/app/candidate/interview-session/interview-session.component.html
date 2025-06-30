@@ -1,4 +1,4 @@
-<div class="neo-container">
+<div #fullscreenContainer class="neo-container">
   <!-- Loading State -->
   @if (isLoading) {
   <div class="text-center my-5">
@@ -34,6 +34,16 @@
           You will have {{ session.interview?.timeLimit }} minutes to complete
           the interview once you start.
         </p>
+        
+        <!-- Add information about coding challenge if present -->
+        @if (hasCodingChallenge) {
+        <div class="mt-4 p-4 border-brutal border-blue-300 bg-blue-50 rounded-md">
+          <h4 class="font-bold mb-2">⚠️ Coding Challenge Included</h4>
+          <p class="mb-2">This session includes a coding challenge that you will need to complete after answering the questions.</p>
+          <p class="text-sm text-blue-700">You can complete the questions first, or go directly to the coding challenge using the button below.</p>
+        </div>
+        }
+        
         <p class="mb-2 text-destructive font-medium">
           Note: This session uses webcam proctoring. Please allow camera access
           when prompted.
@@ -267,19 +277,49 @@
           There are no questions available for this interview. Please contact
           the interviewer.
         </p>
-      </div>
-      <div>
-        <app-neo-button
-          type="button"
-          (click)="completeSession()"
-          [disabled]="isSubmitting"
-        >
-          @if (isSubmitting) {
-          <span class="inline-block animate-spin mr-2">⟳</span>
-          } Return to Dashboard
-        </app-neo-button>
+        
+        <!-- If no questions but has coding challenge -->
+        @if (hasCodingChallenge) {
+        <div class="mt-4 p-4 border-brutal border-blue-300 bg-blue-50 rounded-md">
+          <p class="mb-2">However, this session includes a coding challenge.</p>
+          <app-neo-button
+            type="button"
+            (click)="navigateToCodingChallenge()"
+            [disabled]="isSubmitting"
+          >
+            @if (isSubmitting) {
+            <span class="inline-block animate-spin mr-2">⟳</span>
+            } Go to Coding Challenge
+          </app-neo-button>
+        </div>
+        } @else {
+        <div>
+          <app-neo-button
+            type="button"
+            (click)="completeSession()"
+            [disabled]="isSubmitting"
+          >
+            @if (isSubmitting) {
+            <span class="inline-block animate-spin mr-2">⟳</span>
+            } Return to Dashboard
+          </app-neo-button>
+        </div>
+        }
       </div>
     </div>
   </app-neo-card>
+  }
+
+  <!-- Add Coding Challenge navigation button at the welcome screen -->
+  @if (!isLoading && !error && !sessionStarted && hasCodingChallenge) {
+  <div class="mt-4">
+    <app-neo-button
+      type="button"
+      (click)="navigateToCodingChallenge()"
+      [disabled]="isSubmitting"
+    >
+      Skip to Coding Challenge
+    </app-neo-button>
+  </div>
   }
 </div>

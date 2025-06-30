@@ -23,4 +23,28 @@ public class InterviewSessionDto {
     private String deviceInfo;
     private boolean proctored;
     private String proctorNotes;
+    private boolean hasCodingChallenge;
+    private Long codingTaskId;
+    
+    // Constructor that maintains backward compatibility
+    public InterviewSessionDto(Long id, String accessToken, LocalDateTime startTime, LocalDateTime endTime, 
+                             String status, Double score, String evaluationSummary, InterviewDto interview, 
+                             UserDto candidate, String ipAddress, String deviceInfo, boolean proctored, 
+                             String proctorNotes) {
+        this.id = id;
+        this.accessToken = accessToken;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.score = score;
+        this.evaluationSummary = evaluationSummary;
+        this.interview = interview;
+        this.candidate = candidate;
+        this.ipAddress = ipAddress;
+        this.deviceInfo = deviceInfo;
+        this.proctored = proctored;
+        this.proctorNotes = proctorNotes;
+        this.hasCodingChallenge = false;
+        this.codingTaskId = null;
+    }
 } 

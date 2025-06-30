@@ -1,9 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autojudge/ui/dist';
-import { CodingService } from '../../../shared/services/coding.service';
+import { NeoButtonComponent, NeoCardComponent, NeoTableColumn, NeoTableComponent } from '@autojudge/ui/dist';
 import { CodingTask } from '../../../shared/models/coding.model';
+import { CodingService } from '../../../shared/services/coding.service';
+
+type DifficultyLevel = 'Easy' | 'Medium' | 'Hard' | 'Expert';
 
 @Component({
   selector: 'app-coding-session',
@@ -18,11 +20,42 @@ import { CodingTask } from '../../../shared/models/coding.model';
     NeoTableComponent
   ]
 })
-export class CodingSessionComponent implements OnInit {
+export class CodingSessionComponent implements OnInit, AfterViewInit {
+  @ViewChild('difficultyTemplate') difficultyTemplate!: TemplateRef<any>;
+  
   codingTasks: CodingTask[] = [];
   loading = true;
   error = '';
   taskId: string | null = null;
+  
+  tableColumns: NeoTableColumn<CodingTask>[] = [
+    {
+      key: 'title',
+      header: 'Title',
+      sortable: true
+    },
+    {
+      key: 'taskType',
+      header: 'Type',
+      sortable: true
+    },
+    {
+      key: 'language',
+      header: 'Language',
+      sortable: true
+    },
+    {
+      key: 'difficulty',
+      header: 'Difficulty',
+      sortable: true
+    },
+    {
+      key: 'timeLimit',
+      header: 'Time Limit',
+      sortable: true,
+      cellFn: (task: CodingTask) => `${task.timeLimit} min`
+    }
+  ];
   
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -35,6 +68,19 @@ export class CodingSessionComponent implements OnInit {
       this.loadCodingTask();
     } else {
       this.loadCodingTasks();
+    }
+  }
+  
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.updateDifficultyColumnTemplate();
+    });
+  }
+  
+  updateDifficultyColumnTemplate(): void {
+    const difficultyColumnIndex = this.tableColumns.findIndex(column => column.key === 'difficulty');
+    if (difficultyColumnIndex !== -1 && this.difficultyTemplate) {
+      this.tableColumns[difficultyColumnIndex].template = this.difficultyTemplate;
     }
   }
   
@@ -93,5 +139,17 @@ export class CodingSessionComponent implements OnInit {
         }
       });
     }
+  }
+  
+  trackByTaskId(task: CodingTask): number {
+    return task.id!;
+  }
+  
+  handleRowAction(task: CodingTask): void {
+    this.viewTask(task.id!);
+  }
+  
+  handleRowSelect(tasks: CodingTask[]): void {
+    console.log('Selected tasks:', tasks);
   }
 } 

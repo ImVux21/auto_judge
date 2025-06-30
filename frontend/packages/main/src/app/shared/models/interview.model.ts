@@ -9,6 +9,9 @@ export interface Interview {
   active: boolean;
   mcqCount: number;
   openEndedCount: number;
+  codingTaskId?: number;
+  codingTaskIds?: number[];
+  hasCodingChallenge?: boolean;
   createdBy: {
     id: number;
     firstName: string;
@@ -59,6 +62,8 @@ export interface InterviewSession {
   score?: number;
   evaluationSummary?: string;
   interview: Interview;
+  hasCodingChallenge?: boolean;
+  codingTaskId?: number;
   candidate: {
     id: number;
     firstName: string;

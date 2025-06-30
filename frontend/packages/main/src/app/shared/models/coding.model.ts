@@ -18,7 +18,7 @@ export interface TestCase {
   input: string;
   expectedOutput: string;
   isHidden: boolean;
-  order?: number;
+  sequence?: number;
 }
 
 export interface CodingTask {
