@@ -138,15 +138,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'test-components',
-    children: [
-      {
-        path: 'neo-select',
-        loadComponent: () => import('./test/neo-select-test/neo-select-test.component').then((c) => c.NeoSelectTestComponent)
-      }
-    ]
-  },
-  {
     path: '**',
     redirectTo: 'auth/login'
   }

@@ -14,7 +14,7 @@
         "webpack:///@autojudge/core/*": "${workspaceFolder}/packages/core/*",
         "webpack:///@autojudge/ui/*": "${workspaceFolder}/packages/ui/*"
       },
-      "preLaunchTask": "Serve Angular Application"
+      "preLaunchTask": "Start All Watch Tasks"
     }
   ]
 } 

@@ -49,6 +49,57 @@
       "args": ["build"],
       "group": "build",
       "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Watch Core Library",
+      "type": "shell",
+      "command": "cd packages/core && npx ng-packagr -p ng-package.json --watch",
+      "isBackground": true,
+      "group": "build",
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Compilation complete"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "develop"
+      }
+    },
+    {
+      "label": "Watch UI Library",
+      "type": "shell",
+      "command": "cd packages/ui && npx ng-packagr -p ng-package.json --watch",
+      "isBackground": true,
+      "group": "build",
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Compilation complete"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "develop"
+      }
+    },
+    {
+      "label": "Start All Watch Tasks",
+      "dependsOn": ["Watch Core Library", "Watch UI Library", "Serve Angular Application"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 } 

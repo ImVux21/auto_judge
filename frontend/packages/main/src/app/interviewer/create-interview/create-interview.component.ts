@@ -2,6 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, inject, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
+import { NeoCheckboxComponent } from '@autojudge/ui';
 import {
   NeoButtonComponent,
   NeoCardComponent,
@@ -13,13 +14,10 @@ import { CodingTask } from "../../shared/models/coding.model";
 import { CodingTasksToOptionsPipe } from "../../shared/pipes/coding-tasks-to-options.pipe";
 import { CodingService } from "../../shared/services/coding.service";
 import { InterviewService } from "../../shared/services/interview.service";
-import { forkJoin, of } from "rxjs";
-import { catchError, switchMap } from "rxjs/operators";
 
 @Component({
   selector: "app-create-interview",
   templateUrl: "./create-interview.component.html",
-  styleUrls: ["./create-interview.component.css"],
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
@@ -28,6 +26,7 @@ import { catchError, switchMap } from "rxjs/operators";
     NeoTextareaComponent, 
     NeoButtonComponent,
     NeoSelectComponent,
+    NeoCheckboxComponent,
     CodingTasksToOptionsPipe
   ],
   standalone: true,
@@ -65,7 +64,6 @@ export class CreateInterviewComponent implements OnInit {
       codingTaskIds: [[]]
     });
 
-    // Add conditional validation for codingTaskIds
     this.interviewForm.get('includeCodingChallenge')?.valueChanges.subscribe(includeCoding => {
       const codingTaskControl = this.interviewForm.get('codingTaskIds');
       if (includeCoding) {

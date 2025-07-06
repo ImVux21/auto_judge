@@ -105,15 +105,12 @@
               
               <!-- Coding Challenge Section -->
               <div class="mb-6 border-t border-gray-200 pt-4">
-                <div class="flex items-start mb-4">
-                  <input 
-                    type="checkbox" 
-                    id="includeCodingChallenge"
-                    formControlName="includeCodingChallenge"
-                    class="mt-1 mr-2"
-                  />
-                  <label for="includeCodingChallenge" class="text-base font-medium">Include Coding Challenge</label>
-                </div>
+                <app-neo-checkbox
+                  label="Include Coding Challenge"
+                  id="includeCodingChallenge"
+                  formControlName="includeCodingChallenge"
+                  variant="blue"
+                ></app-neo-checkbox>
                 
                 @if (interviewForm.get('includeCodingChallenge')?.value) {
                   <div class="mb-4 pl-6">

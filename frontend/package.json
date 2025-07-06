@@ -7,13 +7,17 @@
     "build": "pnpm --filter @autojudge/core build && pnpm --filter @autojudge/ui build && pnpm --filter @autojudge/main build",
     "build:core": "pnpm --filter @autojudge/core build",
     "build:ui": "pnpm --filter @autojudge/ui build",
-    "build:main": "pnpm --filter @autojudge/main build"
+    "build:main": "pnpm --filter @autojudge/main build",
+    "watch:core": "pnpm --filter @autojudge/core watch",
+    "watch:ui": "pnpm --filter @autojudge/ui watch",
+    "dev": "concurrently \"pnpm watch:core\" \"pnpm watch:ui\" \"pnpm start\""
   },
   "devDependencies": {
     "typescript": "~5.5.2",
     "style-loader": "^3.3.4",
     "css-loader": "^6.9.0",
-    "@angular-builders/custom-webpack": "^17.0.0"
+    "@angular-builders/custom-webpack": "^17.0.0",
+    "concurrently": "^8.2.2"
   },
   "engines": {
     "node": ">=18.0.0",

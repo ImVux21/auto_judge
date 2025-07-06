@@ -1,0 +1,62 @@
+.neo-checkbox-container {
+  background-color: transparent;
+  padding: 0.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.neo-checkbox-wrapper {
+  height: 24px;
+  width: 24px;
+  background-color: #fff; /* bright blue */
+  border: 3px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.neo-checkbox {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.neo-checkbox:checked {
+  background-color: #4ea1f3;
+}
+
+// Hide the default checkbox
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// Hide the checkmark by default
+.checkmark {
+  visibility: hidden;
+  
+  &.visible {
+    visibility: visible;
+  }
+}
+
+// Style for checked state
+.neo-checkbox-wrapper:has(.checkmark.visible) {
+  background-color: #4ea1f3;
+}
