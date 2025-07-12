@@ -5,6 +5,7 @@ import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autoju
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { AnalyticsService } from '../../shared/services/analytics.service';
+import { CodingAnalyticsComponent } from '../coding-analytics/coding-analytics.component';
 
 @Component({
   selector: 'app-session-analytics',
@@ -17,7 +18,8 @@ import { AnalyticsService } from '../../shared/services/analytics.service';
     NgChartsModule,
     NeoButtonComponent,
     NeoCardComponent,
-    NeoTableComponent
+    NeoTableComponent,
+    CodingAnalyticsComponent
   ]
 })
 export class SessionAnalyticsComponent implements OnInit {
@@ -166,9 +168,16 @@ export class SessionAnalyticsComponent implements OnInit {
   }
   
   getScoreClass(score: number): string {
-    if (score < 0.4) return 'bg-destructive text-destructive-foreground';
-    if (score < 0.7) return 'bg-secondary text-secondary-foreground';
-    return 'bg-primary text-primary-foreground';
+    if (score >= 0.8) return 'bg-primary text-primary-foreground';
+    if (score >= 0.6) return 'bg-accent text-accent-foreground';
+    if (score >= 0.4) return 'bg-secondary text-secondary-foreground';
+    if (score >= 0.2) return 'bg-warning text-warning-foreground';
+    return 'bg-destructive text-destructive-foreground';
+  }
+
+  getCircleOffset(percentage: number): number {
+    const circumference = 2 * Math.PI * 45; // 2πr where r=45
+    return circumference * (1 - percentage);
   }
   
   getEventTypeClass(eventType: string): string {

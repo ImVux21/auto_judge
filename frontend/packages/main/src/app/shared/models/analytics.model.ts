@@ -34,6 +34,7 @@ export interface SessionAnalytics {
   score: number;
   answers: AnswerData[];
   proctorData?: ProctorData;
+  codingData?: CodingAnalytics;
 }
 
 export interface CandidateAnalytics {
@@ -106,4 +107,32 @@ export interface SecurityStatus {
   secure: boolean;
   violationCount: number;
   statusDetails?: string;
+}
+
+export interface CodingAnalytics {
+  taskId: number;
+  taskTitle: string;
+  language: string;
+  timeSpent: number;
+  submissionCount: number;
+  passedTestCases: number;
+  totalTestCases: number;
+  score: number;
+  codeQuality?: CodeQualityMetrics;
+  submissionHistory?: SubmissionSummary[];
+}
+
+export interface CodeQualityMetrics {
+  complexity: number;
+  maintainability: number;
+  performance: number;
+  readability: number;
+  comments: number;
+}
+
+export interface SubmissionSummary {
+  timestamp: string;
+  passedTests: number;
+  totalTests: number;
+  executionTime: number;
 }

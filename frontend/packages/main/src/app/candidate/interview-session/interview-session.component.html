@@ -147,37 +147,13 @@
         @if (questions[currentQuestionIndex]?.type === 'MULTIPLE_CHOICE') {
         <form [formGroup]="mcqForm" (ngSubmit)="submitMCQAnswer()">
           <div class="space-y-3">
-            @for (option of questions[currentQuestionIndex]?.options; track
-            option.id) {
-            <div
-              class="p-3 border-brutal border-black cursor-pointer transition-all hover:bg-muted"
-              [ngClass]="{ 'bg-primary/20': isOptionSelected(option.id) }"
-              (click)="toggleOption(option.id)"
-            >
-              <div class="flex items-center">
-                <div class="relative h-6 w-6 border-brutal border-black mr-3">
-                  @if (isOptionSelected(option.id)) {
-                  <div
-                    class="absolute inset-0 bg-primary flex items-center justify-center"
-                  >
-                    <svg
-                      class="h-4 w-4 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  }
-                </div>
-                <label class="font-medium cursor-pointer">
-                  {{ option.text }}
-                </label>
-              </div>
+            @for (option of questions[currentQuestionIndex]?.options; track option.id) {
+            <div class="p-3 border-brutal border-black transition-all hover:bg-muted">
+              <app-neo-checkbox
+                [label]="option.text"
+                [id]="'mcq-option-' + option.id"
+                [formControl]="getMCQOptionControl(option.id)"
+              ></app-neo-checkbox>
             </div>
             }
           </div>

@@ -120,7 +120,7 @@
     </div>
 
     <!-- Score Distribution -->
-    <app-neo-card>
+    <app-neo-card class="mb-6">
       <div class="p-0">
         <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
           <h5 class="font-bold text-lg mb-0">Score Distribution</h5>
@@ -152,6 +152,109 @@
                     </div>
                   </div>
                 </app-neo-card>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </app-neo-card>
+
+    <!-- Coding Analytics -->
+    <app-neo-card>
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Coding Analytics</h5>
+        </div>
+        <div class="p-4">
+          @if (!dashboardData.codingAnalytics) {
+            <div class="text-center py-3">
+              <p class="text-muted-foreground">No coding data available yet.</p>
+            </div>
+          }
+          @if (dashboardData.codingAnalytics) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Language Distribution -->
+              <app-neo-card>
+                <div class="p-4">
+                  <h6 class="font-bold mb-3">Language Distribution</h6>
+                  @if (dashboardData.codingAnalytics.languageDistribution) {
+                    <div class="space-y-3">
+                      @for (lang of getLanguageDistributionItems(); track lang.language) {
+                        <div>
+                          <div class="flex justify-between mb-1">
+                            <span class="font-medium">{{ lang.language }}</span>
+                            <span>{{ lang.count }}</span>
+                          </div>
+                          <div class="h-3 bg-muted border-brutal border-black relative">
+                            <div class="absolute top-0 left-0 h-full bg-primary" 
+                                [style.width.%]="getLanguagePercentage(lang.count)">
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </app-neo-card>
+
+              <!-- Test Case Success Rate -->
+              <app-neo-card>
+                <div class="p-4">
+                  <h6 class="font-bold mb-3">Test Case Success Rate</h6>
+                  @if (dashboardData.codingAnalytics.testCaseSuccessRate) {
+                    <div class="flex items-center justify-center h-40">
+                      <div class="relative w-40 h-40">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                          <!-- Background circle -->
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="10"></circle>
+                          <!-- Progress circle -->
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="10"
+                                  stroke-dasharray="282.7" [attr.stroke-dashoffset]="getCircleOffset(dashboardData.codingAnalytics.testCaseSuccessRate)"
+                                  transform="rotate(-90 50 50)"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                          <span class="text-3xl font-bold">{{ dashboardData.codingAnalytics.testCaseSuccessRate | percent }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </app-neo-card>
+            </div>
+
+            <!-- Recent Coding Tasks -->
+            <div class="mt-6">
+              <h6 class="font-bold mb-3">Recent Coding Tasks</h6>
+              @if (dashboardData.codingAnalytics.recentTasks && dashboardData.codingAnalytics.recentTasks.length > 0) {
+                <div class="overflow-x-auto">
+                  <table class="w-full border-brutal border-black">
+                    <thead>
+                      <tr class="bg-muted">
+                        <th class="p-3 text-left border-r-brutal border-black">Task</th>
+                        <th class="p-3 text-left border-r-brutal border-black">Language</th>
+                        <th class="p-3 text-left border-r-brutal border-black">Submissions</th>
+                        <th class="p-3 text-left border-r-brutal border-black">Pass Rate</th>
+                        <th class="p-3 text-left">Avg. Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (task of dashboardData.codingAnalytics.recentTasks; track task.id) {
+                        <tr class="border-t-brutal border-black">
+                          <td class="p-3 border-r-brutal border-black">{{ task.title }}</td>
+                          <td class="p-3 border-r-brutal border-black">{{ task.language }}</td>
+                          <td class="p-3 border-r-brutal border-black">{{ task.submissionCount }}</td>
+                          <td class="p-3 border-r-brutal border-black">{{ task.passRate | percent }}</td>
+                          <td class="p-3">{{ formatTime(task.averageTime) }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+              @if (!dashboardData.codingAnalytics.recentTasks || dashboardData.codingAnalytics.recentTasks.length === 0) {
+                <div class="text-center py-3 border-brutal border-black p-4">
+                  <p class="text-muted-foreground">No recent coding tasks.</p>
+                </div>
               }
             </div>
           }

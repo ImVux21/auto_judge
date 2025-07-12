@@ -53,6 +53,17 @@ export class AnalyticsDashboardComponent implements OnInit {
     }));
   }
 
+  getLanguageDistributionItems(): any[] {
+    if (!this.dashboardData.codingAnalytics?.languageDistribution) {
+      return [];
+    }
+    
+    return Object.entries(this.dashboardData.codingAnalytics.languageDistribution).map(([language, count]) => ({
+      language,
+      count
+    }));
+  }
+
   getProgressBarClass(range: string): string {
     switch (range) {
       case '0-20': return 'bg-danger';
@@ -70,6 +81,23 @@ export class AnalyticsDashboardComponent implements OnInit {
     return (count / total) * 100;
   }
 
+  getLanguagePercentage(count: number): number {
+    if (!this.dashboardData.codingAnalytics?.languageDistribution) {
+      return 0;
+    }
+    
+    const total = Object.values(this.dashboardData.codingAnalytics.languageDistribution)
+      .reduce((sum: any, count: any) => sum + count, 0) as number;
+    
+    if (total === 0) return 0;
+    return (count / total) * 100;
+  }
+
+  getCircleOffset(percentage: number): number {
+    const circumference = 2 * Math.PI * 45; // 2πr where r=45
+    return circumference * (1 - percentage);
+  }
+
   getTotalSessions(): number {
     if (!this.dashboardData.scoreDistribution) {
       return 0;
@@ -82,5 +110,20 @@ export class AnalyticsDashboardComponent implements OnInit {
   formatDate(dateString: string): string {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString();
+  }
+
+  formatTime(seconds: number): string {
+    if (!seconds) return '0s';
+    
+    if (seconds < 60) {
+      return `${Math.round(seconds)}s`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      return `${minutes}m ${Math.round(seconds % 60)}s`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}h ${minutes}m`;
+    }
   }
 } 

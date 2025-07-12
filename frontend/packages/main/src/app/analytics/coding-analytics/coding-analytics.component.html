@@ -1,0 +1,190 @@
+<div class="neo-container">
+  <h1 class="text-3xl font-bold mb-6">Coding Analytics</h1>
+
+  @if (loading) {
+    <div class="text-center my-5">
+      <div class="inline-block animate-spin text-4xl">⟳</div>
+      <p class="mt-2">Loading coding analytics data...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="bg-destructive text-destructive-foreground p-4 mb-6 border-brutal border-black shadow-brutal">
+      {{ error }}
+    </div>
+  }
+
+  @if (!loading && !error && codingAnalytics) {
+    <div class="mb-6">
+      <app-neo-button [routerLink]="['/analytics/session', sessionId]" class="mb-4">
+        <span class="flex items-center">
+          <span class="mr-2">←</span> Back to Session Analytics
+        </span>
+      </app-neo-button>
+    </div>
+
+    <!-- Task Info -->
+    <app-neo-card class="mb-6">
+      <div class="p-0">
+        <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+          <h5 class="font-bold text-lg mb-0">Task Information</h5>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h6 class="font-bold">Task Title</h6>
+              <p>{{ codingAnalytics.taskTitle }}</p>
+            </div>
+            <div>
+              <h6 class="font-bold">Programming Language</h6>
+              <p>{{ codingAnalytics.language }}</p>
+            </div>
+            <div>
+              <h6 class="font-bold">Time Spent</h6>
+              <p>{{ formatTime(codingAnalytics.timeSpent) }}</p>
+            </div>
+            <div>
+              <h6 class="font-bold">Submissions</h6>
+              <p>{{ codingAnalytics.submissionCount }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-neo-card>
+
+    <!-- Performance Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <!-- Test Case Performance -->
+      <app-neo-card>
+        <div class="p-0">
+          <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+            <h5 class="font-bold text-lg mb-0">Test Case Performance</h5>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-center">
+              <div class="relative w-48 h-48">
+                <svg viewBox="0 0 100 100" class="w-full h-full">
+                  <!-- Background circle -->
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="10"></circle>
+                  <!-- Progress circle -->
+                  <circle cx="50" cy="50" r="45" fill="none" 
+                          [ngClass]="{
+                            'stroke-primary': getTestPassRate() >= 0.8,
+                            'stroke-accent': getTestPassRate() >= 0.6 && getTestPassRate() < 0.8,
+                            'stroke-secondary': getTestPassRate() >= 0.4 && getTestPassRate() < 0.6,
+                            'stroke-warning': getTestPassRate() >= 0.2 && getTestPassRate() < 0.4,
+                            'stroke-destructive': getTestPassRate() < 0.2
+                          }"
+                          stroke-width="10"
+                          stroke-dasharray="282.7" 
+                          [attr.stroke-dashoffset]="getCircleOffset(getTestPassRate())"
+                          transform="rotate(-90 50 50)"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                  <span class="text-3xl font-bold">{{ codingAnalytics.passedTestCases }}/{{ codingAnalytics.totalTestCases }}</span>
+                  <span class="text-sm text-muted-foreground">Tests Passed</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 text-center">
+              <h6 class="font-bold">Score</h6>
+              <p class="text-2xl">{{ codingAnalytics.score | percent }}</p>
+            </div>
+          </div>
+        </div>
+      </app-neo-card>
+
+      <!-- Code Quality -->
+      @if (codingAnalytics.codeQuality) {
+        <app-neo-card>
+          <div class="p-0">
+            <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+              <h5 class="font-bold text-lg mb-0">Code Quality Metrics</h5>
+            </div>
+            <div class="p-4">
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span>Complexity</span>
+                    <span>{{ codingAnalytics.codeQuality.complexity }}/10</span>
+                  </div>
+                  <div class="h-2 bg-muted border-brutal border-black relative">
+                    <div class="absolute top-0 left-0 h-full bg-primary" 
+                        [style.width.%]="codingAnalytics.codeQuality.complexity * 10">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span>Maintainability</span>
+                    <span>{{ codingAnalytics.codeQuality.maintainability }}/10</span>
+                  </div>
+                  <div class="h-2 bg-muted border-brutal border-black relative">
+                    <div class="absolute top-0 left-0 h-full bg-primary" 
+                        [style.width.%]="codingAnalytics.codeQuality.maintainability * 10">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span>Performance</span>
+                    <span>{{ codingAnalytics.codeQuality.performance }}/10</span>
+                  </div>
+                  <div class="h-2 bg-muted border-brutal border-black relative">
+                    <div class="absolute top-0 left-0 h-full bg-primary" 
+                        [style.width.%]="codingAnalytics.codeQuality.performance * 10">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span>Readability</span>
+                    <span>{{ codingAnalytics.codeQuality.readability }}/10</span>
+                  </div>
+                  <div class="h-2 bg-muted border-brutal border-black relative">
+                    <div class="absolute top-0 left-0 h-full bg-primary" 
+                        [style.width.%]="codingAnalytics.codeQuality.readability * 10">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </app-neo-card>
+      }
+    </div>
+
+    <!-- Submission History -->
+    @if (codingAnalytics.submissionHistory && codingAnalytics.submissionHistory.length > 0) {
+      <app-neo-card>
+        <div class="p-0">
+          <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+            <h5 class="font-bold text-lg mb-0">Submission History</h5>
+          </div>
+          <div class="p-4">
+            <div class="overflow-x-auto">
+              <table class="w-full border-brutal border-black">
+                <thead>
+                  <tr class="bg-muted">
+                    <th class="p-3 text-left border-r-brutal border-black">Timestamp</th>
+                    <th class="p-3 text-left border-r-brutal border-black">Tests Passed</th>
+                    <th class="p-3 text-left">Execution Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (submission of codingAnalytics.submissionHistory; track $index) {
+                    <tr class="border-t-brutal border-black">
+                      <td class="p-3 border-r-brutal border-black">{{ formatDate(submission.timestamp) }}</td>
+                      <td class="p-3 border-r-brutal border-black">{{ submission.passedTests }}/{{ submission.totalTests }}</td>
+                      <td class="p-3">{{ submission.executionTime }} ms</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </app-neo-card>
+    }
+  }
+</div> 

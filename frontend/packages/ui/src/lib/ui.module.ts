@@ -13,6 +13,8 @@ import { NeoMenubarMenuComponent } from "./components/neo-menubar/neo-menubar-me
 import { NeoMenubarSeparatorComponent } from "./components/neo-menubar/neo-menubar-separator.component";
 import { NeoMenubarTriggerComponent } from "./components/neo-menubar/neo-menubar-trigger.component";
 import { NeoMenubarComponent } from "./components/neo-menubar/neo-menubar.component";
+import { NeoRadioGroupComponent } from './components/neo-radio/neo-radio-group.component';
+import { NeoRadioOptionComponent } from './components/neo-radio/neo-radio-option.component';
 import { NeoSelectComponent } from "./components/neo-select/neo-select.component";
 import { NeoTableComponent } from "./components/neo-table/neo-table.component";
 import { NeoTextareaComponent } from "./components/neo-textarea/neo-textarea.component";
@@ -29,9 +31,11 @@ const NEO_COMPONENTS = [
   NeoMenubarMenuComponent,
   NeoMenubarSeparatorComponent,
   NeoMenubarTriggerComponent,
-  NeoCheckboxComponent,
+  NeoCheckboxComponent, 
   NeoSelectComponent,
   NeoCodeEditorComponent,
+  NeoRadioGroupComponent,
+  NeoRadioOptionComponent,
 ];
 
 @NgModule({

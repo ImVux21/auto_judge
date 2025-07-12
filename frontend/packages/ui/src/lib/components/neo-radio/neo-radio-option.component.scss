@@ -1,0 +1,369 @@
+// Neo Radio Component SCSS
+.neo-radio-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+
+  .neo-radio-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    background-color: #ffffff;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+
+    &:hover {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    &:focus-within {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    &.disabled {
+      border-color: #d1d5db;
+      background-color: #f3f4f6;
+      cursor: not-allowed;
+
+      &:hover {
+        border-color: #d1d5db;
+        box-shadow: none;
+      }
+
+      .radiomark {
+        background-color: #f3f4f6;
+      }
+    }
+
+    .radiomark {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      transition: all 0.2s ease-in-out;
+
+      &.selected {
+        background-color: #6366f1;
+        border: 2px solid #6366f1;
+
+        svg {
+          fill: white;
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      &:not(.selected) {
+        background-color: transparent;
+
+        svg {
+          display: none;
+        }
+      }
+    }
+  }
+
+  // Label styling
+  label {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #374151;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: #6366f1;
+    }
+  }
+
+  // Error message styling
+  .text-destructive {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    margin-left: 2rem;
+  }
+}
+
+// Radio Group specific styling
+.neo-radio-group {
+  .group-label {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #111827;
+    margin-bottom: 0.75rem;
+  }
+
+  .text-destructive {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+}
+
+// Animation variants
+.neo-radio-container {
+  .neo-radio-wrapper {
+    // Pulse animation on select
+    &.selected {
+      animation: pulse-select 0.3s ease-out;
+    }
+
+    // Ripple effect on click
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+@keyframes pulse-select {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .neo-radio-container {
+    .neo-radio-wrapper {
+      border-color: #6b7280;
+      background-color: #1f2937;
+
+      &:hover {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+      }
+
+      &:focus-within {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+      }
+
+      &.disabled {
+        border-color: #4b5563;
+        background-color: #374151;
+
+        .radiomark {
+          background-color: #374151;
+        }
+      }
+
+      .radiomark {
+        &.selected {
+          background-color: #818cf8;
+          border-color: #818cf8;
+        }
+      }
+    }
+
+    label {
+      color: #f9fafb;
+
+      &:hover {
+        color: #818cf8;
+      }
+    }
+  }
+
+  .neo-radio-group {
+    .group-label {
+      color: #f9fafb;
+    }
+  }
+}
+
+// Size variants
+.neo-radio-container {
+  // Small size
+  &.size-sm {
+    .neo-radio-wrapper {
+      width: 18px;
+      height: 18px;
+
+      .radiomark.selected svg {
+        width: 8px;
+        height: 8px;
+      }
+    }
+
+    label {
+      font-size: 0.875rem;
+    }
+  }
+
+  // Large size
+  &.size-lg {
+    .neo-radio-wrapper {
+      width: 28px;
+      height: 28px;
+
+      .radiomark.selected svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    label {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// Color variants
+.neo-radio-container {
+  // Success variant
+  &.variant-success {
+    .neo-radio-wrapper {
+      &:hover {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      }
+
+      &:focus-within {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+      }
+
+      .radiomark.selected {
+        background-color: #10b981;
+        border-color: #10b981;
+      }
+    }
+
+    label:hover {
+      color: #10b981;
+    }
+  }
+
+  // Warning variant
+  &.variant-warning {
+    .neo-radio-wrapper {
+      &:hover {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+      }
+
+      &:focus-within {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+      }
+
+      .radiomark.selected {
+        background-color: #f59e0b;
+        border-color: #f59e0b;
+      }
+    }
+
+    label:hover {
+      color: #f59e0b;
+    }
+  }
+
+  // Error variant
+  &.variant-error {
+    .neo-radio-wrapper {
+      border-color: #dc2626;
+
+      &:hover {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      }
+
+      &:focus-within {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+      }
+
+      .radiomark.selected {
+        background-color: #dc2626;
+        border-color: #dc2626;
+      }
+    }
+
+    label:hover {
+      color: #dc2626;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .neo-radio-container {
+    .neo-radio-wrapper {
+      width: 22px;
+      height: 22px;
+
+      .radiomark.selected svg {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    label {
+      font-size: 1rem;
+    }
+  }
+
+  .neo-radio-group {
+    .group-label {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+// Focus visible for accessibility
+.neo-radio-container {
+  input[type="radio"] {
+    &:focus-visible + .neo-radio-wrapper {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .neo-radio-container {
+    .neo-radio-wrapper {
+      border-width: 3px;
+      border-color: #000000;
+
+      &:hover {
+        border-color: #000000;
+        box-shadow: 0 0 0 2px #000000;
+      }
+
+      .radiomark.selected {
+        background-color: #000000;
+        border-color: #000000;
+
+        svg {
+          fill: #ffffff;
+        }
+      }
+    }
+
+    label {
+      color: #000000;
+      font-weight: 700;
+    }
+  }
+}

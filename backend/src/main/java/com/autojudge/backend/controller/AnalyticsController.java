@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import com.autojudge.backend.model.CodingSubmission;
+import com.autojudge.backend.model.CodingTask;
+import com.autojudge.backend.model.TestCaseResult;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -33,6 +37,7 @@ public class AnalyticsController {
     private final ProctorService proctorService;
     private final ProctorSnapshotRepository proctorSnapshotRepository;
     private final EntityMapper entityMapper;
+    private final CodingSubmissionRepository codingSubmissionRepository;
 
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboardData() {
@@ -357,5 +362,83 @@ public class AnalyticsController {
         snapshotData.put("imageData", snapshot.getImageData());
         
         return ResponseEntity.ok(snapshotData);
+    }
+
+    @GetMapping("/coding/{sessionId}")
+    @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
+    public ResponseEntity<?> getCodingAnalytics(@PathVariable Long sessionId) {
+        // Find the session
+        Optional<InterviewSession> sessionOpt = sessionRepository.findById(sessionId);
+        if (sessionOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        InterviewSession session = sessionOpt.get();
+        // Get coding submissions for this session
+        List<CodingSubmission> submissions = codingSubmissionRepository.findByInterviewSessionOrderBySubmittedAtDesc(session);
+        if (submissions.isEmpty()) {
+            return ResponseEntity.ok(Map.of("message", "No coding submissions found for this session"));
+        }
+        // Use the latest submission for analytics
+        CodingSubmission latestSubmission = submissions.get(0);
+        CodingTask task = latestSubmission.getCodingTask();
+        // Aggregate test case results
+        int totalTestCases = 0;
+        int passedTestCases = 0;
+        double totalScore = 0.0;
+        int submissionCount = submissions.size();
+        List<Map<String, Object>> submissionHistory = new ArrayList<>();
+        for (CodingSubmission submission : submissions) {
+            List<TestCaseResult> results = submission.getTestCaseResults();
+            int passed = 0;
+            int total = 0;
+            long totalExecTime = 0;
+            if (results != null) {
+                for (TestCaseResult result : results) {
+                    total++;
+                    if (Boolean.TRUE.equals(result.getPassed())) passed++;
+                    if (result.getExecutionTimeMs() != null) totalExecTime += result.getExecutionTimeMs();
+                }
+            }
+            if (submission == latestSubmission) {
+                totalTestCases = total;
+                passedTestCases = passed;
+                totalScore = total > 0 ? (double) passed / total : 0.0;
+            }
+            Map<String, Object> summary = new HashMap<>();
+            summary.put("timestamp", submission.getSubmittedAt());
+            summary.put("passedTests", passed);
+            summary.put("totalTests", total);
+            summary.put("executionTime", totalExecTime);
+            submissionHistory.add(summary);
+        }
+        // Calculate time spent (difference between first and last submission)
+        long timeSpent = 0;
+        if (submissions.size() > 1) {
+            CodingSubmission first = submissions.get(submissions.size() - 1);
+            CodingSubmission last = submissions.get(0);
+            if (first.getSubmittedAt() != null && last.getSubmittedAt() != null) {
+                timeSpent = java.time.Duration.between(first.getSubmittedAt(), last.getSubmittedAt()).getSeconds();
+            }
+        }
+        // Mock code quality metrics for now
+        Map<String, Object> codeQuality = Map.of(
+            "complexity", 5,
+            "maintainability", 7,
+            "performance", 6,
+            "readability", 8,
+            "comments", 2
+        );
+        Map<String, Object> response = new HashMap<>();
+        response.put("taskId", task.getId());
+        response.put("taskTitle", task.getTitle());
+        response.put("language", latestSubmission.getLanguage());
+        response.put("timeSpent", timeSpent);
+        response.put("submissionCount", submissionCount);
+        response.put("passedTestCases", passedTestCases);
+        response.put("totalTestCases", totalTestCases);
+        response.put("score", totalScore);
+        response.put("codeQuality", codeQuality);
+        response.put("submissionHistory", submissionHistory);
+        return ResponseEntity.ok(response);
     }
 } 

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@autojudge/core/dist';
 import { Observable } from 'rxjs';
-import { AnalyticsSummary, CandidateAnalytics, InterviewAnalytics, ProctorEvent, ProctorSnapshot, SecurityStatus, SessionAnalytics } from '../models/analytics.model';
+import { AnalyticsSummary, CandidateAnalytics, CodingAnalytics, InterviewAnalytics, ProctorEvent, ProctorSnapshot, SecurityStatus, SessionAnalytics } from '../models/analytics.model';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +28,7 @@ export class AnalyticsService {
   getInterviewAnalytics(id: number): Observable<InterviewAnalytics> {
     return this.apiService.get<InterviewAnalytics>({
       api: 'analytics',
-      url: `interviews/${id}`
+      url: `interview/${id}`
     });
   }
 
@@ -36,7 +36,7 @@ export class AnalyticsService {
   getSessionAnalytics(id: number): Observable<SessionAnalytics> {
     return this.apiService.get<SessionAnalytics>({
       api: 'analytics',
-      url: `sessions/${id}`
+      url: `session/${id}`
     });
   }
 
@@ -45,6 +45,28 @@ export class AnalyticsService {
     return this.apiService.get<CandidateAnalytics>({
       api: 'analytics',
       url: `candidates/${candidateId}`
+    });
+  }
+
+  // Coding analytics
+  getCodingAnalytics(sessionId: number): Observable<CodingAnalytics> {
+    return this.apiService.get<CodingAnalytics>({
+      api: 'analytics',
+      url: `coding/${sessionId}`
+    });
+  }
+
+  getCodingTaskAnalytics(taskId: number): Observable<any> {
+    return this.apiService.get<any>({
+      api: 'analytics',
+      url: `coding/tasks/${taskId}`
+    });
+  }
+
+  getCodingLanguageDistribution(): Observable<Record<string, number>> {
+    return this.apiService.get<Record<string, number>>({
+      api: 'analytics',
+      url: 'coding/languages'
     });
   }
 

@@ -127,6 +127,10 @@ export const routes: Routes = [
       {
         path: 'session/:id',
         loadComponent: () => import('./analytics/session-analytics/session-analytics.component').then(c => c.SessionAnalyticsComponent)
+      },
+      {
+        path: 'coding/:id',
+        loadComponent: () => import('./analytics/coding-analytics/coding-analytics.component').then(c => c.CodingAnalyticsComponent)
       }
     ],
     canActivate: [AuthGuard, RoleGuard],

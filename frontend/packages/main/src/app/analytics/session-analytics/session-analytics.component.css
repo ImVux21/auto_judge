@@ -18,3 +18,24 @@
     transform: rotate(360deg);
   }
 }
+
+/* Stroke colors for coding analytics */
+.stroke-primary {
+  stroke: #3b82f6;
+}
+
+.stroke-accent {
+  stroke: #10b981;
+}
+
+.stroke-secondary {
+  stroke: #8b5cf6;
+}
+
+.stroke-warning {
+  stroke: #f59e0b;
+}
+
+.stroke-destructive {
+  stroke: #ef4444;
+}
