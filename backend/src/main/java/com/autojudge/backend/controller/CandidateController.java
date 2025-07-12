@@ -251,19 +251,19 @@ public class CandidateController {
         
         return ResponseEntity.ok(new MessageResponse("Interview completed successfully"));
     }
-    
+
     @GetMapping("/session/{token}/answers")
     public ResponseEntity<?> getSessionAnswers(@PathVariable String token) {
         Optional<InterviewSession> sessionOpt = interviewService.getSessionByToken(token);
-        
+
         if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        
+
         InterviewSession session = sessionOpt.get();
         List<Answer> answers = answerService.getAnswersBySession(session);
         List<AnswerDto> answerDtos = entityMapper.toAnswerDtoList(answers);
-        
+
         return ResponseEntity.ok(answerDtos);
     }
 } 

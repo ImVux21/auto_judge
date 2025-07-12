@@ -65,6 +65,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
   questions: any[] = [];
   currentQuestionIndex = 0;
   hasAnswered: boolean[] = [];
+  sessionAnswers: any[] = [];
 
   // Timer
   timeRemaining = 0;
@@ -184,12 +185,35 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
         this.questions = data;
         this.initMCQForm(this.questions[this.currentQuestionIndex].options);
         this.hasAnswered = new Array(this.questions.length).fill(false);
+
+        // Fetch existing answers
+        this.loadSessionAnswers();
       },
       error: (err: any) => {
         this.error =
           "Failed to load questions: " +
           (err.error?.message || err.message || "Unknown error");
       },
+    });
+  }
+
+  loadSessionAnswers(): void {
+    this.candidateService.getSessionAnswers(this.sessionToken).subscribe({
+      next: (answers: any[]) => {
+        this.sessionAnswers = answers;
+        answers.forEach(answer => {
+          const questionIndex = this.questions.findIndex(q => q.id === answer.question.id);
+          if (questionIndex !== -1) {
+            this.hasAnswered[questionIndex] = true;
+          }
+        });
+
+        // After loading answers, populate the form for the initial question
+        this.populateFormForCurrentQuestion();
+      },
+      error: (err: any) => {
+        console.error('Failed to load session answers:', err);
+      }
     });
   }
 
@@ -361,6 +385,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
       this.resetForms();
+      this.populateFormForCurrentQuestion();
     }
   }
 
@@ -371,6 +396,7 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     if (this.currentQuestionIndex > 0) {
       this.currentQuestionIndex--;
       this.resetForms();
+      this.populateFormForCurrentQuestion();
     }
   }
 
@@ -379,6 +405,26 @@ export class InterviewSessionComponent implements OnInit, OnDestroy {
     this.openEndedForm.reset();
     this.submitting = false;
     this.submitError = "";
+  }
+
+  populateFormForCurrentQuestion(): void {
+    const question = this.questions[this.currentQuestionIndex];
+    const answer = this.sessionAnswers.find(a => a.question.id === question.id);
+
+    if (answer) {
+      if (question.type === 'MULTIPLE_CHOICE') {
+        const selectedOptionIds = answer.selectedOptions.map((opt: any) => opt.id);
+        const options = this.questions[this.currentQuestionIndex].options;
+        const formArray = this.mcqForm.get('selectedOptions') as FormArray;
+        options.forEach((option: any, index: number) => {
+          if (selectedOptionIds.includes(option.id)) {
+            formArray.at(index).setValue(true);
+          }
+        });
+      } else if (question.type === 'OPEN_ENDED') {
+        this.openEndedForm.get('textAnswer')?.setValue(answer.textAnswer);
+      }
+    }
   }
 
   // MCQ Option selection methods

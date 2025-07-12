@@ -87,13 +87,18 @@
           <p class="font-bold mb-2">
             Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}
           </p>
-          <div class="w-48 h-3 bg-muted border-brutal border-black relative">
-            <div
-              class="absolute top-0 left-0 h-full bg-primary"
-              [style.width.%]="
-                ((currentQuestionIndex + 1) / questions.length) * 100
-              "
-            ></div>
+          <div class="flex items-center space-x-2">
+            @for (question of questions; track question.id; let i = $index) {
+              <div class="w-8 h-8 flex items-center justify-center rounded-full border-2 border-black"
+                   [class.bg-primary]="i === currentQuestionIndex"
+                   [class.text-primary-foreground]="i === currentQuestionIndex">
+                @if (hasAnswered[i]) {
+                  <span>✓</span>
+                } @else {
+                  <span>{{ i + 1 }}</span>
+                }
+              </div>
+            }
           </div>
         </div>
         <div class="mt-4 sm:mt-0 text-right">
