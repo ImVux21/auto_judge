@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,15 @@ public class CodingService {
     public List<CodingTaskDto> getAllTasks() {
         List<CodingTask> tasks = codingTaskRepository.findByOrderByCreatedAtDesc();
         return tasks.stream()
+                .map(codingMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    // Get tasks by interview ID
+    public List<CodingTaskDto> getTasksByInterviewId(Long interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Interview not found with ID: " + interviewId));
+        return interview.getCodingTasks().stream()
                 .map(codingMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -133,7 +144,7 @@ public class CodingService {
     }
     
     // Get task for a specific session
-    public CodingTaskDto getTaskForSession(String sessionToken) {
+    public List<CodingTaskDto> getTaskForSession(String sessionToken) {
         InterviewSession session = interviewSessionRepository.findByAccessToken(sessionToken)
                 .orElseThrow(() -> new EntityNotFoundException("Interview session not found with token: " + sessionToken));
         
@@ -141,24 +152,27 @@ public class CodingService {
         Interview interview = session.getInterview();
         
         // Check if this interview has a coding task assigned
-        if (interview.getCodingTask() == null) {
+        if (interview.getCodingTasks() == null) {
             throw new EntityNotFoundException("No coding task assigned to this interview");
         }
         
-        CodingTask task = interview.getCodingTask();
-        CodingTaskDto taskDto = codingMapper.toDto(task);
+        List<CodingTaskDto> tasks = interview.getCodingTasks().stream()
+                .map(codingMapper::toDto)
+                .collect(Collectors.toList());
         
         // For candidates, don't return the solution code
-        taskDto.setSolutionCode(null);
+        tasks.forEach(task -> task.setSolutionCode(null));
         
         // Filter out hidden test cases for candidates
-        if (taskDto.getTestCases() != null) {
-            taskDto.setTestCases(taskDto.getTestCases().stream()
-                    .filter(tc -> !tc.getIsHidden())
-                    .collect(Collectors.toList()));
-        }
+        tasks.forEach(task -> {
+            if (task.getTestCases() != null) {
+                task.setTestCases(task.getTestCases().stream()
+                        .filter(tc -> !tc.getIsHidden())
+                        .collect(Collectors.toList()));
+            }
+        });
         
-        return taskDto;
+        return tasks;
     }
     
     // Execute code
@@ -300,7 +314,7 @@ public class CodingService {
                 .orElseThrow(() -> new EntityNotFoundException("Coding task not found with ID: " + taskId));
                 
         // For backward compatibility, still set the single task reference
-        interview.setCodingTask(task);
+        interview.setCodingTasks(new HashSet<>(Collections.singletonList(task)));
         
         // Also add to the multiple tasks collection
         interview.getCodingTasks().add(task);
@@ -328,9 +342,9 @@ public class CodingService {
         if (!taskIds.isEmpty()) {
             CodingTask firstTask = codingTaskRepository.findById(taskIds.get(0))
                     .orElseThrow(() -> new EntityNotFoundException("Coding task not found with ID: " + taskIds.get(0)));
-            interview.setCodingTask(firstTask);
+            interview.setCodingTasks(new HashSet<>(Collections.singletonList(firstTask)));
         } else {
-            interview.setCodingTask(null);
+            interview.setCodingTasks(new HashSet<>());
         }
         
         interview.setHasCodingChallenge(!taskIds.isEmpty());
@@ -343,7 +357,7 @@ public class CodingService {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new EntityNotFoundException("Interview not found with ID: " + interviewId));
                 
-        interview.setCodingTask(null);
+        interview.setCodingTasks(new HashSet<>());
         interview.getCodingTasks().clear();
         interview.setHasCodingChallenge(false);
         interviewRepository.save(interview);

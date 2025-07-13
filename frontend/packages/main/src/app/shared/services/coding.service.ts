@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { ApiService } from '@autojudge/core/dist';
 import { Observable } from 'rxjs';
 import { CodingSubmission, CodingTask, ExecutionRequest, ExecutionResponse } from '../models/coding.model';
-import { ApiService } from '@autojudge/core/dist';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +14,13 @@ export class CodingService {
     return this.apiService.get<CodingTask[]>({
       api: 'coding',
       url: 'tasks',
+    });
+  }
+
+  getCodingTaskByInterviewId(interviewId: number): Observable<CodingTask[]> {
+    return this.apiService.get<CodingTask[]>({
+      api: 'coding',
+      url: `tasks/interview/${interviewId}`,
     });
   }
 

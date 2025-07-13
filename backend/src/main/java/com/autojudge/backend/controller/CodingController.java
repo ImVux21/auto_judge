@@ -8,7 +8,7 @@ import com.autojudge.backend.payload.request.SaveProgressRequest;
 import com.autojudge.backend.payload.response.ExecuteCodeResponse;
 import com.autojudge.backend.payload.response.MessageResponse;
 import com.autojudge.backend.service.CodingService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +18,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/coding")
 @CrossOrigin(origins = "*", maxAge = 3600)
+@RequiredArgsConstructor
 public class CodingController {
-
     private final CodingService codingService;
-
-    @Autowired
-    public CodingController(CodingService codingService) {
-        this.codingService = codingService;
-    }
 
     @GetMapping("/tasks")
     @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
     public ResponseEntity<List<CodingTaskDto>> getAllTasks() {
         return ResponseEntity.ok(codingService.getAllTasks());
+    }
+
+    @GetMapping("/tasks/interview/{interviewId}")
+    @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
+    public ResponseEntity<List<CodingTaskDto>> getTasksByInterviewId(@PathVariable Long interviewId) {
+        return ResponseEntity.ok(codingService.getTasksByInterviewId(interviewId));
     }
     
     @GetMapping("/tasks/{id}")
@@ -67,7 +68,7 @@ public class CodingController {
     // Candidate endpoints
     
     @GetMapping("/sessions/{sessionToken}/task")
-    public ResponseEntity<CodingTaskDto> getTaskForSession(@PathVariable String sessionToken) {
+    public ResponseEntity<List<CodingTaskDto>> getTaskForSession(@PathVariable String sessionToken) {
         return ResponseEntity.ok(codingService.getTaskForSession(sessionToken));
     }
     

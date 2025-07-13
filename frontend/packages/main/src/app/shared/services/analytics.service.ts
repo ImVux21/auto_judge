@@ -56,6 +56,13 @@ export class AnalyticsService {
     });
   }
 
+  getAllCodingAnalytics(sessionId: number): Observable<CodingAnalytics[]> {
+    return this.apiService.get<CodingAnalytics[]>({
+      api: 'analytics',
+      url: `coding/${sessionId}/all`
+    });
+  }
+
   getCodingTaskAnalytics(taskId: number): Observable<any> {
     return this.apiService.get<any>({
       api: 'analytics',

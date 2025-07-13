@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoSelectComponent } from '@autojudge/ui/dist';
 import { CodingAnalytics } from '../../shared/models/analytics.model';
 import { AnalyticsService } from '../../shared/services/analytics.service';
 
@@ -14,12 +14,15 @@ import { AnalyticsService } from '../../shared/services/analytics.service';
     CommonModule,
     RouterLink,
     NeoCardComponent,
-    NeoButtonComponent
+    NeoButtonComponent,
+    NeoSelectComponent
   ]
 })
 export class CodingAnalyticsComponent implements OnInit, OnChanges {
   @Input() sessionId?: number;
   codingAnalytics?: CodingAnalytics;
+  allCodingAnalytics: CodingAnalytics[] = [];
+  selectedTaskId?: number;
   loading = true;
   error = '';
 
@@ -28,13 +31,13 @@ export class CodingAnalyticsComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     if (this.sessionId) {
-      this.loadCodingAnalytics(this.sessionId);
+      this.loadAllCodingAnalytics(this.sessionId);
     } else {
       this.route.paramMap.subscribe(params => {
         const id = params.get('id');
         if (id) {
           this.sessionId = +id;
-          this.loadCodingAnalytics(this.sessionId);
+          this.loadAllCodingAnalytics(this.sessionId);
         } else {
           this.error = 'Session ID not provided.';
           this.loading = false;
@@ -45,15 +48,21 @@ export class CodingAnalyticsComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['sessionId'] && this.sessionId) {
-      this.loadCodingAnalytics(this.sessionId);
+      this.loadAllCodingAnalytics(this.sessionId);
     }
   }
 
-  loadCodingAnalytics(sessionId: number): void {
+  loadAllCodingAnalytics(sessionId: number): void {
     this.loading = true;
-    this.analyticsService.getCodingAnalytics(sessionId).subscribe({
-      next: (data: CodingAnalytics) => {
-        this.codingAnalytics = data;
+    this.analyticsService.getAllCodingAnalytics(sessionId).subscribe({
+      next: (data: CodingAnalytics[]) => {
+        this.allCodingAnalytics = data;
+        if (this.allCodingAnalytics.length > 0) {
+          this.selectedTaskId = this.allCodingAnalytics[0].taskId;
+          this.updateSelectedTask();
+        } else {
+          this.codingAnalytics = undefined;
+        }
         this.loading = false;
       },
       error: (err: any) => {
@@ -62,6 +71,17 @@ export class CodingAnalyticsComponent implements OnInit, OnChanges {
         console.error('Error loading coding analytics data:', err);
       }
     });
+  }
+
+  updateSelectedTask(): void {
+    if (this.selectedTaskId) {
+      this.codingAnalytics = this.allCodingAnalytics.find(task => task.taskId === this.selectedTaskId);
+    }
+  }
+
+  onTaskChange(taskId: number): void {
+    this.selectedTaskId = taskId;
+    this.updateSelectedTask();
   }
 
   getTestPassRate(): number {

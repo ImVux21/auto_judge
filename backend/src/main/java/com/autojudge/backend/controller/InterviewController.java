@@ -7,7 +7,6 @@ import com.autojudge.backend.payload.dto.InterviewSessionDto;
 import com.autojudge.backend.payload.dto.QuestionDto;
 import com.autojudge.backend.payload.request.CreateInterviewRequest;
 import com.autojudge.backend.payload.request.CreateSessionRequest;
-import com.autojudge.backend.payload.response.MessageResponse;
 import com.autojudge.backend.repository.QuestionRepository;
 import com.autojudge.backend.repository.UserRepository;
 import com.autojudge.backend.security.services.UserDetailsImpl;
@@ -178,6 +177,26 @@ public class InterviewController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
+    public ResponseEntity<?> updateInterview(@PathVariable Long id, @Valid @RequestBody CreateInterviewRequest request) {
+        Optional<Interview> interviewOpt = interviewService.getInterviewById(id);
+        if (interviewOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Interview interview = interviewOpt.get();
+        interview.setTitle(request.getTitle());
+        interview.setJobRole(request.getJobRole());
+        interview.setDescription(request.getDescription());
+        interview.setTimeLimit(request.getTimeLimit());
+        // Optionally update mcqCount and openEndedCount if you want to allow changing question counts
+        // interview.setMcqCount(request.getMcqCount());
+        // interview.setOpenEndedCount(request.getOpenEndedCount());
+        Interview updated = interviewService.interviewRepository.save(interview);
+        InterviewDto interviewDto = entityMapper.toInterviewDto(updated);
+        return ResponseEntity.ok(interviewDto);
     }
     
     // Public endpoints for candidates

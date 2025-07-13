@@ -21,4 +21,5 @@ public class InterviewDto {
     private int questionCount;
     private int mcqCount;
     private int openEndedCount;
+    private boolean hasCodingChallenge;
 } 

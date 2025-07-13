@@ -22,6 +22,8 @@ import com.autojudge.backend.model.CodingSubmission;
 import com.autojudge.backend.model.CodingTask;
 import com.autojudge.backend.model.TestCaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDateTime;
+import java.time.Duration;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -38,6 +40,7 @@ public class AnalyticsController {
     private final ProctorSnapshotRepository proctorSnapshotRepository;
     private final EntityMapper entityMapper;
     private final CodingSubmissionRepository codingSubmissionRepository;
+    private final CodingTaskRepository codingTaskRepository;
 
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboardData() {
@@ -93,7 +96,73 @@ public class AnalyticsController {
         // Convert to DTOs
         List<InterviewSessionDto> recentSessionDtos = entityMapper.toInterviewSessionDtoList(recentSessions);
         analytics.put("recentSessions", recentSessionDtos);
-        
+
+        // Coding Analytics
+        List<CodingSubmission> allSubmissions = codingSubmissionRepository.findAll();
+        Map<String, Integer> languageCount = new HashMap<>();
+        int totalPassed = 0;
+        int totalTestCases = 0;
+        for (CodingSubmission submission : allSubmissions) {
+            // Count language usage
+            String lang = submission.getLanguage();
+            languageCount.put(lang, languageCount.getOrDefault(lang, 0) + 1);
+            // Aggregate test case results for pass rate
+            List<TestCaseResult> results = submission.getTestCaseResults();
+            if (results != null) {
+                for (TestCaseResult result : results) {
+                    totalTestCases++;
+                    if (Boolean.TRUE.equals(result.getPassed())) totalPassed++;
+                }
+            }
+        }
+        double testCaseSuccessRate = totalTestCases > 0 ? (double) totalPassed / totalTestCases : 0.0;
+        // Recent Coding Tasks
+        List<CodingTask> recentTasksList = codingTaskRepository.findByOrderByCreatedAtDesc();
+        List<Map<String, Object>> recentTasks = new ArrayList<>();
+        int maxRecent = 5;
+        for (CodingTask task : recentTasksList.stream().limit(maxRecent).toList()) {
+            Map<String, Object> taskMap = new HashMap<>();
+            taskMap.put("id", task.getId());
+            taskMap.put("title", task.getTitle());
+            taskMap.put("language", task.getLanguage());
+            // Submissions for this task
+            List<CodingSubmission> taskSubs = allSubmissions.stream()
+                .filter(s -> s.getCodingTask().getId().equals(task.getId()))
+                .toList();
+            taskMap.put("submissionCount", taskSubs.size());
+            // Pass rate for this task
+            int taskPassed = 0;
+            int taskTotal = 0;
+            long totalTime = 0;
+            for (CodingSubmission sub : taskSubs) {
+                List<TestCaseResult> results = sub.getTestCaseResults();
+                if (results != null) {
+                    for (TestCaseResult result : results) {
+                        taskTotal++;
+                        if (Boolean.TRUE.equals(result.getPassed())) taskPassed++;
+                    }
+                }
+            }
+            double passRate = taskTotal > 0 ? (double) taskPassed / taskTotal : 0.0;
+            taskMap.put("passRate", passRate);
+            // Average time (in seconds) between first and last submission for this task
+            if (taskSubs.size() > 1) {
+                List<LocalDateTime> times = taskSubs.stream()
+                    .map(CodingSubmission::getSubmittedAt)
+                    .sorted()
+                    .toList();
+                long seconds = java.time.Duration.between(times.get(0), times.get(times.size() - 1)).getSeconds();
+                totalTime = seconds;
+            }
+            taskMap.put("averageTime", totalTime);
+            recentTasks.add(taskMap);
+        }
+        Map<String, Object> codingAnalytics = new HashMap<>();
+        codingAnalytics.put("languageDistribution", languageCount);
+        codingAnalytics.put("testCaseSuccessRate", testCaseSuccessRate);
+        codingAnalytics.put("recentTasks", recentTasks);
+        analytics.put("codingAnalytics", codingAnalytics);
+
         return ResponseEntity.ok(analytics);
     }
     
@@ -440,5 +509,111 @@ public class AnalyticsController {
         response.put("codeQuality", codeQuality);
         response.put("submissionHistory", submissionHistory);
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/coding/{sessionId}/all")
+    @PreAuthorize("hasRole('INTERVIEWER') or hasRole('ADMIN')")
+    public ResponseEntity<?> getAllCodingAnalytics(@PathVariable Long sessionId) {
+        // Find the session
+        Optional<InterviewSession> sessionOpt = sessionRepository.findById(sessionId);
+        if (sessionOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        InterviewSession session = sessionOpt.get();
+        
+        // Get all coding submissions for this session
+        List<CodingSubmission> allSubmissions = codingSubmissionRepository.findByInterviewSessionOrderBySubmittedAtDesc(session);
+        if (allSubmissions.isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        
+        // Group submissions by task
+        Map<Long, List<CodingSubmission>> submissionsByTask = allSubmissions.stream()
+            .collect(Collectors.groupingBy(submission -> submission.getCodingTask().getId()));
+            
+        // Create analytics for each task
+        List<Map<String, Object>> taskAnalytics = new ArrayList<>();
+        
+        for (Map.Entry<Long, List<CodingSubmission>> entry : submissionsByTask.entrySet()) {
+            Long taskId = entry.getKey();
+            List<CodingSubmission> taskSubmissions = entry.getValue();
+            
+            // Sort submissions by time (newest first)
+            taskSubmissions.sort(Comparator.comparing(CodingSubmission::getSubmittedAt).reversed());
+            
+            // Use the latest submission for task info
+            CodingSubmission latestSubmission = taskSubmissions.get(0);
+            CodingTask task = latestSubmission.getCodingTask();
+            
+            // Aggregate test case results
+            int totalTestCases = 0;
+            int passedTestCases = 0;
+            double totalScore = 0.0;
+            int submissionCount = taskSubmissions.size();
+            List<Map<String, Object>> submissionHistory = new ArrayList<>();
+            
+            for (CodingSubmission submission : taskSubmissions) {
+                List<TestCaseResult> results = submission.getTestCaseResults();
+                int passed = 0;
+                int total = 0;
+                long totalExecTime = 0;
+                
+                if (results != null) {
+                    for (TestCaseResult result : results) {
+                        total++;
+                        if (Boolean.TRUE.equals(result.getPassed())) passed++;
+                        if (result.getExecutionTimeMs() != null) totalExecTime += result.getExecutionTimeMs();
+                    }
+                }
+                
+                if (submission == latestSubmission) {
+                    totalTestCases = total;
+                    passedTestCases = passed;
+                    totalScore = total > 0 ? (double) passed / total : 0.0;
+                }
+                
+                Map<String, Object> summary = new HashMap<>();
+                summary.put("timestamp", submission.getSubmittedAt());
+                summary.put("passedTests", passed);
+                summary.put("totalTests", total);
+                summary.put("executionTime", totalExecTime);
+                submissionHistory.add(summary);
+            }
+            
+            // Calculate time spent (difference between first and last submission)
+            long timeSpent = 0;
+            if (taskSubmissions.size() > 1) {
+                CodingSubmission first = taskSubmissions.get(taskSubmissions.size() - 1);
+                CodingSubmission last = taskSubmissions.get(0);
+                if (first.getSubmittedAt() != null && last.getSubmittedAt() != null) {
+                    timeSpent = java.time.Duration.between(first.getSubmittedAt(), last.getSubmittedAt()).getSeconds();
+                }
+            }
+            
+            // Mock code quality metrics for now
+            Map<String, Object> codeQuality = Map.of(
+                "complexity", 5,
+                "maintainability", 7,
+                "performance", 6,
+                "readability", 8,
+                "comments", 2
+            );
+            
+            Map<String, Object> taskAnalytic = new HashMap<>();
+            taskAnalytic.put("taskId", task.getId());
+            taskAnalytic.put("taskTitle", task.getTitle());
+            taskAnalytic.put("language", latestSubmission.getLanguage());
+            taskAnalytic.put("timeSpent", timeSpent);
+            taskAnalytic.put("submissionCount", submissionCount);
+            taskAnalytic.put("passedTestCases", passedTestCases);
+            taskAnalytic.put("totalTestCases", totalTestCases);
+            taskAnalytic.put("score", totalScore);
+            taskAnalytic.put("codeQuality", codeQuality);
+            taskAnalytic.put("submissionHistory", submissionHistory);
+            
+            taskAnalytics.add(taskAnalytic);
+        }
+        
+        return ResponseEntity.ok(taskAnalytics);
     }
 } 

@@ -45,10 +45,6 @@ public class Interview {
     @Column(nullable = false)
     private boolean active = true;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coding_task_id")
-    private CodingTask codingTask;
-    
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "interview_coding_tasks",

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EntityMapper {
     private final OptionRepository optionRepository;
+    private final CodingMapper codingMapper;
 
     public UserDto toUserDto(User user) {
         if (user == null) {
@@ -60,7 +61,8 @@ public class EntityMapper {
                 toUserDto(interview.getCreatedBy()),
                 interview.getQuestions().size(),
                 mcqCount,
-                openEndedCount
+                openEndedCount,
+                interview.isHasCodingChallenge()
         );
     }
     
@@ -120,12 +122,14 @@ public class EntityMapper {
         
         // Check if the interview associated with this session has a coding challenge
         boolean hasCodingChallenge = false;
-        Long codingTaskId = null;
+        List<CodingTaskDto> codingTasks = null;
         
         if (session.getInterview() != null) {
             hasCodingChallenge = session.getInterview().isHasCodingChallenge();
-            if (session.getInterview().getCodingTask() != null) {
-                codingTaskId = session.getInterview().getCodingTask().getId();
+            if (session.getInterview().getCodingTasks() != null) {
+                codingTasks = session.getInterview().getCodingTasks().stream()
+                        .map(codingMapper::toDto)
+                        .collect(Collectors.toList());
             }
         }
         
@@ -144,7 +148,7 @@ public class EntityMapper {
                 session.isProctored(),
                 session.getProctorNotes(),
                 hasCodingChallenge,
-                codingTaskId
+                codingTasks
         );
     }
     

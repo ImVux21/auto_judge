@@ -28,6 +28,9 @@
         <app-neo-button (click)="toggleSessionForm()">
           Create Session
         </app-neo-button>
+        <app-neo-button (click)="openEditModal()">
+          Edit Interview
+        </app-neo-button>
       </div>
     </div>
 
@@ -112,6 +115,33 @@
             </div>
           </div>
         </app-neo-card>
+
+        <!-- Coding Tasks List -->
+        <app-neo-card class="mb-6">
+          <div class="p-0">
+            <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black">
+              <h5 class="font-bold text-lg mb-0">Coding Tasks ({{ codingTasks.length }})</h5>
+            </div>
+            <div class="p-4">
+              @if (codingTasks.length === 0) {
+                <div class="text-center py-3">
+                  <p class="text-muted-foreground">No coding tasks assigned to this interview.</p>
+                </div>
+              }
+              @if (codingTasks.length > 0) {
+                <ul class="space-y-4">
+                  @for (task of codingTasks; track task.id) {
+                    <li class="border-brutal border-black p-4">
+                      <h6 class="font-bold mb-1">{{ task.title }}</h6>
+                      <p class="mb-1 text-sm text-muted-foreground">{{ task.description }}</p>
+                      <p class="mb-1 text-xs">Difficulty: {{ task.difficulty }}</p>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+        </app-neo-card>
       </div>
 
       <!-- Sessions List -->
@@ -171,7 +201,7 @@
   <!-- Create Session Form Modal -->
   @if (showSessionForm) {
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="w-full max-w-md">
+      <div class="w-full sm:max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded shadow-lg">
         <app-neo-card>
           <div class="p-0">
             <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black flex justify-between items-center">
@@ -254,6 +284,144 @@
                       <span class="inline-block animate-spin mr-2">⟳</span>
                     }
                     Create Session
+                  </app-neo-button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </app-neo-card>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Interview Modal -->
+  @if (showEditModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <app-neo-card>
+          <div class="p-0">
+            <div class="bg-primary text-primary-foreground p-4 border-b-brutal border-black flex justify-between items-center">
+              <h5 class="font-bold text-lg mb-0">Edit Interview</h5>
+              <app-neo-button type="button" class="text-xl font-bold p-0 min-h-0 min-w-0 h-auto bg-transparent border-none shadow-none hover:bg-transparent" (click)="closeEditModal()">×</app-neo-button>
+            </div>
+            <div class="p-6">
+              @if (editError) {
+                <div class="bg-destructive text-destructive-foreground p-3 mb-4 border-brutal border-black shadow-brutal-sm">
+                  {{ editError }}
+                </div>
+              }
+              <form [formGroup]="editForm" (ngSubmit)="submitEdit()">
+                <div class="mb-4">
+                  <app-neo-input
+                    label="Interview Title"
+                    id="title"
+                    formControlName="title"
+                    placeholder="Enter interview title"
+                    [error]="editForm.get('title')?.invalid && editForm.get('title')?.touched ? 
+                      (editForm.get('title')?.errors?.['required'] ? 'Title is required' : 
+                       editForm.get('title')?.errors?.['minlength'] ? 'Title must be at least 3 characters' : '') : ''"
+                  ></app-neo-input>
+                </div>
+                <div class="mb-4">
+                  <app-neo-input
+                    label="Job Role"
+                    id="jobRole"
+                    formControlName="jobRole"
+                    placeholder="Enter job role (e.g. Software Engineer, Product Manager)"
+                    [error]="editForm.get('jobRole')?.invalid && editForm.get('jobRole')?.touched ? 
+                      (editForm.get('jobRole')?.errors?.['required'] ? 'Job role is required' : 
+                       editForm.get('jobRole')?.errors?.['minlength'] ? 'Job role must be at least 3 characters' : '') : ''"
+                  ></app-neo-input>
+                </div>
+                <div class="mb-4">
+                  <app-neo-textarea
+                    label="Description (Optional)"
+                    id="description"
+                    formControlName="description"
+                    placeholder="Enter interview description"
+                    [rows]="3"
+                  ></app-neo-textarea>
+                </div>
+                <div class="mb-4">
+                  <app-neo-input
+                    label="Time Limit (minutes)"
+                    id="timeLimit"
+                    formControlName="timeLimit"
+                    type="number"
+                    [error]="editForm.get('timeLimit')?.invalid && editForm.get('timeLimit')?.touched ? 
+                      (editForm.get('timeLimit')?.errors?.['required'] ? 'Time limit is required' : 
+                       editForm.get('timeLimit')?.errors?.['min'] ? 'Time limit must be at least 10 minutes' :
+                       editForm.get('timeLimit')?.errors?.['max'] ? 'Time limit cannot exceed 180 minutes' : '') : ''"
+                  ></app-neo-input>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <app-neo-input
+                      label="Number of Multiple Choice Questions"
+                      id="mcqCount"
+                      formControlName="mcqCount"
+                      type="number"
+                      [error]="editForm.get('mcqCount')?.invalid && editForm.get('mcqCount')?.touched ? 
+                        (editForm.get('mcqCount')?.errors?.['required'] ? 'MCQ count is required' : 
+                         editForm.get('mcqCount')?.errors?.['min'] ? 'MCQ count must be at least 0' :
+                         editForm.get('mcqCount')?.errors?.['max'] ? 'MCQ count cannot exceed 20' : '') : ''"
+                    ></app-neo-input>
+                  </div>
+                  <div>
+                    <app-neo-input
+                      label="Number of Open-Ended Questions"
+                      id="openEndedCount"
+                      formControlName="openEndedCount"
+                      type="number"
+                      [error]="editForm.get('openEndedCount')?.invalid && editForm.get('openEndedCount')?.touched ? 
+                        (editForm.get('openEndedCount')?.errors?.['required'] ? 'Open-ended count is required' : 
+                         editForm.get('openEndedCount')?.errors?.['min'] ? 'Open-ended count must be at least 0' :
+                         editForm.get('openEndedCount')?.errors?.['max'] ? 'Open-ended count cannot exceed 10' : '') : ''"
+                    ></app-neo-input>
+                  </div>
+                  @if (editForm.get('mcqCount')?.value === 0 && editForm.get('openEndedCount')?.value === 0 && !editForm.get('includeCodingChallenge')?.value) {
+                    <div class="md:col-span-2 mt-2">
+                      <div class="bg-secondary text-secondary-foreground p-3 border-brutal border-black shadow-brutal-sm">
+                        You must include at least one question (MCQ or open-ended) or a coding challenge.
+                      </div>
+                    </div>
+                  }
+                </div>
+                <!-- Coding Challenge Section -->
+                <div class="mb-6 border-t border-gray-200 pt-4">
+                  <app-neo-checkbox
+                    label="Include Coding Challenge"
+                    id="includeCodingChallenge"
+                    formControlName="includeCodingChallenge"
+                    variant="blue"
+                  ></app-neo-checkbox>
+                  @if (editForm.get('includeCodingChallenge')?.value) {
+                    <div class="mb-4 pl-6">
+                      <app-neo-select
+                        label="Select Coding Tasks"
+                        id="codingTaskIds"
+                        formControlName="codingTaskIds"
+                        [options]="allCodingTasks | codingTasksToOptions"
+                        placeholder="Select coding tasks"
+                        [error]="editForm.get('codingTaskIds')?.invalid && editForm.get('codingTaskIds')?.touched ? 'Please select at least one coding task' : ''"
+                        [multiple]="true"
+                        [maxDisplayChips]="3"
+                      ></app-neo-select>
+                      @if (allCodingTasks.length === 0) {
+                        <div class="mt-2 text-sm text-muted-foreground">
+                          No coding tasks available. <a routerLink="/interviewer/live-coding/tasks/create" class="text-primary hover:underline">Create one first</a>.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="flex justify-between mt-6">
+                  <app-neo-button type="button" class="bg-background text-foreground hover:bg-primary hover:text-primary-foreground" (click)="closeEditModal()">Cancel</app-neo-button>
+                  <app-neo-button type="submit" [disabled]="editForm.invalid || editSubmitting || (editForm.get('mcqCount')?.value === 0 && editForm.get('openEndedCount')?.value === 0)">
+                    @if (editSubmitting) {
+                      <span class="inline-block animate-spin mr-2">⟳</span>
+                    }
+                    Save Changes
                   </app-neo-button>
                 </div>
               </form>

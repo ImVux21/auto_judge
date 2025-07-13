@@ -225,3 +225,32 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Neo-brutalism scrollbar style */
+::-webkit-scrollbar {
+  width: 14px;
+  background: #fff700; /* Neo-brutalism yellow */
+  border: 2px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 3px solid #fff700;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #222;
+}
+
+::-webkit-scrollbar-corner {
+  background: #fff700;
+  border: 2px solid #000;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #000 #fff700;
+}

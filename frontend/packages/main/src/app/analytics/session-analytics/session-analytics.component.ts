@@ -14,11 +14,9 @@ import { CodingAnalyticsComponent } from '../coding-analytics/coding-analytics.c
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     NgChartsModule,
     NeoButtonComponent,
     NeoCardComponent,
-    NeoTableComponent,
     CodingAnalyticsComponent
   ]
 })

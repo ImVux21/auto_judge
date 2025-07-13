@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class InterviewSessionDto {
     private boolean proctored;
     private String proctorNotes;
     private boolean hasCodingChallenge;
-    private Long codingTaskId;
+    private List<CodingTaskDto> codingTasks;
     
     // Constructor that maintains backward compatibility
     public InterviewSessionDto(Long id, String accessToken, LocalDateTime startTime, LocalDateTime endTime, 
@@ -45,6 +46,6 @@ public class InterviewSessionDto {
         this.proctored = proctored;
         this.proctorNotes = proctorNotes;
         this.hasCodingChallenge = false;
-        this.codingTaskId = null;
+        this.codingTasks = null;
     }
 } 

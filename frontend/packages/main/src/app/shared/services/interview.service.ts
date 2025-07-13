@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '@autojudge/core/dist';
 import { Observable } from 'rxjs';
-import { Interview, InterviewSession, InterviewStatus, InterviewTemplate, Question } from '../models/interview.model';
+import { Interview, InterviewSession, InterviewStatus, Question } from '../models/interview.model';
 
 
 
@@ -13,21 +13,21 @@ export class InterviewService {
 
   getAllInterviews(): Observable<Interview[]> {
     return this.apiService.get<Interview[]>({
-      api: 'interviews',
+      api: 'interview',
       url: '',
     });
   }
 
   getInterviewById(id: string): Observable<Interview> {
     return this.apiService.get<Interview>({
-      api: 'interviews',
+      api: 'interview',
       url: `${id}`,
     });
   }
 
-  updateInterview(id: string, interview: Partial<Interview>): Observable<Interview> {
+  updateInterview(id: number, interview: Partial<Interview>): Observable<Interview> {
     return this.apiService.put<Interview>({
-      api: 'interviews',
+      api: 'interview',
       url: `${id}`,
       body: interview,
     });
@@ -35,61 +35,23 @@ export class InterviewService {
 
   deleteInterview(id: string): Observable<void> {
     return this.apiService.delete<void>({
-      api: 'interviews',
+      api: 'interview',
       url: `${id}`,
     });
   }
 
   updateInterviewStatus(id: string, status: InterviewStatus): Observable<Interview> {
     return this.apiService.put<Interview>({
-      api: 'interviews',
+      api: 'interview',
       url: `${id}/status`,
       body: { status },
-    });
-  }
-
-  // Templates
-  getAllTemplates(): Observable<InterviewTemplate[]> {
-    return this.apiService.get<InterviewTemplate[]>({
-      api: 'templates',
-      url: '',
-    });
-  }
-
-  getTemplateById(id: string): Observable<InterviewTemplate> {
-    return this.apiService.get<InterviewTemplate>({
-      api: 'templates',
-      url: `${id}`,
-    });
-  }
-
-  createTemplate(template: Partial<InterviewTemplate>): Observable<InterviewTemplate> {
-    return this.apiService.post<InterviewTemplate>({
-      api: 'templates',
-      url: '',
-      body: template,
-    });
-  }
-
-  updateTemplate(id: string, template: Partial<InterviewTemplate>): Observable<InterviewTemplate> {
-    return this.apiService.put<InterviewTemplate>({
-      api: 'templates',
-      url: `${id}`,
-      body: template,
-    });
-  }
-
-  deleteTemplate(id: string): Observable<void> {
-    return this.apiService.delete<void>({
-      api: 'templates',
-      url: `${id}`,
     });
   }
 
   // Questions
   addQuestion(interviewId: string, question: Question): Observable<Interview> {
     return this.apiService.post<Interview>({
-      api: 'interviews',
+      api: 'interview',
       url: `${interviewId}/questions`,
       body: question,
     });
@@ -97,7 +59,7 @@ export class InterviewService {
 
   updateQuestion(interviewId: string, questionId: string, question: Partial<Question>): Observable<Interview> {
     return this.apiService.put<Interview>({
-      api: 'interviews',
+      api: 'interview',
       url: `${interviewId}/questions/${questionId}`,
       body: question,
     });
@@ -105,7 +67,7 @@ export class InterviewService {
 
   deleteQuestion(interviewId: string, questionId: string): Observable<Interview> {
     return this.apiService.delete<Interview>({
-      api: 'interviews',
+      api: 'interview',
       url: `${interviewId}/questions/${questionId}`,
     });
   }
@@ -120,7 +82,7 @@ export class InterviewService {
 
   scheduleInterview(interviewId: string, candidateId: string, startTime: Date): Observable<InterviewSession> {
     return this.apiService.post<InterviewSession>({
-      api: 'interviews',
+      api: 'interview',
       url: `${interviewId}/schedule`,
       body: {
         candidateId,
