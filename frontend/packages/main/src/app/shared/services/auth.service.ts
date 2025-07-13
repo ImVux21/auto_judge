@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { ApiService, SessionService } from "@autojudge/core/dist";
+import { ApiService, SessionService } from "@autojudge/core";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { AuthResponse, User } from "../models/user.model";
 

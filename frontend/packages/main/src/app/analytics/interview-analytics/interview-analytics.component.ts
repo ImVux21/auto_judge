@@ -2,8 +2,8 @@ import { Component, OnInit, inject, ViewChild, TemplateRef, AfterViewInit } from
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AnalyticsService } from '../../shared/services/analytics.service';
 import { CommonModule } from '@angular/common';
-import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autojudge/ui/dist';
-import { NeoTableColumn } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autojudge/ui';
+import { NeoTableColumn } from '@autojudge/ui';
 
 @Component({
   selector: 'app-interview-analytics',

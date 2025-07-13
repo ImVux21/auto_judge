@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent, NeoInputComponent, NeoCheckboxComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoInputComponent, NeoCheckboxComponent } from '@autojudge/ui';
 import { CommonModule } from '@angular/common';
 import { CandidateService } from '../../shared/services/candidate.service';
 import { FormsModule } from '@angular/forms';

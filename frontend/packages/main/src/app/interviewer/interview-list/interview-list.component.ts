@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Interview } from '../../shared/models/interview.model';
 import { InterviewService } from '../../shared/services/interview.service';
 import { CommonModule } from '@angular/common';
-import { NeoButtonComponent, NeoCardComponent, NeoTableComponent, NeoTableColumn } from 'packages/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoTableComponent, NeoTableColumn } from '@autojudge/ui';
 
 @Component({
   selector: 'app-interview-list',

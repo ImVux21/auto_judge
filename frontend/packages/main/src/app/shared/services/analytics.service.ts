@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@autojudge/core/dist';
+import { ApiService } from '@autojudge/core';
 import { Observable } from 'rxjs';
 import { AnalyticsSummary, CandidateAnalytics, InterviewAnalytics, ProctorEvent, ProctorSnapshot, SecurityStatus, SessionAnalytics } from '../models/analytics.model';
 

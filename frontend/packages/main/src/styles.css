@@ -153,7 +153,6 @@
   @apply bg-background border-brutal border-black shadow-brutal-sm p-2 w-full focus:outline-none;
 }
 
-/* Select is now fully implemented in the component */
 .neo-select {
   @apply bg-background border-brutal border-black shadow-brutal-sm p-2 pr-8 w-full focus:outline-none appearance-none relative;
 }
@@ -176,52 +175,4 @@
 
 .neo-dropdown-item {
   @apply block px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground cursor-pointer;
-}
-
-/* You can add global styles to this file, and also import other style files */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --primary: #FFF133;
-  --primary-hover: #FFE500;
-  --primary-active: #E6CC00;
-  --background: #FFFFFF;
-  --text: #000000;
-  --border: #000000;
-  --shadow: #000000;
-}
-
-/* Theme variations */
-.theme-blue {
-  --primary: #33A1FF;
-  --primary-hover: #0089FF;
-  --primary-active: #0066CC;
-}
-
-.theme-green {
-  --primary: #33FF8D;
-  --primary-hover: #00FF6E;
-  --primary-active: #00CC58;
-}
-
-.theme-orange {
-  --primary: #FF9633;
-  --primary-hover: #FF7A00;
-  --primary-active: #CC6200;
-}
-
-.theme-violet {
-  --primary: #B833FF;
-  --primary-hover: #9900FF;
-  --primary-active: #7A00CC;
-}
-
-body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: var(--background);
-  color: var(--text);
-  margin: 0;
-  padding: 0;
 }

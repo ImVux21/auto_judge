@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CodingSubmission, CodingTask, ExecutionRequest, ExecutionResponse } from '../models/coding.model';
-import { ApiService } from '@autojudge/core/dist';
+import { ApiService } from '@autojudge/core';
 
 @Injectable({
   providedIn: 'root'

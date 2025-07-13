@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '@autojudge/core/dist';
+import { ApiService } from '@autojudge/core';
 import { Candidate, CandidateSession } from '../models/candidate.model';
 
 

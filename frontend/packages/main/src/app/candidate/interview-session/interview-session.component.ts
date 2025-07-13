@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent, NeoTextareaComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoTextareaComponent } from '@autojudge/ui';
 import { interval, Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CandidateService } from '../../shared/services/candidate.service';

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { CommonModule } from '@angular/common';
-import { NeoCardComponent, NeoInputComponent, NeoButtonComponent } from '@autojudge/ui/dist';
+import { NeoCardComponent, NeoInputComponent, NeoButtonComponent } from '@autojudge/ui';
 
 @Component({
   selector: 'app-login',

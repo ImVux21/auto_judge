@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoTableComponent } from '@autojudge/ui';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { AnalyticsService } from '../../shared/services/analytics.service';

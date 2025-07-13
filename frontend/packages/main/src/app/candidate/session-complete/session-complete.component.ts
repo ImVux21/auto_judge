@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CandidateService } from '../../shared/services/candidate.service';
 import { CommonModule } from '@angular/common';
-import { NeoCardComponent, NeoButtonComponent } from '@autojudge/ui/dist';
+import { NeoCardComponent, NeoButtonComponent } from '@autojudge/ui';
 
 @Component({
   selector: 'app-session-complete',

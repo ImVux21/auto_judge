@@ -16,7 +16,7 @@ import {
   NeoSelectComponent,
   NeoTextareaComponent,
   SelectOption,
-} from "@autojudge/ui/dist";
+} from "@autojudge/ui";
 import {
   CodingTask,
   CodingTaskType,

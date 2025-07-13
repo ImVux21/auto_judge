@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Interview, InterviewSession, Question } from '../../shared/models/interview.model';
-import { NeoButtonComponent, NeoCardComponent } from 'packages/ui/dist';
+import { NeoButtonComponent, NeoCardComponent } from '@autojudge/ui';
 import { CommonModule } from '@angular/common';
 import { InterviewService } from '../../shared/services/interview.service';
 

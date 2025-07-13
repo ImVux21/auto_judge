@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent } from '@autojudge/ui';
 import { AnalyticsService } from '../../shared/services/analytics.service';
 
 @Component({

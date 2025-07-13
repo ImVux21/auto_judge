@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent, NeoInputComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoInputComponent } from '@autojudge/ui';
 import { NeoSelectComponent } from '../../../../../../packages/ui/src/lib/components/neo-select/neo-select.component';
 import { AuthService } from '../../shared/services/auth.service';
 

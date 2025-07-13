@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { editor } from 'monaco-editor';
 
 export enum ProgrammingLanguage {
   JAVASCRIPT = 'javascript',
@@ -144,16 +143,17 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
   @Output() codeChange = new EventEmitter<string>();
   @Output() run = new EventEmitter<string>();
 
-  private editor: editor.IStandaloneCodeEditor | null = null;
-  private originalModel: editor.ITextModel | null = null;
+  private editor: any = null;
+  private originalModel: any = null;
   private value: string = '';
   isRunning: boolean = false;
+  private monacoLoaded = false;
   
   private onChange: any = () => {};
   private onTouched: any = () => {};
 
   ngOnInit(): void {
-    this.initMonaco();
+    this.loadMonacoEditor();
   }
 
   ngOnDestroy(): void {
@@ -165,7 +165,20 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
     }
   }
 
-  private initMonaco(): void {
+  private async loadMonacoEditor(): Promise<void> {
+    if (this.monacoLoaded) return;
+    
+    try {
+      // Lazy load Monaco Editor
+      const monaco = await import('monaco-editor');
+      this.monacoLoaded = true;
+      this.initMonaco(monaco.editor);
+    } catch (error) {
+      console.error('Failed to load Monaco Editor:', error);
+    }
+  }
+
+  private initMonaco(editor: any): void {
     const container = this.editorContainer.nativeElement;
     
     // Create model with initial code
@@ -174,19 +187,29 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
       this.mapLanguage(this.language)
     );
     
-    // Create editor instance
+    // Create editor instance with optimized settings
     this.editor = editor.create(container, {
       model: this.originalModel,
       theme: 'vs-dark',
       automaticLayout: true,
       scrollBeyondLastLine: false,
-      minimap: { enabled: true },
+      minimap: { enabled: false }, // Disable minimap to reduce bundle size
       fontSize: 14,
       lineNumbers: 'on',
       readOnly: this.readOnly,
       scrollbar: {
         verticalScrollbarSize: 10,
         horizontalScrollbarSize: 10
+      },
+      // Optimize performance
+      renderWhitespace: 'none',
+      wordWrap: 'on',
+      folding: false,
+      // Disable features that increase bundle size
+      suggestOnTriggerCharacters: false,
+      quickSuggestions: false,
+      parameterHints: {
+        enabled: false
       }
     });
     
@@ -234,7 +257,10 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
     this.language = newLang;
     
     if (this.editor && this.originalModel) {
-      editor.setModelLanguage(this.originalModel, this.mapLanguage(newLang));
+      // Dynamically import Monaco to get the setModelLanguage function
+      import('monaco-editor').then(monaco => {
+        monaco.editor.setModelLanguage(this.originalModel, this.mapLanguage(newLang));
+      });
     }
   }
 
@@ -249,11 +275,7 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
       this.isRunning = true;
       const code = this.editor.getValue();
       this.run.emit(code);
-      
-      // Reset running state after a delay (this would be handled differently in real implementation)
-      setTimeout(() => {
-        this.isRunning = false;
-      }, 1000);
+      this.isRunning = false;
     }
   }
 
@@ -274,7 +296,6 @@ export class NeoCodeEditorComponent implements OnInit, OnDestroy, ControlValueAc
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.readOnly = isDisabled;
     if (this.editor) {
       this.editor.updateOptions({ readOnly: isDisabled });
     }

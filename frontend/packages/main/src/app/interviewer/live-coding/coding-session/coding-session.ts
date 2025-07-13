@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { NeoButtonComponent, NeoCardComponent, NeoTableColumn, NeoTableComponent } from '@autojudge/ui/dist';
+import { NeoButtonComponent, NeoCardComponent, NeoTableColumn, NeoTableComponent } from '@autojudge/ui';
 import { CodingTask } from '../../../shared/models/coding.model';
 import { CodingService } from '../../../shared/services/coding.service';
 

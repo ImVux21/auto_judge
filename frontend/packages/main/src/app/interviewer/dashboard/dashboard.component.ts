@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { NeoCardComponent } from 'packages/ui/dist';
+import { NeoCardComponent } from '@autojudge/ui';
 import { Interview, InterviewSession } from '../../shared/models/interview.model';
 import { AnalyticsService } from '../../shared/services/analytics.service';
 import { InterviewService } from '../../shared/services/interview.service';

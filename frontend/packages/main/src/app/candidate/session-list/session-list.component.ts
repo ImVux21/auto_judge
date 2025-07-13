@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, ViewChild, TemplateRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NeoCardComponent, NeoInputComponent, NeoButtonComponent, NeoTableComponent, NeoTableColumn } from '@autojudge/ui/dist';
+import { NeoCardComponent, NeoInputComponent, NeoButtonComponent, NeoTableComponent, NeoTableColumn } from '@autojudge/ui';
 import { CommonModule } from '@angular/common';
 import { CandidateService } from '../../shared/services/candidate.service';
 

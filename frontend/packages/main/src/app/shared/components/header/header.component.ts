@@ -7,7 +7,7 @@ import {
     NeoMenubarMenuComponent,
     NeoMenubarSeparatorComponent,
     NeoMenubarTriggerComponent
-} from '@autojudge/ui/dist';
+} from '@autojudge/ui';
 import { AuthService } from '../../services/auth.service';
 
 @Component({

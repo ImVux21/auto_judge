@@ -8,9 +8,9 @@ import {
 } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { AuthService } from "../shared/services/auth.service";
-import { NeoCardComponent, NeoInputComponent, NeoButtonComponent } from "packages/ui/dist";
+import { NeoCardComponent, NeoInputComponent, NeoButtonComponent } from "@autojudge/ui";
 import { LogoutButtonComponent } from "../shared/components/logout-button/logout-button.component";
-import { SessionService, StorageService } from "@autojudge/core/dist";
+import { SessionService, StorageService } from "@autojudge/core";
 
 @Component({
   selector: "app-profile",

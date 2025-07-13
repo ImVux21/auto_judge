@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '@autojudge/core/dist';
+import { ApiService } from '@autojudge/core';
 import { Observable } from 'rxjs';
 import { Interview, InterviewSession, InterviewStatus, InterviewTemplate, Question } from '../models/interview.model';
 

@@ -9,7 +9,7 @@ import {
   NeoInputComponent,
   NeoSelectComponent,
   NeoTextareaComponent
-} from "packages/ui/dist";
+} from "@autojudge/ui";
 import { CodingTask } from "../../shared/models/coding.model";
 import { CodingTasksToOptionsPipe } from "../../shared/pipes/coding-tasks-to-options.pipe";
 import { CodingService } from "../../shared/services/coding.service";

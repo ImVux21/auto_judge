@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { NeoButtonComponent } from 'packages/ui/dist';
+import { NeoButtonComponent } from '@autojudge/ui';
 
 @Component({
   selector: 'app-logout-button',
